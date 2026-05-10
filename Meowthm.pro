@@ -1,3 +1,5 @@
+TARGET = Meowthm
+
 QT += widgets
 
 CONFIG += c++17
