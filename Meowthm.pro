@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     gamescene.cpp \
+    ButtonItem.cpp \
     main.cpp \
     mainwindow.cpp \
     note.cpp \
@@ -17,6 +18,11 @@ SOURCES += \
 
 HEADERS += \
     gamescene.h \
+    AchievementsWindow.h \
+    ButtonItem.h \
+    PokeWindow.h \
+    SelectSongWindow.h \
+    SettingsWindow.h \
     mainwindow.h \
     note.h \
     track.h
