@@ -16,15 +16,8 @@ protected:
     // 0.判定时间戳
     qint64 targetTime;
 
-    // 1.当前y坐标
-    int currentY;
-
-    // 2.音符类型
+    // 1.音符类型
     NoteType type;
-
-    //3.音符的形状（目前是长方形）
-    int noteWidth;
-    int noteHeight;
 
 
 public:
@@ -45,6 +38,32 @@ public:
     void updateY(int newY);
 
 
+};
+
+
+class Tap: public Note{
+public:
+    // 去掉了_type参数
+    explicit Tap(qint64 _targetTime, int _noteWidth, int _noteHeight, QWidget* parent = nullptr);
+    virtual ~Tap();
+};
+
+
+class Hold: public Note{
+    Q_OBJECT
+
+protected:
+    // Hold独有的数据：尾部判定时间
+    qint64 tailTime;
+
+public:
+    // 注意：相比 Tap，多了一个 _tailTime 参数，同样去掉了 _type 参数
+    explicit Hold(qint64 _targetTime, qint64 _tailTime, int _noteWidth, int _noteHeight, QWidget* parent = nullptr);
+
+    virtual ~Hold();
+
+    // 检查是否结束的接口
+    qint64 getTailTime() const;
 };
 
 #endif // NOTE_H
