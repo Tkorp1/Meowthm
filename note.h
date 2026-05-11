@@ -22,12 +22,16 @@ protected:
     // 2.音符类型
     NoteType type;
 
+    //3.音符的形状（目前是长方形）
+    int noteWidth;
+    int noteHeight;
+
 
 public:
 
     // 0.构造函数
     // 注意:该构造函数使用了 explicit 关键字，不能进行隐式类型转换！！！
-    explicit Note(qint64 _targetTime, NoteType _type = TAP, QWidget* parent = nullptr);
+    explicit Note(qint64 _targetTime, int _noteWidth, int _noteHeight, NoteType _type = TAP, QWidget* parent = nullptr);
 
     // 1.析构函数
     virtual ~Note();
