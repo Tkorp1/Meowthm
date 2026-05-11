@@ -10,7 +10,7 @@ class Track : public QObject
     Q_OBJECT
 public:
     // 0.构造函数
-    Track(int _trackIndex, int _hitLineY, int _xPos);
+    explicit Track(int _trackIndex, int _hitLineY, int _xPos, QObject* parent = nullptr);
 
     // 1.析构函数
     ~Track();
@@ -18,20 +18,31 @@ public:
     // 2.添加音符的函数,输入指向note的指针
     void addNote(Note* note);
 
-    // 3.更新轨道音符，输入当前绝对时间
+    // 3.更新轨道音符，输入当前绝对时间，同时负责清理miss的音符和判定hold结束
+    // Y = hitLineY - detaT * speed
     // 在这个函数里要调用 note 的update函数更改 note 的y坐标，同时要删除已经 miss 的音符
-    void updateTrack(qint64 currentMusicTime);
+    // 在引入 hold 之后，需要增加 hold 是否完结的判断，即 currentMusicTime >= currentHoldingNote->getTailTime()
+    void updateTrack(qint64 currentMusicTime, double currentSpeed);
 
 
-    // 4.向gamescene提供轨道上现存的所有音符（miss的已经被update删掉了）
-    const QList<Note*> getCurrentNote(qint64 currentMusicTime);
+    // 4.向gamescene提供轨道上现存的所有音符（miss的已经被update删掉了）,返回引用
+    const QList<Note*>& getCurrentNote() const;
 
-    // 5.判定接口，接受gamescene捕捉的键盘输入
-    // 注意在引入hold之后要在里面单独分出来hold
-    void checkHit(qint64 currentMusicTime);
+    // 5.主动按键判定接口，接受gamescene捕捉的键盘输入
+    // 具体逻辑:拿出第一个 note 计算与 targetTime 的时间差，删除已经判定的 note ，返回一个 int 值给 GameScene 加分
+    // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect
+    /* 注意在引入hold之后,当该 note 是 hold 并且已经打出 good 或者 perfect
+     * ，需要将这个 hold 赋值给 currentHoldingNote*/
+    int checkHit(qint64 currentMusicTime);
 
-    // 6.对hold的长按释放接口判定（使用方法目前存疑
-    void checkRelease(qint64 currentMusicTime);
+
+
+    //下面是 hold 的逻辑可以先不写
+    // 6.对hold的长按释放判定
+    /* 当此时 currentHoldingNote 不为 nullptr 且松开按键，说明玩家松手了，触发miss并 delete 这个音符，
+     指针悬空*/
+    // 如果提前松手导致 Miss，返回 true，否则返回 false
+    bool isReleased(qint64 currentMusicTime);
 
 protected:
     // 所有的成员变量：
@@ -43,13 +54,16 @@ protected:
     QList<Note*> noteInTrack;
 
     // 3.轨道位置（横坐标，长度和其他的参数在GameScene里面，是全局的数据
-    int xPOs;
+    int xPos;
 
     // 4.判定纵坐标高度
     int hitLineY;
 
-    //4.QWidget
-    QWidget* trackParent;
+
+    //下面是关于hold的逻辑，可以暂时先不写
+    // 6.记录当前正在长按的 hold 音符
+    Note* currentHoldingNote = nullptr;
+
 
 };
 
