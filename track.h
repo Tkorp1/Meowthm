@@ -24,7 +24,7 @@ public:
 
 
     // 4.向gamescene提供轨道上现存的所有音符（miss的已经被update删掉了）
-    const QVector<Note*> getCurrentNote(qint64 currentMusicTime);
+    const QList<Note*> getCurrentNote(qint64 currentMusicTime);
 
     // 5.判定接口，接受gamescene捕捉的键盘输入
     // 注意在引入hold之后要在里面单独分出来hold
