@@ -34,7 +34,7 @@ public:
 
     // 0.构造函数
     // 一、为成员变量赋值
-    // 二、在构造函数中设计窗口的形状，例如用 this->setFixedSize 设计大小，this->setStyleSheet 设计样式
+    // 二、在构造函数中设计窗口的形状，例如用 this->setFixedSize 设计大小，this->setStyleSheet 设计样式；设计分数空间的位置和样式（注意：要把分数控件移动到最顶层）
     // 三、创建四条轨道，并把它们的信号连接到 hitNoteJudge 函数上
     // 四、设置updateTime定时器，并连接信号槽：每次定时器响就执行gameloop。定时器的间隔可以先设置为16ms，之后再调整
     // 五、使用谱面解析器生成音符（谱面解析器还没写，这一块暂）
