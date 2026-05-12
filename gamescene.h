@@ -31,13 +31,16 @@ public:
 
     // 1.析构函数
     ~GameScene();
-
+protected:
     // 2.键盘事件监听函数的重载：键盘按下 D F J K 四个键，调用对应轨道的checkHit函数
     void keyPressEvent(QKeyEvent *event) override;
 
     // 3.键盘事件监听函数的重载：键盘松开。
     // 此处是留给hold的逻辑，可以先不写
     void keyReleaseEvent(QKeyEvent *event) override;
+
+    // 4.画图：这里负责画出静态的舞台，包括背景和轨道、判定线
+    void paintEvent(QPaintEvent *event) override;
 
 private slots:
 
