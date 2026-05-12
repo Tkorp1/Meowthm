@@ -20,7 +20,7 @@ public:
 
     // 3.更新轨道音符，输入当前绝对时间，同时负责清理miss的音符和判定hold结束
     // Y = hitLineY - detaT * speed
-    // 在这个函数里要调用 note 的update函数更改 note 的y坐标，同时要删除已经 miss 的音符
+    // 在这个函数里要调用 note 的update函数更改 note 的y坐标，同时要删除已经 miss 的音符，在miss时报告信号 noteJudged(1)
     // 在引入 hold 之后，需要增加 hold 是否完结的判断，即 currentMusicTime >= currentHoldingNote->getTailTime()
     void updateTrack(qint64 currentMusicTime, double currentSpeed);
 
@@ -29,11 +29,11 @@ public:
     const QList<Note*>& getCurrentNote() const;
 
     // 5.主动按键判定接口，接受gamescene捕捉的键盘输入
-    // 具体逻辑:拿出第一个 note 计算与 targetTime 的时间差，删除已经判定的 note ，返回一个 int 值给 GameScene 加分
+    // 具体逻辑:拿出第一个 note 计算与 targetTime 的时间差，删除已经判定的 note ，调用 信号noteJudged 给 GameScene 加分
     // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect
     /* 注意在引入hold之后,当该 note 是 hold 并且已经打出 good 或者 perfect
-     * ，需要将这个 hold 赋值给 currentHoldingNote*/
-    int checkHit(qint64 currentMusicTime);
+     * ，需要将这个 hold 赋值给 currentHoldingNote，进入hold的后续判定 */
+    void  checkHit(qint64 currentMusicTime);
 
 
 
@@ -43,6 +43,12 @@ public:
      指针悬空*/
     // 如果提前松手导致 Miss，返回 true，否则返回 false
     bool isReleased(qint64 currentMusicTime);
+
+
+signals:
+    // 7.向gamescene报告判定的信号，只需要声明不需要实现
+    // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect
+    void noteJudged(int result);
 
 protected:
     // 所有的成员变量：
@@ -61,8 +67,9 @@ protected:
 
 
     //下面是关于hold的逻辑，可以暂时先不写
-    // 6.记录当前正在长按的 hold 音符
+    // 5.记录当前正在长按的 hold 音符
     Note* currentHoldingNote = nullptr;
+
 
 
 };
