@@ -8,6 +8,7 @@
 enum NoteType{TAP, HOLD};
 
 // note是音符基类，继承自QLabel，后续添加贴图
+// 对于note的显示，“哪里new出来哪里就负责show”，所以note的显示在谱面解析器里面！！！
 class Note : public QLabel
 {
     Q_OBJECT
