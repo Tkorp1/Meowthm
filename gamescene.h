@@ -28,10 +28,9 @@ private:
     int currentScore; // 当前得分
     int currentCombo; // 当前连击数（注意miss时要清零）
     QLabel* scoreLabel; // 显示分数的标签
-    QLabel* combolabel; // 显示 combo 的标签
+    QLabel* comboLabel; // 显示 combo 的标签
 
     // 5.音乐引擎（暂时先不写）
-
 
 public:
 
