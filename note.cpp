@@ -34,3 +34,26 @@ void Note::updateY(int newY){
 
     return;
 }
+
+Tap::Tap(qint64 _targetTime, int _noteWidth, int _noteHeight, QWidget* parent)
+    :Note(_targetTime, _noteWidth, _noteHeight, NoteType::TAP, parent){
+
+}
+
+Tap::~Tap(){
+
+}
+
+
+Hold::Hold(qint64 _targetTime, qint64 _tailTime, int _noteWidth, int _noteHeight, QWidget* parent)
+    :Note(_targetTime, _noteWidth, _noteHeight, NoteType::HOLD, parent), tailTime(_tailTime){
+
+}
+
+Hold::~Hold(){
+
+}
+
+qint64 Hold::getTailTime() const{
+    return tailTime;
+}
