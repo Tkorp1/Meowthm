@@ -59,6 +59,7 @@ protected:
 
 public:
     // 注意：相比 Tap，多了一个 _tailTime 参数，同样去掉了 _type 参数
+    // 注意，hold的 noteHeight 是需要创建时根据时间和流速实时计算的
     explicit Hold(qint64 _targetTime, qint64 _tailTime, int _noteWidth, int _noteHeight, QWidget* parent = nullptr);
 
     virtual ~Hold();
