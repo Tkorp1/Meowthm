@@ -1,9 +1,8 @@
 #include "mapparser.h"
-
-MapParser::MapParser(GameScene* _currentGameScene) {
+#include "gamescene.h"
+MapParser::MapParser(QString _path, GameScene* _currentGameScene):Path(_path) {
     currentGameScene = _currentGameScene;
 }
-
-void MapParser::operator()(Track* trackTemp){
+QList<Note*> MapParser::parse(){
 
 }
