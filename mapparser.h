@@ -14,7 +14,8 @@ protected:
     GameScene* currentGameScene; // 记录当前游戏界面，方便给新生成的音符 parent
     Track** ptrTracks; // 指向四个轨道的指针
 public:
-    MapParser();
+    MapParser(GameScene* _currentGameScene);
+    void operator()(Track* trackTemp);
 };
 
 #endif // MAPPARSER_H
