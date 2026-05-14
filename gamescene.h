@@ -5,13 +5,14 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include "track.h"
+#include "mapparser.h"
 
 class GameScene : public QWidget
 {
     Q_OBJECT
 private:
     // 1.游戏核心变量
-    double globalSpeed;      // 全局流速 像素/ms
+    double globalSpeed;      // 全局流速 像素/ms。 // 先写了一个数据记得改
     qint64 currentMusicTime; // 当前音乐播放时间 ms //初始化时记得设为0
     int hitLineY;            // 判定线的统一Y坐标 像素
 
