@@ -8,6 +8,29 @@
 class Track : public QObject
 {
     Q_OBJECT
+
+protected:
+    // 所有的成员变量：
+
+    // 1.轨道编号 0 1 2 3
+    int trackIndex;
+
+    // 2.存放所有存活的音符实例，数据类型为list
+    QList<Note*> noteInTrack;
+
+    // 3.轨道位置（横坐标，长度和其他的参数在GameScene里面，是全局的数据
+    int xPos;
+
+    // 4.判定纵坐标高度
+    int hitLineY;
+
+
+    //下面是关于hold的逻辑，可以暂时先不写
+    // 5.记录当前正在长按的 hold 音符
+    Note* currentHoldingNote = nullptr;
+
+
+
 public:
     // 0.构造函数
     explicit Track(int _trackIndex, int _hitLineY, int _xPos, QObject* parent = nullptr);
@@ -49,27 +72,6 @@ signals:
     // 7.向gamescene报告判定的信号，只需要声明不需要实现
     // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect
     void noteJudged(int result);
-
-protected:
-    // 所有的成员变量：
-
-    // 1.轨道编号 0 1 2 3
-    int trackIndex;
-
-    // 2.存放所有存活的音符实例，数据类型为list
-    QList<Note*> noteInTrack;
-
-    // 3.轨道位置（横坐标，长度和其他的参数在GameScene里面，是全局的数据
-    int xPos;
-
-    // 4.判定纵坐标高度
-    int hitLineY;
-
-
-    //下面是关于hold的逻辑，可以暂时先不写
-    // 5.记录当前正在长按的 hold 音符
-    Note* currentHoldingNote = nullptr;
-
 
 
 };
