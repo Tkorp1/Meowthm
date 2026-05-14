@@ -13,6 +13,7 @@ SOURCES += \
     ButtonItem.cpp \
     main.cpp \
     mainwindow.cpp \
+    mapparser.cpp \
     note.cpp \
     track.cpp
 
@@ -24,6 +25,7 @@ HEADERS += \
     SelectSongWindow.h \
     SettingsWindow.h \
     mainwindow.h \
+    mapparser.h \
     note.h \
     track.h
 
