@@ -67,6 +67,9 @@ public:
     // 如果提前松手导致 Miss，返回 true，否则返回 false
     bool isReleased(qint64 currentMusicTime);
 
+    //7.获取track的id的函数
+    int getTrackId()const;
+
 
 signals:
     // 7.向gamescene报告判定的信号，只需要声明不需要实现

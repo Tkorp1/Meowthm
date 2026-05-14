@@ -1,3 +1,9 @@
 #include "mapparser.h"
 
-MapParser::MapParser() {}
+MapParser::MapParser(GameScene* _currentGameScene) {
+    currentGameScene = _currentGameScene;
+}
+
+void MapParser::operator()(Track* trackTemp){
+
+}
