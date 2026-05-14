@@ -1,8 +1,8 @@
 #include "gamescene.h"
 #include "mapparser.h"
 
-GameScene::GameScene(QWidget *parent)
-    : QWidget{parent}
+GameScene::GameScene(QString _mapPath, QWidget *parent)
+    : QWidget{parent}, mapPath(_mapPath)
 {
     // 0.设置gamescene的基本形状
     // 大小
@@ -39,6 +39,12 @@ GameScene::~GameScene(){
 
 }
 
+
+QString GameScene::getMapPath() const{
+    return mapPath;
+}
+
+
 void GameScene::keyPressEvent(QKeyEvent *event){
     // D F J K
     if(event -> key() == Qt::Key_D){
@@ -68,5 +74,14 @@ void GameScene::gameLoop(){
     }
 
 }
+
+
+void GameScene::hitNoteJudge(int result){
+    if(result == 1){ // Miss
+        // 连击中断
+        currentCombo = 0;
+    }
+}
+
 
 

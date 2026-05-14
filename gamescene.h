@@ -11,6 +11,8 @@ class GameScene : public QWidget
 {
     Q_OBJECT
 private:
+    // 0.谱面文件路径
+    QString mapPath;
     // 1.游戏核心变量
     double globalSpeed;      // 全局流速 像素/ms。 // 先写了一个数据记得改
     qint64 currentMusicTime; // 当前音乐播放时间 ms //初始化时记得设为0
@@ -39,10 +41,15 @@ public:
     // 三、创建四条轨道，并把它们的信号连接到 hitNoteJudge 函数上
     // 四、设置updateTime定时器，并连接信号槽：每次定时器响就执行gameloop。定时器的间隔可以先设置为16ms，之后再调整
     // 五、使用谱面解析器生成音符（谱面解析器还没写，这一块暂）
-    explicit GameScene(QWidget *parent = nullptr);
+    explicit GameScene(QString _mapPath, QWidget *parent = nullptr);
+
 
     // 1.析构函数
     ~GameScene();
+
+    // 2.获取谱面文件路径
+    QString getMapPath() const;
+
 
 protected:
 
@@ -59,7 +66,7 @@ protected:
 private slots:
 
     // 5.主循环，updateTimer 每隔 x ms 就会调用一次这个函数
-    // 一、获取来自音乐模块的 currentMusicTime。由于音乐模块还没写，可以先按照 += 递增模拟一下
+    // 一、获取来自音乐模块的 currentMusicTime。由于音乐模块还没写，可以先按照 +=16 递增模拟一下
     // 二、调用轨道的 updateTrack 更新
     void gameLoop();
 
