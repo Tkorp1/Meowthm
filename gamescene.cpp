@@ -3,6 +3,7 @@
 
 
 #include <QPainter>
+#include <QDir>
 
 GameScene::GameScene(QString _mapPath, QWidget *parent)
     : QWidget{parent},
@@ -45,11 +46,20 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
 
     // 这里等写完 mapparser以后再改一下
-    MapParser mp = MapParser(mapPath ,this);
+    QDir dir(mapPath);
+
+    MapParser mp = MapParser(mapPath);
     for(int i = 0; i < 4; i++){
         tracks[i] = new Track(i, _hitLineY, leftX + trackWidth * i, this);
         connect(tracks[i], &Track::noteJudged, this, &GameScene::hitNoteJudge);
-        mp(&tracks[i]);
+        //文件操作，获取轨道的路径
+        QString fileName = QString("track%1.txt").arg(i);
+
+        QString path = dir.filePath(fileName);
+
+        //获取list
+        QList<Note*> noteListTemp=mp.parse(path);
+        tracks[i]->addNotes(noteListTemp);
     }
 
 

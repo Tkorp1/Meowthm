@@ -38,8 +38,8 @@ public:
     // 1.析构函数
     ~Track();
 
-    // 2.添加音符的函数,输入指向note的指针
-    void addNote(Note* note);
+    // 2.添加音符的函数,输入note的list
+    void addNotes(const QList<Note*> noteList);
 
     // 3.更新轨道音符，输入当前绝对时间，同时负责清理miss的音符和判定hold结束
     // Y = hitLineY - detaT * speed
