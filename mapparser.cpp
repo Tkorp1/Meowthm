@@ -94,13 +94,47 @@ QList<Note*> MapParser::parse(QString trackPath){
             qint64 _targetTime = targetTimeCalculator(barIndex, beats);
 
 
+            /*注意note的格式在这里修改
+             * noteWidth
+             * noteHeight
+             */
+
+            int noteWidth = 300;
+            int noteHeight = 30;
+            Note* noteTemp = new Tap(_targetTime, noteWidth, noteHeight);
+            /*
+             * 一
+             * 定
+             * 要
+             * 注
+             * 意
+             * 这
+             * 里
+             * 用
+             * 的
+             * 是
+             * nullptr
+             */
+            result.append(noteTemp);
+
 
         }
         else if(type==1){
             //现在是hold
 
+            /*
+             * hold
+             * 的
+             * 逻辑
+             * 目前
+             * 不实现。。
+             * 别忘记了
+             */
+
+
         }
 
     }
+    return result;
 
 }
