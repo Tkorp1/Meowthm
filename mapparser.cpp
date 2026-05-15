@@ -102,6 +102,7 @@ QList<Note*> MapParser::parse(QString trackPath){
             int noteWidth = 300;
             int noteHeight = 30;
             Note* noteTemp = new Tap(_targetTime, noteWidth, noteHeight);
+            noteTemp->show();
             /*
              * 一
              * 定
