@@ -60,6 +60,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         //获取list
         QList<Note*> noteListTemp=mp.parse(path);
         tracks[i]->addNotes(noteListTemp);
+        tracks[i]->setNoteParent(this);
     }
 
 
