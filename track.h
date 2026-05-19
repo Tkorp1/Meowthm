@@ -39,7 +39,7 @@ public:
     ~Track();
 
     // 2.添加音符的函数,输入note的list
-    void addNotes(const QList<Note*> noteList);
+    void addNotes(const QList<Note*>& noteList);
 
     // 3.更新轨道音符，输入当前绝对时间，同时负责清理miss的音符和判定hold结束
     // Y = hitLineY - detaT * speed
@@ -74,7 +74,7 @@ public:
     void setNoteParent(QWidget* parent);
 
 signals:
-    // 7.向gamescene报告判定的信号，只需要声明不需要实现
+    // 9.向gamescene报告判定的信号，只需要声明不需要实现
     // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect
     void noteJudged(int result);
 

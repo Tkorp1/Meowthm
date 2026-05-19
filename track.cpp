@@ -9,10 +9,14 @@ Track::Track(int _trackIndex, int _hitLineY, int _xPos, QObject* parent):
 }
 
 // 1.析构函数
-Track::~Track(){}
+Track::~Track(){
+    while(!noteInTrack.isEmpty()){
+        delete noteInTrack.takeFirst();
+    }
+}
 
 // 2.添加音符的函数,输入note的list
-void Track::addNotes(const QList<Note*> noteList){
+void Track::addNotes(const QList<Note*>& noteList){
     noteInTrack=noteList;
 }
 
@@ -52,18 +56,17 @@ void  Track::checkHit(qint64 currentMusicTime){
     // 现在可以开始判定了
     Note* note = noteInTrack.front();
     qint64 deltaT = currentMusicTime - note->getTargetTime();
-    deltaT = qAbs(deltaT);
-    // 获得时间差并且取绝对值
-    if(deltaT > 160){
+    // 获得时间差
+    if(deltaT > 160 || deltaT < -160){
         // 无事发生，没有按到
         emit noteJudged(0);
     }
-    else if(deltaT <= 160 && deltaT > 80){
+    else if((deltaT <= 160 && deltaT > 80)||(deltaT >= -160 && deltaT < -80)){
         // 现在是good
         emit noteJudged(2);
         delete noteInTrack.takeFirst();
     }
-    else if(deltaT <= 80){
+    else if(deltaT <= 80 && deltaT >= -80){
         // 现在是perfect判定
         emit noteJudged(3);
         delete noteInTrack.takeFirst();
