@@ -23,6 +23,7 @@ private slots:
     void onSelectSong();      // 选曲界面
     void onSettings();        // 设置界面
     void onAchievements();    // 成就界面
+    void onProfile();        // 个人档案
     void onPoke();            // 戳界面
     void onExitGame();        // 退出游戏
 

@@ -1,12 +1,20 @@
 #include "MainWindow.h"
-#include "ButtonItem.h"
-#include "SelectSongWindow.h"    // 选曲窗口
-#include "SettingsWindow.h"      // 设置窗口
-#include "AchievementsWindow.h"  // 成就窗口
-#include "PokeWindow.h"          // 戳窗口
+#include "SelectSongWindow.h"
+#include "SettingsWindow.h"
+#include "AchievementsWindow.h"
+#include "PokeWindow.h"
+#include "ProfileWindow.h"
 #include <QBrush>
 #include <QFont>
 #include <QGraphicsTextItem>
+#include <QPixmap>
+#include <QDebug>
+#include <QPushButton>
+#include <QGraphicsProxyWidget>
+#include <QKeyEvent>
+#include <QCursor>
+#include <QPointF>
+#include <functional>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     , scene(new QGraphicsScene(this))
 {
     setWindowTitle("游戏初始界面");
-    setFixedSize(800, 600);
+    setFixedSize(1200, 800);
 
     view->setScene(scene);
     view->setRenderHint(QPainter::Antialiasing);
@@ -23,75 +31,62 @@ MainWindow::MainWindow(QWidget *parent)
     view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setCentralWidget(view);
 
-    scene->setBackgroundBrush(QBrush(QColor(30, 30, 40)));
+    // 添加背景图（保持比例，不拉伸）
+    QPixmap bgPixmap("bg.png");
+    if (!bgPixmap.isNull()) {
+        QPixmap scaledBg = bgPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QGraphicsPixmapItem *bgItem = new QGraphicsPixmapItem(scaledBg);
+        bgItem->setPos((width() - scaledBg.width()) / 2, (height() - scaledBg.height()) / 2);
+        bgItem->setZValue(-1);
+        scene->addItem(bgItem);
+    } else {
+        scene->setBackgroundBrush(QBrush(QColor(30, 30, 40)));
+    }
 
-    // 标题
-    QGraphicsTextItem *title = scene->addText("Meowthm");
-    QFont titleFont("Microsoft YaHei", 28, QFont::Bold);
-    title->setFont(titleFont);
-    title->setDefaultTextColor(Qt::white);
-    qreal titleWidth = title->boundingRect().width();
-    title->setPos((width() - titleWidth) / 2, 80);
+    // 按钮样式：完全透明，无文字，无边框
+    QString buttonStyle = R"(
+        QPushButton {
+            background-color: transparent;
+            color: transparent;
+            border: none;
+        }
+        QPushButton:hover {
+            background-color: transparent;
+        }
+        QPushButton:pressed {
+            background-color: transparent;
+        }
+    )";
 
-    // 为了方便布局，定义按钮的垂直起始位置和间距
-    int startY = 220;
-    int stepY = 80;
-    int currentY = startY;
+    int btnWidth = 200;
+    int btnHeight = 110;
 
-    // 选曲按钮
-    ButtonItem *enterBtn = new ButtonItem(
-        "btn_enter_normal.png",
-        "btn_enter_hover.png",
-        "btn_enter_pressed.png"
-        );
-    qreal btnWidth = enterBtn->pixmap().width();
-    enterBtn->setPos((width() - btnWidth) / 2, currentY);
-    scene->addItem(enterBtn);
-    connect(enterBtn, &ButtonItem::clicked, this, &MainWindow::onSelectSong);
-    currentY += stepY;
+    struct ButtonData {
+        QString text;
+        int x;
+        int y;
+        std::function<void()> onClick;
+    };
 
-    // 设置按钮
-    ButtonItem *settingsBtn = new ButtonItem(
-        "btn_settings_normal.png",
-        "btn_settings_hover.png",
-        "btn_settings_pressed.png"
-        );
-    settingsBtn->setPos((width() - btnWidth) / 2, currentY);
-    scene->addItem(settingsBtn);
-    connect(settingsBtn, &ButtonItem::clicked, this, &MainWindow::onSettings);
-    currentY += stepY;
+    QList<ButtonData> buttons = {
+        { "退出游戏", 1025, 24, [this]() { onExitGame(); } },
+        { "进入选曲界面", 115, 498, [this]() { onSelectSong(); } },
+        { "设置", 361, 498, [this]() { onSettings(); } },
+        { "个人档案", 625, 498, [this]() { onProfile(); } },
+        { "成就", 880, 498, [this]() { onAchievements(); } },
+        { "戳", 727, 336, [this]() { onPoke(); } }
+    };
 
-    // 成就按钮
-    ButtonItem *achievementsBtn = new ButtonItem(
-        "btn_achievements_normal.png",
-        "btn_achievements_hover.png",
-        "btn_achievements_pressed.png"
-        );
-    achievementsBtn->setPos((width() - btnWidth) / 2, currentY);
-    scene->addItem(achievementsBtn);
-    connect(achievementsBtn, &ButtonItem::clicked, this, &MainWindow::onAchievements);
-    currentY += stepY;
+    for (const auto &data : buttons) {
+        QPushButton *btn = new QPushButton(data.text);
+        btn->setFixedSize(btnWidth, btnHeight);
+        btn->setStyleSheet(buttonStyle);
+        QGraphicsProxyWidget *proxy = scene->addWidget(btn);
+        proxy->setPos(data.x, data.y);
+        QObject::connect(btn, &QPushButton::clicked, data.onClick);
+    }
 
-    // 戳按钮
-    ButtonItem *pokeBtn = new ButtonItem(
-        "btn_poke_normal.png",
-        "btn_poke_hover.png",
-        "btn_poke_pressed.png"
-        );
-    pokeBtn->setPos((width() - btnWidth) / 2, currentY);
-    scene->addItem(pokeBtn);
-    connect(pokeBtn, &ButtonItem::clicked, this, &MainWindow::onPoke);
-    currentY += stepY;
-
-    // 退出按钮
-    ButtonItem *exitBtn = new ButtonItem(
-        "btn_exit_normal.png",
-        "btn_exit_hover.png",
-        "btn_exit_pressed.png"
-        );
-    exitBtn->setPos((width() - btnWidth) / 2, currentY);
-    scene->addItem(exitBtn);
-    connect(exitBtn, &ButtonItem::clicked, this, &MainWindow::onExitGame);
+    view->setFocus();
 }
 
 MainWindow::~MainWindow()
@@ -130,4 +125,11 @@ void MainWindow::onPoke()
 void MainWindow::onExitGame()
 {
     this->close();
+}
+
+void MainWindow::onProfile()
+{
+    ProfileWindow *window = new ProfileWindow(this);
+    window->show();
+    this->hide();
 }

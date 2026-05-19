@@ -12,9 +12,15 @@ ButtonItem::ButtonItem(const QString &normalImg,
     , m_isPressed(false)
 {
     // 加载并设置普通状态的图片
-    QPixmap pixmap(m_normalImgPath);
-    setPixmap(pixmap);
 
+    QPixmap pixmap(m_normalImgPath);
+    if (pixmap.isNull()) {
+        qDebug() << "ERROR: failed to load" << m_normalImgPath;
+    } else {
+        qDebug() << "Loaded" << m_normalImgPath << "size:" << pixmap.size();
+    }
+    setPixmap(pixmap);
+    setAcceptHoverEvents(true);
     // 允许接受悬停事件（实现 hover 效果）
     setAcceptHoverEvents(true);
 }
