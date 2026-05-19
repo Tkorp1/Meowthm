@@ -17,6 +17,8 @@ Note::~Note(){
 
 }
 
+// 所有的get函数：
+
 qint64 Note::getTargetTime()const{
     return targetTime;
 }
@@ -28,6 +30,8 @@ int Note::getCurrentY()const{
 NoteType Note::getType()const{
     return type;
 }
+
+// 其他的函数：
 
 void Note::updateY(int newY){
     this->move(this->x(), newY);
