@@ -2,6 +2,10 @@
 #define PROFILEWINDOW_H
 
 #include <QWidget>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
+#include <QTextEdit>
 
 class ProfileWindow : public QWidget
 {
@@ -9,6 +13,37 @@ class ProfileWindow : public QWidget
 public:
     explicit ProfileWindow(QWidget *parent = nullptr);
     ~ProfileWindow();
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
+
+private slots:
+    // 昵称相关
+    void onNicknameTriggerClicked();  // 修改昵称按钮
+    void onNicknameSaveClicked();     // 保存昵称
+
+    // 简介相关（多行文本）
+    void onBioTriggerClicked();       // 编辑简介按钮
+    void onBioSaveClicked();          // 保存简介
+
+    // 返回主界面
+    void onBackClicked();
+
+private:
+    // 昵称控件
+    QPushButton *m_nicknameTriggerBtn;  // 触发按钮
+    QLineEdit   *m_nicknameEdit;    // 编辑文本框
+    QPushButton *m_nicknameSaveBtn; // 保存按钮
+    QLabel      *m_nicknameDisplayLabel;    // 显示文本框
+
+    // 简介控件（多行文本）
+    QPushButton *m_bioTriggerBtn;
+    QTextEdit   *m_bioEdit;
+    QPushButton *m_bioSaveBtn;
+    QLabel      *m_bioDisplayLabel;
+
+    // 返回按钮
+    QPushButton *m_backBtn;
 };
 
 #endif // PROFILEWINDOW_H

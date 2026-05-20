@@ -17,6 +17,7 @@
 #include <functional>
 
 MainWindow::MainWindow(QWidget *parent)
+    // 基本初始化
     : QMainWindow(parent)
     , ui(nullptr)
     , view(new QGraphicsView(this))
@@ -25,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("游戏初始界面");
     setFixedSize(1200, 800);
 
+    // 图形视图框架初始化
     view->setScene(scene);
     view->setRenderHint(QPainter::Antialiasing);
     view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -40,10 +42,10 @@ MainWindow::MainWindow(QWidget *parent)
         bgItem->setZValue(-1);
         scene->addItem(bgItem);
     } else {
-        scene->setBackgroundBrush(QBrush(QColor(30, 30, 40)));
+
     }
 
-    // 按钮样式：完全透明，无文字，无边框
+    // 按钮样式：完全透明，无文字，无边框，实现点击背景图相应区域即可触发
     QString buttonStyle = R"(
         QPushButton {
             background-color: transparent;
@@ -57,10 +59,10 @@ MainWindow::MainWindow(QWidget *parent)
             background-color: transparent;
         }
     )";
-
+    // 按钮大小
     int btnWidth = 200;
     int btnHeight = 110;
-
+    // 按钮相关参数
     struct ButtonData {
         QString text;
         int x;
@@ -76,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent)
         { "成就", 880, 498, [this]() { onAchievements(); } },
         { "戳", 727, 336, [this]() { onPoke(); } }
     };
-
+    // 一键初始化所有按钮
     for (const auto &data : buttons) {
         QPushButton *btn = new QPushButton(data.text);
         btn->setFixedSize(btnWidth, btnHeight);
@@ -93,33 +95,33 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+// 连接所有按钮到槽函数
 void MainWindow::onSelectSong()
 {
     SelectSongWindow *window = new SelectSongWindow(this);
     window->show();
-    this->hide();
+    //this->hide();
 }
 
 void MainWindow::onSettings()
 {
     SettingsWindow *window = new SettingsWindow(this);
     window->show();
-    this->hide();
+    //this->hide();
 }
 
 void MainWindow::onAchievements()
 {
     AchievementsWindow *window = new AchievementsWindow(this);
     window->show();
-    this->hide();
+    //this->hide();
 }
 
 void MainWindow::onPoke()
 {
     PokeWindow *window = new PokeWindow(this);
     window->show();
-    this->hide();
+    //this->hide();
 }
 
 void MainWindow::onExitGame()
@@ -131,5 +133,5 @@ void MainWindow::onProfile()
 {
     ProfileWindow *window = new ProfileWindow(this);
     window->show();
-    this->hide();
+    //this->hide();
 }
