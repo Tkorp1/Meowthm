@@ -10,7 +10,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     mapPath(_mapPath),
     currentMusicTime(0), //初始化为 0！！！
     currentScore(0),
-    currentCombo(0)
+    currentCombo(0),
+    state(GameState())
 {
     // 0.设置gamescene的基本形状
     // 大小
@@ -45,7 +46,6 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     int leftX = 200;
 
 
-    // 这里等写完 mapparser以后再改一下
     QDir dir(mapPath);
 
     MapParser mp = MapParser(mapPath);
@@ -134,6 +134,7 @@ void GameScene::gameLoop(){
 void GameScene::hitNoteJudge(int result){
     if(result == 1){ // Miss
         // 连击中断
+
         currentCombo = 0;
         //comboLabel->show();
     }else if(result >= 2){

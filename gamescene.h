@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include "track.h"
 #include "mapparser.h"
+#include "gamestate.h"
 
 class GameScene : public QWidget
 {
@@ -25,6 +26,8 @@ private:
     QTimer* updateTimer;     // 负责触发每帧刷新的“闹钟”
 
     // 4.记分系统与ui控件
+    GameState state; // 额外添加的储存，目前不删除下面的变量
+
     int currentScore; // 当前得分
     int currentCombo; // 当前连击数（注意miss时要清零）
     QLabel* scoreLabel; // 显示分数的标签
