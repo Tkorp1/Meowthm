@@ -36,7 +36,7 @@ private:
 
 public:
     // 1.构造函数
-    GameState(QString _currentSong);// 一开始只有歌曲参数
+    GameState(QString _currentSong = "None");// 一开始只有歌曲参数
 
     // 2.所有的读取函数
 

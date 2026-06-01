@@ -18,6 +18,7 @@ SOURCES += \
     mainwindow.cpp \
     mapparser.cpp \
     note.cpp \
+    resultscene.cpp \
     track.cpp \
     SelectSongWindow.cpp \
     SettingsWindow.cpp \
@@ -38,6 +39,7 @@ HEADERS += \
     mainwindow.h \
     mapparser.h \
     note.h \
+    resultscene.h \
     track.h \
 
 FORMS += \
