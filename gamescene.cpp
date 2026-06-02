@@ -1,6 +1,7 @@
 #include "gamescene.h"
 #include "mapparser.h"
 #include "gameconfig.h"
+#include "resultscene.h"
 
 #include <QPainter>
 #include <QDir>
@@ -9,7 +10,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     : QWidget{parent},
     mapPath(_mapPath),
     currentMusicTime(0), //初始化为 0！！！
-    state(GameState())
+    state(GameState()),
+    gameEnded(false)
 {
     // 0.设置gamescene的基本形状
     // 大小
@@ -23,16 +25,20 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     this->setFocusPolicy(Qt::StrongFocus);
 
     // 1.初始化参数
-    connect(GameConfig::instance(), &GameConfig::noteSpeedChanged,
-            this, [this](double newSpeed){ globalSpeed = newSpeed; });
-    /*
 
+    // 先读取当前配置
+    globalSpeed = GameConfig::instance()->getNoteSpeed();
+    offset = GameConfig::instance()->getCurrentOffset();
 
-    注意这里的流速需要从config里面读取
+    // 监听流速变化
+    connect(GameConfig::instance(),
+            &GameConfig::noteSpeedChanged,
+            this,
+            [this](double newSpeed){
+                globalSpeed = newSpeed;
+            });
 
-
-    */
-    int _hitLineY = 500;
+    hitLineY = 500;
 
     // 2.与ui相关的部件
     scoreLabel = new QLabel(this);
@@ -62,10 +68,10 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
     MapParser mp = MapParser(mapPath);
     for(int i = 0; i < 4; i++){
-        tracks[i] = new Track(i, _hitLineY, leftX + trackWidth * i, this);
+        tracks[i] = new Track(i, hitLineY, leftX + trackWidth * i, this);
         connect(tracks[i], &Track::noteJudged, this, &GameScene::hitNoteJudge);
         //文件操作，获取轨道的路径
-        QString fileName = QString("track%1.txt").arg(i);
+        QString fileName = QString("Track%1.txt").arg(i);
 
         QString path = dir.filePath(fileName);
 
@@ -75,16 +81,59 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         tracks[i]->setNoteParent(this);
     }
 
+    allMusicTime = mp.getMusicTime();
 
-    //4.建立闹钟
+    // 4.音乐引擎
+    player = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+    player->setAudioOutput(audioOutput);
+
+    QString musicPath = dir.filePath("music.mp3");
+    player->setSource(QUrl::fromLocalFile(musicPath));
+
+    connect(player,
+            &QMediaPlayer::mediaStatusChanged,
+            this,
+            [this](QMediaPlayer::MediaStatus status){
+                if(status ==
+                    QMediaPlayer::EndOfMedia){
+                    gameOver();
+                }
+            });
+
+    audioOutput->setVolume(0.5);
+
+    player->play();
+
+    // 5.建立闹钟
     updateTimer = new QTimer(this);
     // 连接信号槽：每次闹钟响就执行gameLoop
     connect(updateTimer, &QTimer::timeout, this, &GameScene::gameLoop);
-    //设定闹钟间隔 目前16s
+    // 设定闹钟间隔 目前16s
     updateTimer->start(16);
+
+
 }
 
 GameScene::~GameScene(){
+
+}
+
+void GameScene::gameOver(){
+    if(gameEnded){
+        return;
+    }
+    gameEnded = true;
+
+    updateTimer->stop();
+
+    player->stop();
+
+    ResultScene* resultscene = new ResultScene(state);
+
+    resultscene->show();
+
+    close();
 
 }
 
@@ -132,12 +181,17 @@ void GameScene::keyReleaseEvent(QKeyEvent * event){
 
 // 主循环函数
 void GameScene::gameLoop(){
-    // 以后写了音乐播放器，再实时播报时间，现在先简单模拟一下递增
-    currentMusicTime += 16;
+    // 实时播报时间
+    currentMusicTime = player->position();
 
     // 更新轨道
     for (int i = 0; i < 4; ++i) {
         tracks[i]->updateTrack(currentMusicTime, globalSpeed);
+    }
+
+    // 如果游戏结束了
+    if(currentMusicTime >= allMusicTime + 2000){
+        gameOver();
     }
 
 }

@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QTimer>
 #include <QKeyEvent>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 #include "track.h"
 #include "mapparser.h"
 #include "gamestate.h"
@@ -18,6 +20,7 @@ private:
     double globalSpeed;      // 全局流速 像素/ms。 // 先写了一个数据记得改
     qint64 currentMusicTime; // 当前音乐播放时间 ms //初始化时记得设为0
     int hitLineY;            // 判定线的统一Y坐标 像素
+    qint64 offset;
 
     // 2.四条轨道的指针
     Track* tracks[4];
@@ -26,15 +29,21 @@ private:
     QTimer* updateTimer;     // 负责触发每帧刷新的“闹钟”
 
     // 4.记分系统与ui控件
-    GameState state; // 额外添加的储存，目前不删除下面的变量
-
-    //int currentScore; // 当前得分
-    //int currentCombo; // 当前连击数（注意miss时要清零）
+    GameState state; // 额外添加的储存
     QLabel* scoreLabel; // 显示分数的标签
     QLabel* comboLabel; // 显示 combo 的标签
     QLabel* accuracyLabel;// 显示acc的标签
 
-    // 5.音乐引擎（暂时先不写）
+    // 5.音乐引擎
+    QMediaPlayer* player;
+    QAudioOutput* audioOutput;
+
+    // 6.停止相关
+    bool gameEnded;
+
+    qint64 allMusicTime;
+
+    void gameOver();
 
 public:
 

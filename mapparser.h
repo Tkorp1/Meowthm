@@ -26,6 +26,9 @@ public:
     // 计算音符的时间的函数，参数为小节数（1开始）和节拍数
     qint64 targetTimeCalculator(int bar, double beats);
 
+    // 返回音乐时间的函数
+    qint64 getMusicTime();
+
 };
 
 #endif // MAPPARSER_H

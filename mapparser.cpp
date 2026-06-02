@@ -47,7 +47,7 @@ qint64 MapParser::targetTimeCalculator(int bar, double beats){
 
     //下面的时间都是一个以毫秒为单位的数字
 
-    int totalBeats = bar*beatsPerBar + beats;
+    double totalBeats = bar * beatsPerBar + beats;
 
     double result = totalBeats * (60000.0)/currentBPM;
 
@@ -101,7 +101,6 @@ QList<Note*> MapParser::parse(QString trackPath){
             int noteWidth = 300;
             int noteHeight = 30;
             Note* noteTemp = new Tap(_targetTime, noteWidth, noteHeight);
-            noteTemp->show();
             /*
              * 一
              * 定
@@ -136,5 +135,39 @@ QList<Note*> MapParser::parse(QString trackPath){
 
     }
     return result;
+
+}
+
+qint64 MapParser::getMusicTime(){
+    QDir dir(Path);
+
+    QString infoPath = dir.filePath("info.txt");
+
+    QFile file(infoPath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << "打不开 info 文件";
+        return 0;
+    }
+
+    QTextStream in(&file);
+
+    in.readLine();
+    in.readLine();
+
+    // 读整行
+
+    QString line = in.readLine();
+
+    file.close();
+
+    QStringList parts = line.split(":");
+
+    if(parts.size() < 2){
+
+        return 0;
+
+    }
+
+    return parts[1].trimmed().toLongLong();
 
 }
