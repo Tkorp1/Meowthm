@@ -15,6 +15,7 @@
 #include <QCursor>
 #include <QPointF>
 #include <functional>
+#include <QDir>
 
 MainWindow::MainWindow(QWidget *parent)
     // 基本初始化
@@ -23,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     , view(new QGraphicsView(this))
     , scene(new QGraphicsScene(this))
 {
+
+    qDebug() << QDir::currentPath();
     setWindowTitle("游戏初始界面");
     setFixedSize(1200, 800);
 
@@ -34,7 +37,8 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(view);
 
     // 添加背景图（保持比例，不拉伸）
-    QPixmap bgPixmap("bg.png");
+    QPixmap bgPixmap(":/image/bg.png");
+    //QPixmap bgPixmap("bg.png");
     if (!bgPixmap.isNull()) {
         QPixmap scaledBg = bgPixmap.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         QGraphicsPixmapItem *bgItem = new QGraphicsPixmapItem(scaledBg);

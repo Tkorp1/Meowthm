@@ -50,3 +50,6 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 QMAKE_POST_LINK += $$quote(cp -r $$PWD/maps $$OUT_PWD/)
+
+RESOURCES += \
+    resources.qrc
