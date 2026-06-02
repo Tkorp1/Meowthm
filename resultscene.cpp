@@ -1,5 +1,7 @@
 #include "resultscene.h"
 
-ResultScene::ResultScene(QWidget *parent)
+ResultScene::ResultScene(GameState _state, QWidget *parent)
     : QWidget{parent}
-{}
+{
+    state = _state;
+}
