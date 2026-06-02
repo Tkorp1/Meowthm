@@ -1,7 +1,7 @@
 TARGET = Meowthm
 
 QT += widgets
-QT += multimedia
+QT += widgets multimedia # 音频
 
 CONFIG += c++17
 
