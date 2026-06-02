@@ -7,12 +7,12 @@
 #include <QDebug>
 #include <QMouseEvent>
 //  调试用显示鼠标位置
-void PokeWindow::mousePressEvent(QMouseEvent *event)
+/*void PokeWindow::mousePressEvent(QMouseEvent *event)
 {
     QPoint pos = event->pos();
     qDebug() << "鼠标点击坐标:" << pos.x() << pos.y();
     QWidget::mousePressEvent(event);
-}
+}*/
 
 PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
 {

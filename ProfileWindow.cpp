@@ -1,4 +1,5 @@
 #include "ProfileWindow.h"
+#include "gameconfig.h"   // 新增：引入全局配置单例
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPixmap>
@@ -41,7 +42,13 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
         "padding: 18px;"
         );
     m_nicknameDisplayLabel->setGeometry(105, 374, 240, 80);
-    m_nicknameDisplayLabel->setText("小喵");
+
+    // 从全局配置中读取已保存的玩家昵称，若无则使用默认值
+    QString savedName = GameConfig::instance()->getCurrentPlayer();
+    if (savedName.isEmpty()) {
+        savedName = "小喵";   // 默认值
+    }
+    m_nicknameDisplayLabel->setText(savedName);
 
     // ---------- 简介模块（多行文本） ----------
     // 触发按钮
@@ -115,15 +122,18 @@ void ProfileWindow::onNicknameTriggerClicked()
     m_nicknameEdit->clear();
 }
 
-// 昵称：保存
+// 昵称：保存 同时更新全局配置和界面显示
 void ProfileWindow::onNicknameSaveClicked()
 {
     QString text = m_nicknameEdit->text().trimmed();
     if (text.isEmpty()) {
-        m_nicknameDisplayLabel->setText("昵称不能为空！");
+        m_nicknameDisplayLabel->setText("昵称不能为滚木！");
         m_nicknameDisplayLabel->show();
         return;
     }
+    // 更新全局配置（自动保存到文件并发射信号）
+    GameConfig::instance()->setCurrentPlayer(text);
+    // 更新界面显示
     m_nicknameDisplayLabel->setText(text);
     m_nicknameDisplayLabel->show();
     m_nicknameEdit->hide();
@@ -145,7 +155,7 @@ void ProfileWindow::onBioSaveClicked()
 {
     QString text = m_bioEdit->toPlainText().trimmed();
     if (text.isEmpty()) {
-        m_bioDisplayLabel->setText("（未填写）");
+        m_bioDisplayLabel->setText("滚木");
     } else {
         m_bioDisplayLabel->setText(text);
     }

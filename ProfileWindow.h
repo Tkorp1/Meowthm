@@ -31,10 +31,10 @@ private slots:
 
 private:
     // 昵称控件
-    QPushButton *m_nicknameTriggerBtn;  // 触发按钮
-    QLineEdit   *m_nicknameEdit;    // 编辑文本框
-    QPushButton *m_nicknameSaveBtn; // 保存按钮
-    QLabel      *m_nicknameDisplayLabel;    // 显示文本框
+    QPushButton *m_nicknameTriggerBtn;
+    QLineEdit   *m_nicknameEdit;
+    QPushButton *m_nicknameSaveBtn;
+    QLabel      *m_nicknameDisplayLabel;
 
     // 简介控件（多行文本）
     QPushButton *m_bioTriggerBtn;
@@ -44,6 +44,9 @@ private:
 
     // 返回按钮
     QPushButton *m_backBtn;
+
+    // 预留功能：根据获取的成就更改背景图
+    // 预留功能：根据获取的成就更改头像
 };
 
 #endif // PROFILEWINDOW_H

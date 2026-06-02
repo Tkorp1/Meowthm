@@ -1,38 +1,50 @@
 #ifndef GAMECONFIG_H
 #define GAMECONFIG_H
+
+#include <QObject>
 #include <QString>
-// 这里面储存的都是全局变量，设想是在gamescene初始化或者main里面就将这个设置好
-// 有很多接口，可以用get读取和set修改
 
-class GameConfig
+// 全局配置类（单例模式），用于存储游戏相关的全局设置
+// 用法：GameConfig::instance()->getNoteSpeed();
+//       GameConfig::instance()->setNoteSpeed(1.2);
+class GameConfig : public QObject
 {
-private:
-    // 1.谱面流速
-    double noteSpeed;
-
-    // 2.当前玩家名
-    QString currentPlayer;
-
-    // 3.当前偏移值
-    qint64 currentOffset;
+    Q_OBJECT
 
 public:
-    // 1.构造函数
-    GameConfig(double _noteSpeed, QString _currentPlayer, qint64 _currentOffset);
+    // 获取单例实例
+    static GameConfig* instance();
 
-    // 2.一些读取函数
-    double getNoteSpeed() const;
+    // 获取/设置 流速（像素/毫秒）
+    double getNoteSpeed() const { return m_noteSpeed; }
+    void setNoteSpeed(double speed);
 
-    QString getCurrentPlayer() const;
+    // 获取/设置 当前玩家昵称
+    QString getCurrentPlayer() const { return m_currentPlayer; }
+    void setCurrentPlayer(const QString &name);
 
-    qint64 getCurrentOffset() const;
+    // 获取/设置 偏移量（毫秒）
+    qint64 getCurrentOffset() const { return m_currentOffset; }
+    void setCurrentOffset(qint64 offset);
 
-    // 3.一些修改函数
-    void setNoteSpeed(double newSpeed);
+signals:
+    void noteSpeedChanged(double newSpeed);
+    void currentPlayerChanged(const QString &newName);
+    void currentOffsetChanged(qint64 newOffset);
 
-    void setCurrentPlayer(QString newName);
+private:
+    // 私有构造/析构，禁止外部创建
+    explicit GameConfig(QObject *parent = nullptr);
+    ~GameConfig();
 
-    void setCurrentOffset(qint64 newOffset);
+    // 禁用拷贝和赋值
+    GameConfig(const GameConfig&) = delete;
+    GameConfig& operator=(const GameConfig&) = delete;
+
+    // 数据成员
+    double m_noteSpeed;
+    QString m_currentPlayer;
+    qint64 m_currentOffset;
 };
 
 #endif // GAMECONFIG_H

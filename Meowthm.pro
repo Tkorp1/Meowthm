@@ -11,7 +11,6 @@ CONFIG += c++17
 SOURCES += \
     gameconfig.cpp \
     gamescene.cpp \
-    ButtonItem.cpp \
     ProfileWindow.cpp \
     gamestate.cpp \
     main.cpp \
@@ -30,7 +29,6 @@ HEADERS += \
     gameconfig.h \
     gamescene.h \
     AchievementsWindow.h \
-    ButtonItem.h \
     PokeWindow.h \
     ProfileWindow.h \
     SelectSongWindow.h \

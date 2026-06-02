@@ -1,6 +1,6 @@
 #include "gamescene.h"
 #include "mapparser.h"
-
+#include "gameconfig.h"
 
 #include <QPainter>
 #include <QDir>
@@ -23,7 +23,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     this->setFocusPolicy(Qt::StrongFocus);
 
     // 1.初始化参数
-    globalSpeed = 0.5;
+    connect(GameConfig::instance(), &GameConfig::noteSpeedChanged,
+            this, [this](double newSpeed){ globalSpeed = newSpeed; });
     /*
 
 

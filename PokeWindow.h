@@ -31,7 +31,7 @@ private:
     QTextEdit *m_fixedText1;
     QTextEdit *m_fixedText2;
 
-    void mousePressEvent(QMouseEvent *event) override;  // 调试用鼠标位置显示
+    //void mousePressEvent(QMouseEvent *event) override;  // 调试用鼠标位置显示
 };
 
 #endif // POKEWINDOW_H
