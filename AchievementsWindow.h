@@ -9,6 +9,7 @@ class AchievementsWindow : public QWidget
 public:
     explicit AchievementsWindow(QWidget *parent = nullptr);
     ~AchievementsWindow();
+    // 暂时滚木
 };
 
 #endif // ACHIEVEMENTSWINDOW_H

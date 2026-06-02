@@ -45,6 +45,7 @@ private:
     // 返回按钮
     QPushButton *m_backBtn;
 
+    // 预留功能：显示rating
     // 预留功能：根据获取的成就更改背景图
     // 预留功能：根据获取的成就更改头像
 };

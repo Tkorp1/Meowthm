@@ -84,6 +84,8 @@ void PokeWindow::initDynamicContent()   // 随机人物和文本
     QString imagePath;
     QString textContent;
 
+    // 预留功能：随机玩家成绩并且输出评价文本
+
     switch (r) {
     case 1:
         imagePath = "poke1.png";
