@@ -46,11 +46,10 @@ qint64 MapParser::targetTimeCalculator(int bar, double beats){
     int beatsPerBar = 4;
 
     //下面的时间都是一个以毫秒为单位的数字
-    double timeOfABeat = (60000.0)/currentBPM;
 
-    double timeOfABar = beatsPerBar * timeOfABeat;
+    int totalBeats = bar*beatsPerBar + beats;
 
-    double result = bar*timeOfABar + beats * timeOfABeat;
+    double result = totalBeats * (60000.0)/currentBPM;
 
     qint64 resulttime = qRound64(result);
 

@@ -9,14 +9,17 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    # gamescene.cpp \       # 注释掉
+    gameconfig.cpp \
+    gamescene.cpp \
     ButtonItem.cpp \
     ProfileWindow.cpp \
+    gamestate.cpp \
     main.cpp \
     mainwindow.cpp \
-    # mapparser.cpp \       # 注释掉
-    # note.cpp \            # 注释掉
-    # track.cpp \           # 注释掉
+    mapparser.cpp \
+    note.cpp \
+    resultscene.cpp \
+    track.cpp \
     SelectSongWindow.cpp \
     SettingsWindow.cpp \
     AchievementsWindow.cpp \
@@ -24,17 +27,20 @@ SOURCES += \
 
 
 HEADERS += \
-    # gamescene.h \         # 注释掉
+    gameconfig.h \
+    gamescene.h \
     AchievementsWindow.h \
     ButtonItem.h \
     PokeWindow.h \
     ProfileWindow.h \
     SelectSongWindow.h \
     SettingsWindow.h \
+    gamestate.h \
     mainwindow.h \
-    # mapparser.h \         # 注释掉
-    # note.h \              # 注释掉
-    # track.h \             # 注释掉
+    mapparser.h \
+    note.h \
+    resultscene.h \
+    track.h \
 
 FORMS += \
     mainwindow.ui

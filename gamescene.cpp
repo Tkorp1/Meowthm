@@ -9,8 +9,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     : QWidget{parent},
     mapPath(_mapPath),
     currentMusicTime(0), //初始化为 0！！！
-    currentScore(0),
-    currentCombo(0)
+    state(GameState())
 {
     // 0.设置gamescene的基本形状
     // 大小
@@ -25,6 +24,13 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
     // 1.初始化参数
     globalSpeed = 0.5;
+    /*
+
+
+    注意这里的流速需要从config里面读取
+
+
+    */
     int _hitLineY = 500;
 
     // 2.与ui相关的部件
@@ -40,12 +46,17 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     comboLabel -> setStyleSheet("color: #00BFFF; font-size: 36px; font-weight: bold; background-color: transparent;");
     comboLabel -> show();
 
+    accuracyLabel = new QLabel(this);
+    accuracyLabel -> setText("Acc: 100.00%");
+    accuracyLabel -> setGeometry(600, 70, 180, 50);
+    accuracyLabel -> setStyleSheet("color: #98FB98; font-size: 24px; font-weight: bold; background-color: transparent;");
+    accuracyLabel -> show();
+
     // 3.创建轨道
     int trackWidth = 100;
     int leftX = 200;
 
 
-    // 这里等写完 mapparser以后再改一下
     QDir dir(mapPath);
 
     MapParser mp = MapParser(mapPath);
@@ -132,18 +143,14 @@ void GameScene::gameLoop(){
 
 
 void GameScene::hitNoteJudge(int result){
-    if(result == 1){ // Miss
-        // 连击中断
-        currentCombo = 0;
-        //comboLabel->show();
-    }else if(result >= 2){
-        currentCombo++;
-        // 目前暂定给分，之后调整
-        currentScore += (result == 3) ? 100 : 70;
-        comboLabel -> setText(QString("Combo: %1").arg(currentCombo));
-        //comboLabel->show();
-    }
-    scoreLabel->setText(QString("Score: %1").arg(currentScore));
+    // 首先修改所有的状态
+    state.changeCurrentState(result);
+    // 然后更改显示
+    comboLabel->setText(QString("Combo: %1").arg(state.getCurrentCombo()));
+
+    scoreLabel->setText(QString("Score: %1").arg(state.getCurrentScore()));
+
+    accuracyLabel->setText(QString("Acc: %1%").arg(state.getCurrentAcc() * 100, 0, 'f', 2));
 
     // 之后的特效在这里写
 }

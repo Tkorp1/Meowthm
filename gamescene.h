@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include "track.h"
 #include "mapparser.h"
+#include "gamestate.h"
 
 class GameScene : public QWidget
 {
@@ -25,10 +26,13 @@ private:
     QTimer* updateTimer;     // 负责触发每帧刷新的“闹钟”
 
     // 4.记分系统与ui控件
-    int currentScore; // 当前得分
-    int currentCombo; // 当前连击数（注意miss时要清零）
+    GameState state; // 额外添加的储存，目前不删除下面的变量
+
+    //int currentScore; // 当前得分
+    //int currentCombo; // 当前连击数（注意miss时要清零）
     QLabel* scoreLabel; // 显示分数的标签
     QLabel* comboLabel; // 显示 combo 的标签
+    QLabel* accuracyLabel;// 显示acc的标签
 
     // 5.音乐引擎（暂时先不写）
 
@@ -73,6 +77,10 @@ private slots:
     // 6.接受来自track的判定结果，并对 currentScore 和 currentCombo 做出更改
     // 在track中已经约定： 0 空 、1 miss 、2 good 、3 perfect
     void hitNoteJudge(int result);
+
+
+    // 7.游戏结束函数，在循环里面如果判定到游戏结束了，直接调用
+    // 会创建一个结束界面，传递state参数
 };
 
 
