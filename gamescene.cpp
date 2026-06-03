@@ -24,6 +24,9 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 气笑了
     this->setFocusPolicy(Qt::StrongFocus);
 
+    // 注意：保证窗口“关闭即销毁”，防止内存泄漏
+    this->setAttribute(Qt::WA_DeleteOnClose);
+
     // 1.初始化参数
 
     // 先读取当前配置
@@ -186,7 +189,7 @@ void GameScene::gameLoop(){
 
     // 更新轨道
     for (int i = 0; i < 4; ++i) {
-        tracks[i]->updateTrack(currentMusicTime, globalSpeed);
+        tracks[i]->updateTrack(currentMusicTime - offset, globalSpeed);
     }
 
     // 如果游戏结束了
