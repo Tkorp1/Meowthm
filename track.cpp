@@ -35,6 +35,20 @@ void Track::updateTrack(qint64 currentMusicTime, double currentSpeed){
             delete noteInTrack.takeAt(i);
         }
     }
+
+    // 更新当前正在长按的Hold
+    if (currentHoldingNote != nullptr) {
+        // 1. 继续掉落
+        double holdY = hitLineY - currentSpeed * (currentHoldingNote->getTargetTime() - currentMusicTime);
+        currentHoldingNote->updateY(holdY);
+
+        // 2. 检查是否按到结尾
+        if (currentMusicTime >= dynamic_cast<Hold*>(currentHoldingNote)->getTailTime()) {
+            emit noteJudged(currentHoldHeadResult);
+            delete currentHoldingNote;
+            currentHoldingNote = nullptr; // 安全清空
+        }
+    }
 }
 
 // 4.向gamescene提供轨道上现存的所有音符（miss的已经被update删掉了）,返回引用
@@ -63,13 +77,27 @@ void  Track::checkHit(qint64 currentMusicTime){
     }
     else if((deltaT <= 160 && deltaT > 80)||(deltaT >= -160 && deltaT < -80)){
         // 现在是good
-        emit noteJudged(2);
-        delete noteInTrack.takeFirst();
+
+        // 判断是不是 Hold
+        if (note->getType() == NoteType::HOLD) {
+            currentHoldingNote = note; // 挂载到专属指针
+            currentHoldHeadResult = 2;
+            noteInTrack.takeFirst();   // 从队列移除，但不delete！！！
+        } else {
+            emit noteJudged(2); // 普通的Tap立刻加分
+            delete noteInTrack.takeFirst();
+        }
     }
     else if(deltaT <= 80 && deltaT >= -80){
         // 现在是perfect判定
-        emit noteJudged(3);
-        delete noteInTrack.takeFirst();
+        if (note->getType() == NoteType::HOLD) {
+            currentHoldingNote = note;
+            currentHoldHeadResult = 3;
+            noteInTrack.takeFirst();
+        } else {
+            emit noteJudged(3);
+            delete noteInTrack.takeFirst();
+        }
     }
 }
 
@@ -80,7 +108,25 @@ void  Track::checkHit(qint64 currentMusicTime){
      指针悬空*/
 // 如果提前松手导致 Miss，返回 true，否则返回 false
 bool Track::isReleased(qint64 currentMusicTime){
-    // 留给以后的自己
+    if (currentHoldingNote == nullptr) {
+        return false;
+    }
+
+    qint64 timeUntilEnd = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - currentMusicTime;
+    qint64 totalDuration = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - dynamic_cast<Hold*>(currentHoldingNote)->getTargetTime();
+    if (timeUntilEnd > totalDuration * 0.1) {
+        // 提前超过10%松手，miss
+        emit noteJudged(1); // 触发 Miss，打断 Combo！
+        delete currentHoldingNote;
+        currentHoldingNote = nullptr;
+        return true;
+    } else {
+        // 发放头判分数！
+        emit noteJudged(currentHoldHeadResult);
+        delete currentHoldingNote;
+        currentHoldingNote = nullptr;
+        return false;
+    }
 }
 
 

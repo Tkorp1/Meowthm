@@ -29,6 +29,8 @@ protected:
     // 5.记录当前正在长按的 hold 音符
     Note* currentHoldingNote = nullptr;
 
+    int currentHoldHeadResult = 0;
+
 
 
 public:

@@ -173,6 +173,10 @@ QString GameScene::getMapPath() const{
 
 
 void GameScene::keyPressEvent(QKeyEvent *event){
+    // 长按触发的自动重复
+    if (event->isAutoRepeat()) {
+        return;
+    }
     // D F J K
     if(event -> key() == Qt::Key_D){
         tracks[0] -> checkHit(currentMusicTime);
@@ -191,6 +195,10 @@ void GameScene::keyPressEvent(QKeyEvent *event){
 
 void GameScene::keyReleaseEvent(QKeyEvent * event){
     // 留给以后的自己
+    // 长按触发的自动重复
+    if (event->isAutoRepeat()) {
+        return;
+    }
 }
 
 
