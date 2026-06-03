@@ -25,7 +25,7 @@ void Track::addNotes(const QList<Note*>& noteList){
 // 在这个函数里要调用 note 的update函数更改 note 的y坐标，同时要删除已经 miss 的音符，在miss时报告信号 noteJudged(1)
 // 在引入 hold 之后，需要增加 hold 是否完结的判断，即 currentMusicTime >= currentHoldingNote->getTailTime()
 void Track::updateTrack(qint64 currentMusicTime, double currentSpeed){
-    for(int i = noteInTrack.size() - 1; i >= 0; ++i){
+    for(int i = noteInTrack.size() - 1; i >= 0; --i){
         double newY = hitLineY - currentSpeed * (noteInTrack[i]->getTargetTime() - currentMusicTime);
         noteInTrack[i]->updateY(newY);
         // 下面判断这个音符是否需要被删除并且发出miss的信号：
