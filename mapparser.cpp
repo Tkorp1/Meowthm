@@ -67,11 +67,18 @@ QList<Note*> MapParser::parse(QString trackPath){
     QTextStream in(&file);
     //现在开始就可以读文件了
     while(!in.atEnd()){
-        int type=0;//默认值
+        int type=-1;//默认值
         // note样式
         int noteWidth = 100;
         int noteHeight = 30;
         in>>type;
+
+
+        // 保险机制，防止没读到
+        if(type == -1){
+            break;
+        }
+
         if(type==0){
             /*
              现在是note
