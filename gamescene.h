@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QSoundEffect>
 #include "track.h"
 #include "mapparser.h"
 #include "gamestate.h"
@@ -44,6 +45,9 @@ private:
     qint64 allMusicTime;
 
     void gameOver();
+
+    // 7.打击音效
+    QSoundEffect* hitSound;
 
 public:
 

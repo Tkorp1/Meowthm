@@ -5,6 +5,7 @@
 
 #include <QPainter>
 #include <QDir>
+#include <QSoundEffect>
 
 GameScene::GameScene(QString _mapPath, QWidget *parent)
     : QWidget{parent},
@@ -108,6 +109,13 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
     player->play();
 
+    // 4.5设置打击音效引擎
+    hitSound = new QSoundEffect(this);
+    // 先放绝对地址
+    hitSound->setSource(QUrl::fromLocalFile("/Users/rose/sound_effect/dong.wav"));
+    // 声音大小
+    hitSound->setVolume(0.65f);
+
     // 5.建立闹钟
     updateTimer = new QTimer(this);
     // 连接信号槽：每次闹钟响就执行gameLoop
@@ -168,12 +176,16 @@ void GameScene::keyPressEvent(QKeyEvent *event){
     // D F J K
     if(event -> key() == Qt::Key_D){
         tracks[0] -> checkHit(currentMusicTime);
+        hitSound->play();
     }else if(event -> key() == Qt::Key_F){
         tracks[1] -> checkHit(currentMusicTime);
+        hitSound->play();
     }else if(event -> key() == Qt::Key_J){
         tracks[2] -> checkHit(currentMusicTime);
+        hitSound->play();
     }else if(event -> key() == Qt::Key_K){
         tracks[3] -> checkHit(currentMusicTime);
+        hitSound->play();
     }
 }
 
@@ -210,7 +222,7 @@ void GameScene::hitNoteJudge(int result){
 
     accuracyLabel->setText(QString("Acc: %1%").arg(state.getCurrentAcc() * 100, 0, 'f', 2));
 
-    // 之后的特效在这里写
+
 }
 
 
