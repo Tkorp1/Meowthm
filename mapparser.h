@@ -23,8 +23,8 @@ public:
     // 获取轨道的note函数，通过track路径
     QList<Note*> parse(QString trackPath);
 
-    // 计算音符的时间的函数，参数为小节数（1开始）和节拍数
-    qint64 targetTimeCalculator(int bar, double beats);
+    // 计算音符的时间的函数，参数为节拍数
+    qint64 targetTimeCalculator(double beats);
 
     // 返回音乐时间的函数
     qint64 getMusicTime();

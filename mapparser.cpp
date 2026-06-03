@@ -38,18 +38,12 @@ MapParser::MapParser(QString _path):Path(_path)
     }
 }
 
-qint64 MapParser::targetTimeCalculator(int bar, double beats){
-    bar--;// 首先就将bar换成0开始的索引
-
-    //听gpt的先加一个每小节的节拍数方便修改
-
-    int beatsPerBar = 4;
+qint64 MapParser::targetTimeCalculator(double beats){
+    beats--;// 首先就将beats换成0开始的索引
 
     //下面的时间都是一个以毫秒为单位的数字
 
-    double totalBeats = bar * beatsPerBar + beats;
-
-    double result = totalBeats * (60000.0)/currentBPM;
+    double result = beats * (60000.0)/currentBPM;
 
     qint64 resulttime = qRound64(result);
 
@@ -73,63 +67,38 @@ QList<Note*> MapParser::parse(QString trackPath){
     //现在开始就可以读文件了
     while(!in.atEnd()){
         int type=0;//默认值
+        // note样式
+        int noteWidth = 100;
+        int noteHeight = 30;
         in>>type;
         if(type==0){
             /*
              现在是note
-             需要读取的是两个数字，一个整数代表第几小节（从1开始，所以要注意-1）
-             第二个是一个double类型的数，0-4，表示这个小节的多少拍。
-             比如第一拍的后面这个八分音符就是：
-             0 1 0.5
-             比如第三小节第四拍的一个四分音符就是：
-             0 3 3.0
+             需要读取的是一个double类型的数表示多少拍。
             */
-            int barIndex;
             double beats;
-            in>>barIndex>>beats;
+            in>>beats;
 
             // 下面开始初始化一个note
 
-            qint64 _targetTime = targetTimeCalculator(barIndex, beats);
+            qint64 _targetTime = targetTimeCalculator(beats);
 
-
-            /*注意note的格式在这里修改
-             * noteWidth
-             * noteHeight
-             */
-
-            int noteWidth = 100;
-            int noteHeight = 30;
             Note* noteTemp = new Tap(_targetTime, noteWidth, noteHeight);
-            /*
-             * 一
-             * 定
-             * 要
-             * 注
-             * 意
-             * 这
-             * 里
-             * 用
-             * 的
-             * 是
-             * nullptr
-             */
             result.append(noteTemp);
 
 
         }
         else if(type==1){
             //现在是hold
+            double beginBeats, endBeats;
+            in>>beginBeats>>endBeats;
 
-            /*
-             * hold
-             * 的
-             * 逻辑
-             * 目前
-             * 不实现。。
-             * 别忘记了
-             */
+            // 下面初始化一个hold
 
+            qint64 _targettimeBegin = targetTimeCalculator(beginBeats);
+            qint64 _targettimeEnd = targetTimeCalculator(endBeats);
+            Note* noteTemp = new Hold(_targettimeBegin, _targettimeEnd, noteWidth, noteHeight);
+            result.append(noteTemp);
 
         }
 
