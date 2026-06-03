@@ -199,6 +199,16 @@ void GameScene::keyReleaseEvent(QKeyEvent * event){
     if (event->isAutoRepeat()) {
         return;
     }
+    // 传给对应的轨道
+    if(event -> key() == Qt::Key_D){
+        tracks[0] -> isReleased(currentMusicTime);
+    }else if(event -> key() == Qt::Key_F){
+        tracks[1] -> isReleased(currentMusicTime);
+    }else if(event -> key() == Qt::Key_J){
+        tracks[2] -> isReleased(currentMusicTime);
+    }else if(event -> key() == Qt::Key_K){
+        tracks[3] -> isReleased(currentMusicTime);
+    }
 }
 
 
