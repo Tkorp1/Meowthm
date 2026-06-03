@@ -93,5 +93,11 @@ int Track::getTrackId()const{
 void Track::setNoteParent(QWidget* parent){
     for(Note* note : std::as_const(noteInTrack)){
         note->setParent(parent);
+
+        // 这里把音符横向移动到它的轨道上
+        // 把初始Y放到屏幕外面（-100），等主循环来接管它的掉落
+        note->move(this->xPos, -100);
+        note->show();
+
     }
 }
