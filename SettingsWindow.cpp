@@ -19,7 +19,7 @@ PreviewTrack::PreviewTrack(QWidget *parent)
     , m_lastHitY(-1) //
     , m_hitAlpha(0)  // 初始完全透明
 {
-    this->setFocusPolicy(Qt::StrongFocus);
+    //this->setFocusPolicy(Qt::StrongFocus);
     setFixedSize(100, 300);          // 轨道宽度100，高度300
     setStyleSheet("background-color: rgba(0,0,0,100); border: 1px solid white;");
 
@@ -108,6 +108,9 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     // 窗口基本设置
     setFixedSize(1200, 800);
     setWindowTitle("设置");
+
+    this->setFocusPolicy(Qt::StrongFocus);
+    this->setFocus();
 
     // ==========================================
     // UI 重构：使用布局管理器与高级 QSS 样式
@@ -306,6 +309,7 @@ void SettingsWindow::onSpeedButtonClicked(double delta)
     // 显示标签的更新由 updateSpeedLabel 完成
 
     updateSpeedLabel(newSpeed);
+    this->setFocus();
 }
 
 // 偏移值调节槽函数
@@ -317,6 +321,8 @@ void SettingsWindow::onOffsetButtonClicked(qint64 delta)
     if (newOffset > 500) newOffset = 500;
     GameConfig::instance()->setCurrentOffset(newOffset);
     updateOffsetLabel(newOffset);
+
+    this->setFocus();
 }
 
 // 更新流速显示（也可以直接连接 GameConfig::noteSpeedChanged 信号）

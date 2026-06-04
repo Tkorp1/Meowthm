@@ -24,21 +24,22 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     setWindowTitle("MUSIC SELECT");
     setFixedSize(1200, 800);
 
-
-    // 1.布局
+    // ==========================================
+    // 1. 全局主布局 (左右分栏)
+    // ==========================================
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->setContentsMargins(40, 40, 40, 40);
     mainLayout->setSpacing(40);
 
-
-    // 2. 左侧
-
+    // ==========================================
+    // 2. 左侧：高冷流线型歌曲列表
+    // ==========================================
     QWidget *leftArea = new QWidget(this);
     leftArea->setFixedWidth(550);
     QVBoxLayout *leftLayout = new QVBoxLayout(leftArea);
     leftLayout->setContentsMargins(0, 0, 0, 0);
 
-    // 左侧标题
+    // 左侧大标题
     QLabel *listTitle = new QLabel("TRACKS", leftArea);
     listTitle->setStyleSheet("color: #00BFFF; font-size: 32px; font-weight: 900; letter-spacing: 5px;");
     leftLayout->addWidget(listTitle);
@@ -69,9 +70,25 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
             QPushButton *card = new QPushButton();
             card->setFixedSize(250, 120); // 宽卡片
             card->setObjectName(QString("card_%1").arg(i));
-            card->setStyleSheet(R"(
+
+
+            QPixmap cover(song.coverPath);
+            QString bgStyle;
+
+
+            // TODO: 这里目前有点问题，有图片可能也无法显示
+            if (!cover.isNull()) {
+                // 1. 如果文件夹里有 cover.jpg，就把图片作为背景居中显示
+                bgStyle = QString("background-image: url(%1); background-position: center;").arg(song.coverPath);
+            } else {
+                // 2. 如果没封面，使用统一的纯色背景
+                bgStyle = "background-color: rgba(30, 40, 55, 200);";
+            }
+
+            // 使用 QString::arg() 把生成的背景动态注入到 QSS 里
+            card->setStyleSheet(QString(R"(
                 QPushButton {
-                    background-color: rgba(20, 30, 40, 200);
+                    %1
                     border-left: 5px solid #4682B4;
                     border-top: 1px solid rgba(255,255,255,30);
                     border-right: 1px solid rgba(255,255,255,30);
@@ -83,11 +100,12 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                     padding-left: 20px;
                 }
                 QPushButton:hover {
-                    background-color: rgba(40, 60, 80, 250);
                     border-left: 5px solid #00BFFF;
-                    padding-left: 30px; /* 悬停时文字微微向右滑动 */
+                    /* 如果是纯色背景，悬停时会微微变亮；如果是图片，则蓝色边框高亮 */
+                    background-color: rgba(60, 80, 100, 250);
                 }
-            )");
+            )").arg(bgStyle));
+
             card->setText(song.name);
             m_cardButtons.append(card);
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
@@ -120,9 +138,9 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     connect(backBtn, &QPushButton::clicked, this, &SelectSongWindow::onBackToMain);
     rightLayout->addWidget(backBtn, 0, Qt::AlignRight);
 
-    rightLayout->addSpacing(80);
+    rightLayout->addSpacing(80); // 留白是高级感的来源
 
-    // 背景水印
+    // 超大背景水印排版 (替代了那些花里胡哨的图片)
     QLabel *hugeText = new QLabel("MEOWTHM\nSYSTEM", rightArea);
     hugeText->setAlignment(Qt::AlignRight);
     hugeText->setStyleSheet("color: rgba(255, 255, 255, 10); font-size: 80px; font-weight: 900; line-height: 80px;");
@@ -130,7 +148,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 
     rightLayout->addStretch();
 
-    // 菜单按钮
+    // 纯代码绘制的高级菜单按钮
     QString menuBtnStyle = R"(
         QPushButton {
             background-color: transparent;
@@ -181,20 +199,23 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 }
 
 SelectSongWindow::~SelectSongWindow() {}
-//背景
+
+// ==========================================
+// 纯代码绘制深邃的赛博朋克极简背景
+// ==========================================
 void SelectSongWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 渐变背景
+    // 绘制深色斜向渐变背景，完全代替 bg_select.png
     QLinearGradient bgGradient(0, 0, width(), height());
-    bgGradient.setColorAt(0.0, QColor(15, 20, 30));   // 左上黑
-    bgGradient.setColorAt(0.5, QColor(25, 35, 55));   // 中间灰蓝
-    bgGradient.setColorAt(1.0, QColor(10, 15, 25));   // 右下黑
+    bgGradient.setColorAt(0.0, QColor(15, 20, 30));   // 左上极夜黑
+    bgGradient.setColorAt(0.5, QColor(25, 35, 55));   // 中间深灰蓝
+    bgGradient.setColorAt(1.0, QColor(10, 15, 25));   // 右下深渊黑
     painter.fillRect(rect(), bgGradient);
 
-    // 半透明几何条
+    // 在右侧画几个倾斜的巨大半透明几何光带，增加设计感
     QPainterPath path;
     path.moveTo(width() * 0.6, 0);
     path.lineTo(width() * 0.9, 0);
@@ -204,14 +225,15 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
     path.closeSubpath();
 
     QLinearGradient shapeGradient(width() * 0.5, 0, width(), height());
-    shapeGradient.setColorAt(0.0, QColor(0, 191, 255, 15)); // 发光
+    shapeGradient.setColorAt(0.0, QColor(0, 191, 255, 15)); // 微微发光的霓虹蓝
     shapeGradient.setColorAt(1.0, QColor(255, 255, 255, 5));
     painter.fillPath(path, shapeGradient);
 
     QWidget::paintEvent(event);
 }
 
-
+// ==========================================
+// 槽函数部分保持不变
 // ==========================================
 void SelectSongWindow::onSongCardClicked()
 {
@@ -224,7 +246,7 @@ void SelectSongWindow::onSongCardClicked()
     if (idx >= songs.size()) return;
 
     const SongInfo &song = songs[idx];
-    GameScene *game = new GameScene(song.mapFolderPath, this);
+    GameScene *game = new GameScene(song.mapFolderPath);
     game->setAttribute(Qt::WA_DeleteOnClose);
     game->show();
     this->hide();
