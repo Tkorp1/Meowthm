@@ -116,8 +116,8 @@ bool Track::isReleased(qint64 currentMusicTime){
 
     qint64 timeUntilEnd = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - currentMusicTime;
     qint64 totalDuration = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - dynamic_cast<Hold*>(currentHoldingNote)->getTargetTime();
-    if (timeUntilEnd > totalDuration * 0.1) {
-        // 提前超过10%松手，miss
+    if (timeUntilEnd > totalDuration * 0.4) {
+        // 提前超过60%松手，miss
         emit noteJudged(1); // 触发 Miss，打断 Combo！
         delete currentHoldingNote;
         currentHoldingNote = nullptr;

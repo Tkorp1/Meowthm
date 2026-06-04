@@ -12,7 +12,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     mapPath(_mapPath),
     currentMusicTime(0), //初始化为 0！！！
     state(GameState()),
-    gameEnded(false)
+    gameEnded(false),
+    isPaused(false)
 {
     // 0.设置gamescene的基本形状
     // 大小
@@ -116,6 +117,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 声音大小
     hitSound->setVolume(0.65f);
 
+
+
     // 5.建立闹钟
     updateTimer = new QTimer(this);
     // 连接信号槽：每次闹钟响就执行gameLoop
@@ -123,6 +126,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 设定闹钟间隔 目前16s
     updateTimer->start(16);
 
+
+    initPauseUI();
 
 }
 
@@ -177,6 +182,22 @@ void GameScene::keyPressEvent(QKeyEvent *event){
     if (event->isAutoRepeat()) {
         return;
     }
+
+    // ESC
+    if (event->key() == Qt::Key_Escape) {
+        if (!isPaused) {
+            pauseGame(); // 如果没暂停，就暂停
+        } else {
+            resumeGame(); // 如果已经暂停了，按 ESC 就恢复（为了目前测试方便）// 稍后不合适可以删除
+        }
+        return; // 直接return，不再往下执行其他按键逻辑！
+    }
+
+    // 【新增】：防作弊锁！如果当前是暂停状态，任何按键都不生效！
+    if (isPaused) {
+        return;
+    }
+
     // D F J K
     if(event -> key() == Qt::Key_D){
         tracks[0] -> checkHit(currentMusicTime);
@@ -244,4 +265,80 @@ void GameScene::hitNoteJudge(int result){
 }
 
 
+void GameScene::pauseGame() {
+    if (gameEnded) return; // 如果游戏已经结束，就不允许暂停了
+
+    isPaused = true;
+    updateTimer->stop();   // 暂停画面
+    player->pause();       // 暂停音乐
+
+    // 显示黑幕，强制提升到最顶层，盖住分数和掉落的音符
+    pauseWidget->raise();
+    pauseWidget->show();
+}
+
+void GameScene::resumeGame() {
+    if (gameEnded) return;
+
+    isPaused = false;
+    updateTimer->start(16); // 恢复画面
+    player->play();         // 恢复音乐
+
+    // 隐藏黑幕
+    pauseWidget->hide();
+}
+
+
+void GameScene::initPauseUI() {
+    // 1. 创建全屏遮罩面板
+    pauseWidget = new QWidget(this);
+    pauseWidget->setGeometry(0, 0, 800, 600);
+
+    // 【防坑秘籍】：给面板起个专有名字，然后只对这个名字设置半透明，防止按钮被污染
+    pauseWidget->setObjectName("pauseMask");
+    pauseWidget->setStyleSheet("QWidget#pauseMask { background-color: rgba(0, 0, 0, 180); }");
+
+    // 2. 创建三个按钮
+    int btnWidth = 200;
+    int btnHeight = 60;
+    int centerX = (800 - btnWidth) / 2; // 居中计算
+
+    // 继续
+    btnContinue = new QPushButton("继 续", pauseWidget);
+    btnContinue->setGeometry(centerX, 200, btnWidth, btnHeight);
+    btnContinue->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-size: 24px; font-weight: bold; border-radius: 10px; }"
+                               "QPushButton:hover { background-color: #45a049; }"); // 悬停变色
+
+    // 重来
+    btnRestart = new QPushButton("重 来", pauseWidget);
+    btnRestart->setGeometry(centerX, 290, btnWidth, btnHeight);
+    btnRestart->setStyleSheet("QPushButton { background-color: #FF9800; color: white; font-size: 24px; font-weight: bold; border-radius: 10px; }"
+                              "QPushButton:hover { background-color: #e68a00; }");
+
+    // 退出
+    btnQuit = new QPushButton("退 出", pauseWidget);
+    btnQuit->setGeometry(centerX, 380, btnWidth, btnHeight);
+    btnQuit->setStyleSheet("QPushButton { background-color: #f44336; color: white; font-size: 24px; font-weight: bold; border-radius: 10px; }"
+                           "QPushButton:hover { background-color: #da190b; }");
+
+    // 3. 默认隐藏，等按 ESC 再出来
+    pauseWidget->hide();
+
+    // ==================
+    // 4. 绑定按钮的三岔路口逻辑
+    // ==================
+    connect(btnContinue, &QPushButton::clicked, this, &GameScene::resumeGame);
+
+    connect(btnRestart, &QPushButton::clicked, this, [this]() {
+        // 用相同的谱面路径，直接 new 一个全新的自己，达成
+        GameScene* newScene = new GameScene(this->mapPath);
+        newScene->show();
+        this->close(); // 关闭当前这个废弃的窗口
+    });
+
+    connect(btnQuit, &QPushButton::clicked, this, [this]() {
+        // 目前选歌界面没写好，先直接关闭。之后这里可以 emit 一个信号回主菜单
+        this->close();
+    });
+}
 
