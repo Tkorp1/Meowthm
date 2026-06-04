@@ -4,6 +4,7 @@
 #include "ProfileWindow.h"
 #include "AchievementsWindow.h"
 #include "MainWindow.h"
+
 #include "gamescene.h"
 #include "gameconfig.h"
 
@@ -20,11 +21,13 @@
 #include <QScrollArea>
 #include <QLabel>
 
+
 SelectSongWindow::SelectSongWindow(QWidget *parent)
     : QWidget(parent)
 {
     setWindowTitle("选曲界面");
     setFixedSize(1200, 800);
+
 
     // 歌曲滚动
     QWidget *leftArea = new QWidget(this);
@@ -32,6 +35,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     QVBoxLayout *leftLayout = new QVBoxLayout(leftArea);
 
     // 歌曲网格的容器
+
     QWidget *gridContainer = new QWidget();
     gridContainer->setStyleSheet("background: transparent;");
     QGridLayout *grid = new QGridLayout(gridContainer);
@@ -44,7 +48,9 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
         noSongLabel->setStyleSheet("color: white; font-size: 20px;");
         grid->addWidget(noSongLabel, 0, 0);
     } else {
+
         const int cols = 2; // 每行2个卡片
+
         int row = 0, col = 0;
         for (int i = 0; i < songs.size(); ++i) {
             const SongInfo &song = songs[i];
@@ -56,7 +62,9 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 QPushButton {
                     background-color: transparent;
                     border: 2px solid #aaa;
+
                     border-radius: 0px;
+
                     color: white;
                     font-size: 14px;
                     font-weight: bold;
@@ -76,9 +84,11 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 QPixmap scaled = cover.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation);
                 card->setIcon(QIcon(scaled));
                 card->setIconSize(QSize(160, 160));
+
             }
 
             card->setText(song.name);
+
 
             // 保存卡片以便索引
             m_cardButtons.append(card);
@@ -102,46 +112,70 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     leftLayout->addWidget(scrollArea);
     leftArea->setLayout(leftLayout);
 
-
-
-    // 右侧透明定位按钮
-
-    QString buttonStyle = R"(
+    // ========== 右侧：功能按钮（改为绝对定位，不再堆叠） ==========
+    // 以下按钮位置、大小可自行修改，互不重叠
+    QPushButton *settingsBtn = new QPushButton("", this);
+    settingsBtn->setGeometry(20, 20, 70, 70);
+    settingsBtn->setStyleSheet(R"(
         QPushButton {
             background-color: transparent;
-            color: transparent;
-            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 8px;
         }
-        QPushButton:hover {
-            background-color: rgba(255, 255, 255, 50); /* 悬停时发亮 */
-        }
-    )";
 
-    int btnWidth = 200;
-    int btnHeight = 110;
+    )");
+    connect(settingsBtn, &QPushButton::clicked, this, &SelectSongWindow::onSettings);
 
-    struct ButtonData {
-        QString text;
-        int x;
-        int y;
-        std::function<void()> onClick;
-    };
+    QPushButton *pokeBtn = new QPushButton("", this);
+    pokeBtn->setGeometry(1050, 600, 120, 60);
+    pokeBtn->setStyleSheet(settingsBtn->styleSheet());
+    connect(pokeBtn, &QPushButton::clicked, this, &SelectSongWindow::onPoke);
 
-    QList<ButtonData> buttons = {
-        { "设置", 361, 498, [this]() { onSettings(); } },
-        { "戳", 727, 336, [this]() { onPoke(); } },
-        { "个人档案", 625, 498, [this]() { onProfile(); } },
-        { "成就", 880, 498, [this]() { onAchievements(); } },
-        { "返回主界面", 1025, 24, [this]() { onBackToMain(); } }
-    };
+    QPushButton *profileBtn = new QPushButton("", this);
+    profileBtn->setGeometry(1080, 680, 100, 100);
+    profileBtn->setStyleSheet(settingsBtn->styleSheet());
+    connect(profileBtn, &QPushButton::clicked, this, &SelectSongWindow::onProfile);
 
-    for (const auto &data : buttons) {
-        QPushButton *btn = new QPushButton(data.text, this);
-        btn->setFixedSize(btnWidth, btnHeight);
-        btn->setStyleSheet(buttonStyle);
-        btn->move(data.x, data.y);
-        QObject::connect(btn, &QPushButton::clicked, data.onClick);
-    }
+    QPushButton *achieveBtn = new QPushButton("", this);
+    achieveBtn->setGeometry(1110, 710, 0, 0);
+    achieveBtn->setStyleSheet(settingsBtn->styleSheet());
+    connect(achieveBtn, &QPushButton::clicked, this, &SelectSongWindow::onAchievements);
+
+    QPushButton *backBtn = new QPushButton("", this);
+    backBtn->setGeometry(20, 710, 70, 70);
+    backBtn->setStyleSheet(settingsBtn->styleSheet());
+    connect(backBtn, &QPushButton::clicked, this, &SelectSongWindow::onBackToMain);
+
+    // ========== 四张图片（不拦截鼠标事件） ==========
+    m_image1 = new QLabel(this);
+    m_image1->setPixmap(QPixmap("s1.png"));
+    m_image1->setScaledContents(true);
+    m_image1->setGeometry(20, 20, 70, 70);
+    m_image1->setAttribute(Qt::WA_TransparentForMouseEvents, true); // 鼠标穿透，不拦截点击
+    m_image1->raise();
+
+    m_image2 = new QLabel(this);
+    m_image2->setPixmap(QPixmap("s2.png"));
+    m_image2->setScaledContents(true);
+    m_image2->setGeometry(20, 710, 70, 70);
+    m_image2->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    m_image2->raise();
+
+    m_image3 = new QLabel(this);
+    m_image3->setPixmap(QPixmap("s3.png"));
+    m_image3->setScaledContents(true);
+    m_image3->setGeometry(1080, 680, 100, 100);
+    m_image3->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    m_image3->raise();
+
+    m_image4 = new QLabel(this);
+    m_image4->setPixmap(QPixmap("s4.png"));
+    m_image4->setScaledContents(true);
+    m_image4->setGeometry(1050, 570, 120, 120);
+    m_image4->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    m_image4->raise();
+
 }
 
 SelectSongWindow::~SelectSongWindow() {}
@@ -149,12 +183,16 @@ SelectSongWindow::~SelectSongWindow() {}
 void SelectSongWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
+
     // 加载背景图
+
+
     QPixmap bg("bg_select.png");
     if (!bg.isNull()) {
         painter.drawPixmap(rect(), bg.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     } else {
         painter.fillRect(rect(), QColor(30, 30, 40));
+
     }
     QWidget::paintEvent(event);
 }
@@ -164,6 +202,7 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
 // 槽函数部分
 
 // 进入游戏
+
 void SelectSongWindow::onSongCardClicked()
 {
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
@@ -175,15 +214,18 @@ void SelectSongWindow::onSongCardClicked()
     if (idx >= songs.size()) return;
 
     const SongInfo &song = songs[idx];
-    qDebug() << "Song selected:" << song.name << "path:" << song.mapFolderPath;
+
 
     // 创建游戏场景并显示
     GameScene *game = new GameScene(song.mapFolderPath, this);
     game->setAttribute(Qt::WA_DeleteOnClose);
-    game->raise();
+
     game->show();
     this->hide();  // 隐藏选曲界面
 }
+
+
+// ---------- 以下为原有的功能按钮槽函数，保持不变 ----------
 
 void SelectSongWindow::onSettings()
 {

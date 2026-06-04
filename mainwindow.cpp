@@ -72,11 +72,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ========== 双缓冲加载与预播放 ==========
     // 1. 播放器 1 立即开始播放视频 1
+
     m_player1->setSource(QUrl("qrc:/movie/movies/video1.mp4")); // 已修改
     m_player1->play();
 
     // 2. 播放器 2 提前【预加载】视频 2，并直接设为【无限循环】
     m_player2->setSource(QUrl("qrc:/movie/movies/video2.mp4")); // 已修改
+
     m_player2->setLoops(QMediaPlayer::Infinite);
 
 

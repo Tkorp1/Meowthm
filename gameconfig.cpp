@@ -65,6 +65,7 @@ void GameConfig::loadSongs()
 {
     m_songs.clear();
 
+
     // 注意：谱面文件夹现在存放在 .qrc 资源文件的 ":/map/maps" 目录下！！！！！！！
     // ⚠️⚠️⚠️一定注意！！！
 
@@ -82,6 +83,7 @@ void GameConfig::loadSongs()
         QString folderPath = mapsDir.absoluteFilePath(dirName);
 
         // 检查是否存在 info.txt 和 music.mp3
+
         QFile infoFile(folderPath + "/info.txt");
         QFile musicFile(folderPath + "/music.mp3");
         if (!infoFile.exists() && !musicFile.exists()) {
@@ -89,7 +91,14 @@ void GameConfig::loadSongs()
             continue;
         }
 
-        // 读取 info.txt 获取歌曲名
+
+
+        // 读取 info.txt 的第一行获取 BPM，第二行获取歌曲名？根据文档，info.txt 格式：
+        // songBPM:default
+        // songname:default
+        // songlength:default
+        // 我们可以从第二行读取歌曲名
+
         QString songName = dirName; // 默认使用文件夹名
         if (infoFile.open(QIODevice::ReadOnly)) {
             QTextStream in(&infoFile);
@@ -110,5 +119,6 @@ void GameConfig::loadSongs()
 
         m_songs.append(info);
         qDebug() << "Loaded song from qrc:" << songName << "path:" << folderPath;
+
     }
 }

@@ -9,6 +9,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+
     // ==========================================
     //  测试方案 A：直接看刚修好的【选曲界面】
     // ==========================================
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     // GameState temp("song");
     // ResultScene* testresult = new ResultScene(temp);
     // testresult->show();
+
 
     return a.exec();
 }
