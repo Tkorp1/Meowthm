@@ -189,7 +189,18 @@ void GameScene::keyPressEvent(QKeyEvent *event){
         if (!isPaused) {
             pauseGame(); // 如果没暂停，就暂停
         } else {
-            resumeGame(); // 如果已经暂停了，按 ESC 就恢复（为了目前测试方便）// 稍后不合适可以删除
+            // 如果已经暂停了
+            if (countdownTimer->isActive()) {
+                // 如果正在倒计时，按 ESC 就打断倒计时，把按钮重新叫出来
+                countdownTimer->stop();
+                countdownLabel->hide();
+                btnContinue->show();
+                btnRestart->show();
+                btnQuit->show();
+            } else {
+                // 如果没在倒计时（看着三个按钮），按 ESC 相当于点击“继续”
+                btnContinue->click();
+            }
         }
         return; // 直接return，不再往下执行其他按键逻辑！
     }
@@ -273,6 +284,12 @@ void GameScene::pauseGame() {
     updateTimer->stop();   // 暂停画面
     player->pause();       // 暂停音乐
 
+    // 重置暂停界面的状态，确保按钮全都在，倒计时藏起来
+    btnContinue->show();
+    btnRestart->show();
+    btnQuit->show();
+    if(countdownLabel) countdownLabel->hide();
+
     // 显示黑幕，强制提升到最顶层，盖住分数和掉落的音符
     pauseWidget->raise();
     pauseWidget->show();
@@ -325,10 +342,49 @@ void GameScene::initPauseUI() {
     // 3. 默认隐藏，等按 ESC 再出来
     pauseWidget->hide();
 
+
+    // 3.5 【新增】：倒计时数字标签和专属闹钟
+    // ==================
+    countdownLabel = new QLabel(pauseWidget); // 放在黑幕上
+    countdownLabel->setGeometry(0, 0, 800, 600);
+    countdownLabel->setAlignment(Qt::AlignCenter); // 绝对居中
+    countdownLabel->setStyleSheet("color: white; font-size: 150px; font-weight: bold; background-color: transparent;");
+    countdownLabel->hide(); // 默认隐藏
+
+    countdownTimer = new QTimer(this);
+    connect(countdownTimer, &QTimer::timeout, this, [this]() {
+        countdownValue--; // 每次响铃，数字减 1
+        if (countdownValue > 0) {
+            countdownLabel->setText(QString::number(countdownValue));
+        } else {
+            // 倒计时结束！
+            countdownTimer->stop();
+            resumeGame(); // 真正恢复游戏此时才执行！
+        }
+    });
+
     // ==================
     // 4. 绑定按钮的三岔路口逻辑
     // ==================
-    connect(btnContinue, &QPushButton::clicked, this, &GameScene::resumeGame);
+
+    // 【修改】：拦截“继续”按钮，不直接 resume，而是开始倒计时
+    connect(btnContinue, &QPushButton::clicked, this, [this]() {
+        // 1. 隐藏三个按钮
+        btnContinue->hide();
+        btnRestart->hide();
+        btnQuit->hide();
+
+        // 2. 初始化并显示倒计时
+        countdownValue = 3;
+        countdownLabel->setText("3");
+        countdownLabel->show();
+
+        // 3. 启动倒计时马达，每 1000 毫秒（1秒）响一次
+        countdownTimer->start(1000);
+    });
+
+
+
 
     connect(btnRestart, &QPushButton::clicked, this, [this]() {
         // 1. 备份当前谱面路径

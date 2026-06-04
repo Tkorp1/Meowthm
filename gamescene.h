@@ -63,6 +63,11 @@ private:
     QPushButton* btnQuit;
     void initPauseUI();
 
+    // 重启倒计时组件
+    QLabel* countdownLabel;
+    QTimer* countdownTimer;
+    int countdownValue;
+
 public:
 
     // 0.构造函数
