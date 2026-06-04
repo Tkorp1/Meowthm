@@ -29,7 +29,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 
     // 歌曲网格容器
     QWidget *gridContainer = new QWidget();
-    //gridContainer->setStyleSheet("background: transparent;");
+    gridContainer->setStyleSheet("background: transparent;");
     QGridLayout *grid = new QGridLayout(gridContainer);
     grid->setSpacing(25);
     grid->setContentsMargins(10, 10, 10, 10);
@@ -109,11 +109,11 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 
     // ========== 右侧：功能按钮（改为绝对定位，不再堆叠） ==========
     // 以下按钮位置、大小可自行修改，互不重叠
-    QPushButton *settingsBtn = new QPushButton("设置", this);
+    QPushButton *settingsBtn = new QPushButton("", this);
     settingsBtn->setGeometry(20, 20, 70, 70);
     settingsBtn->setStyleSheet(R"(
         QPushButton {
-            background-color: rgba(70,130,200,200);
+            background-color: transparent;
             color: white;
             font-size: 16px;
             border-radius: 8px;
@@ -122,27 +122,27 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     )");
     connect(settingsBtn, &QPushButton::clicked, this, &SelectSongWindow::onSettings);
 
-    QPushButton *pokeBtn = new QPushButton("戳", this);
-    pokeBtn->setGeometry(950, 190, 180, 60);
+    QPushButton *pokeBtn = new QPushButton("", this);
+    pokeBtn->setGeometry(1050, 600, 120, 60);
     pokeBtn->setStyleSheet(settingsBtn->styleSheet());
     connect(pokeBtn, &QPushButton::clicked, this, &SelectSongWindow::onPoke);
 
-    QPushButton *profileBtn = new QPushButton("个人档案", this);
-    profileBtn->setGeometry(950, 280, 180, 60);
+    QPushButton *profileBtn = new QPushButton("", this);
+    profileBtn->setGeometry(1080, 680, 100, 100);
     profileBtn->setStyleSheet(settingsBtn->styleSheet());
     connect(profileBtn, &QPushButton::clicked, this, &SelectSongWindow::onProfile);
 
-    QPushButton *achieveBtn = new QPushButton("成就", this);
-    achieveBtn->setGeometry(1110, 710, 70, 70);
+    QPushButton *achieveBtn = new QPushButton("", this);
+    achieveBtn->setGeometry(1110, 710, 0, 0);
     achieveBtn->setStyleSheet(settingsBtn->styleSheet());
     connect(achieveBtn, &QPushButton::clicked, this, &SelectSongWindow::onAchievements);
 
-    QPushButton *backBtn = new QPushButton("返回主界面", this);
+    QPushButton *backBtn = new QPushButton("", this);
     backBtn->setGeometry(20, 710, 70, 70);
     backBtn->setStyleSheet(settingsBtn->styleSheet());
     connect(backBtn, &QPushButton::clicked, this, &SelectSongWindow::onBackToMain);
 
-    // ========== 四张图片（绝对定位，位置大小可调，并且不拦截鼠标事件） ==========
+    // ========== 四张图片（不拦截鼠标事件） ==========
     m_image1 = new QLabel(this);
     m_image1->setPixmap(QPixmap("s1.png"));
     m_image1->setScaledContents(true);
@@ -160,14 +160,14 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     m_image3 = new QLabel(this);
     m_image3->setPixmap(QPixmap("s3.png"));
     m_image3->setScaledContents(true);
-    m_image3->setGeometry(800, 600, 150, 150);
+    m_image3->setGeometry(1080, 680, 100, 100);
     m_image3->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     m_image3->raise();
 
     m_image4 = new QLabel(this);
     m_image4->setPixmap(QPixmap("s4.png"));
     m_image4->setScaledContents(true);
-    m_image4->setGeometry(1000, 50, 80, 80);
+    m_image4->setGeometry(1050, 570, 120, 120);
     m_image4->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     m_image4->raise();
 }
