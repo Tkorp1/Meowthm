@@ -83,6 +83,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         //获取list
         QList<Note*> noteListTemp=mp.parse(path);
         tracks[i]->addNotes(noteListTemp);
+        // 同时增加两秒的时间
         tracks[i]->setNoteParent(this);
     }
 

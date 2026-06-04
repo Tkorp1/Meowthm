@@ -12,7 +12,7 @@
 // ==================== PreviewTrack 实现 ====================
 PreviewTrack::PreviewTrack(QWidget *parent)
     : QWidget(parent)
-    , m_speed(0.5)          // 默认速度，与 GameConfig 初始值一致
+    , m_speed(4)          // 默认速度，与 GameConfig 初始值一致
     , m_noteY(0)
     , m_timerId(0)
 {

@@ -72,7 +72,7 @@ public:
     // 7.获取track的id的函数
     int getTrackId()const;
 
-    // 8.设置note的父类指针
+    // 8.设置note的父类指针，同时为初始的时候增加两秒的时间
     void setNoteParent(QWidget* parent);
 
 signals:

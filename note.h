@@ -38,6 +38,8 @@ public:
     // 3.核心接口：移动函数，改变y坐标
     void updateY(int newY);
 
+    // 4.新增，修改时间函数
+    virtual void changeTargetTime(qint64 ti);
 
 };
 
@@ -66,6 +68,10 @@ public:
 
     // 检查是否结束的接口
     qint64 getTailTime() const;
+
+    void changeTargetTime(qint64 ti) override;
+
+
 };
 
 #endif // NOTE_H

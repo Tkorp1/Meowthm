@@ -39,6 +39,11 @@ void Note::updateY(int newY){
     return;
 }
 
+void Note::changeTargetTime(qint64 ti){
+    targetTime += ti;
+    return;
+}
+
 Tap::Tap(qint64 _targetTime, int _noteWidth, int _noteHeight, QWidget* parent)
     :Note(_targetTime, _noteWidth, _noteHeight, NoteType::TAP, parent){
 
@@ -60,4 +65,10 @@ Hold::~Hold(){
 
 qint64 Hold::getTailTime() const{
     return tailTime;
+}
+
+void Hold::changeTargetTime(qint64 ti){
+    targetTime += ti;
+    tailTime += ti;
+    return;
 }

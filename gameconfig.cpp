@@ -12,7 +12,7 @@ GameConfig::GameConfig(QObject *parent) : QObject(parent)
 {
     // 从持久化存储中加载数据
     QSettings settings;
-    m_noteSpeed = settings.value("game/noteSpeed", 0.5).toDouble();
+    m_noteSpeed = settings.value("game/noteSpeed", 4).toDouble();
     m_currentPlayer = settings.value("game/currentPlayer", "Player").toString();
     m_currentOffset = settings.value("game/currentOffset", 0).toLongLong();
 
