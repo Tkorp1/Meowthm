@@ -59,11 +59,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_player1, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
 
     // ========== 获取绝对路径 ==========
-    QFileInfo video1Info("video1.mp4");
-    QFileInfo video2Info("video2.mp4");
+    // QFileInfo video1Info("video1.mp4");
+    // QFileInfo video2Info("video2.mp4");
 
-    QString video1Path = video1Info.absoluteFilePath();
-    QString video2Path = video2Info.absoluteFilePath();
+    // QString video1Path = video1Info.absoluteFilePath();
+    // QString video2Path = video2Info.absoluteFilePath();
+    // 有问题，删了
 
     // 检查文件是否存在
     //if (!video1Info.exists()) qDebug() << "ERROR: video1.mp4 NOT found at:" << video1Path;
@@ -71,11 +72,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ========== 双缓冲加载与预播放 ==========
     // 1. 播放器 1 立即开始播放视频 1
-    m_player1->setSource(QUrl::fromLocalFile(video1Path));
+    m_player1->setSource(QUrl("qrc:/movie/movies/video1.mp4")); // 已修改
     m_player1->play();
 
     // 2. 播放器 2 提前【预加载】视频 2，并直接设为【无限循环】
-    m_player2->setSource(QUrl::fromLocalFile(video2Path));
+    m_player2->setSource(QUrl("qrc:/movie/movies/video2.mp4")); // 已修改
     m_player2->setLoops(QMediaPlayer::Infinite);
 
 

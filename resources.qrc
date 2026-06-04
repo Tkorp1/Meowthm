@@ -21,4 +21,8 @@
         <file>maps/song1/Track2.txt</file>
         <file>maps/song1/Track3.txt</file>
     </qresource>
+    <qresource prefix="/movie">
+        <file>movies/video1.mp4</file>
+        <file>movies/video2.mp4</file>
+    </qresource>
 </RCC>

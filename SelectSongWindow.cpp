@@ -4,6 +4,9 @@
 #include "ProfileWindow.h"
 #include "AchievementsWindow.h"
 #include "MainWindow.h"
+#include "gamescene.h"
+#include "gameconfig.h"
+
 #include <QPushButton>
 #include <QGraphicsProxyWidget>
 #include <QGraphicsScene>
@@ -12,6 +15,10 @@
 #include <QPixmap>
 #include <QDebug>
 #include <functional>
+#include <QVBoxLayout>
+#include <QGridLayout>
+#include <QScrollArea>
+#include <QLabel>
 
 SelectSongWindow::SelectSongWindow(QWidget *parent)
     : QWidget(parent)
@@ -19,16 +26,12 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     setWindowTitle("选曲界面");
     setFixedSize(1200, 800);
 
-<<<<<<< HEAD
-    // 按钮样式：完全透明，无文字，无边框
-    QString buttonStyle = R"(
-=======
-    // ========== 左侧：歌曲网格区域（使用布局，不改为绝对定位） ==========
+    // 歌曲滚动
     QWidget *leftArea = new QWidget(this);
     leftArea->setGeometry(20, 100, 500, 600);  // 占据大部分区域，留出右侧和底部空间
     QVBoxLayout *leftLayout = new QVBoxLayout(leftArea);
 
-    // 歌曲网格容器
+    // 歌曲网格的容器
     QWidget *gridContainer = new QWidget();
     gridContainer->setStyleSheet("background: transparent;");
     QGridLayout *grid = new QGridLayout(gridContainer);
@@ -41,7 +44,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
         noSongLabel->setStyleSheet("color: white; font-size: 20px;");
         grid->addWidget(noSongLabel, 0, 0);
     } else {
-        const int cols = 2; // 每行4个卡片
+        const int cols = 2; // 每行2个卡片
         int row = 0, col = 0;
         for (int i = 0; i < songs.size(); ++i) {
             const SongInfo &song = songs[i];
@@ -73,18 +76,9 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 QPixmap scaled = cover.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation);
                 card->setIcon(QIcon(scaled));
                 card->setIconSize(QSize(160, 160));
-            } else {
-                // 没有封面时显示默认图标或占位符
-                card->setText(song.name);
-
             }
 
-            // 如果已经有封面文字，则不再重复显示；否则只显示歌曲名
-            if (card->icon().isNull()) {
-                card->setText(song.name);
-            } else {
-                card->setText(song.name);
-            }
+            card->setText(song.name);
 
             // 保存卡片以便索引
             m_cardButtons.append(card);
@@ -108,30 +102,24 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     leftLayout->addWidget(scrollArea);
     leftArea->setLayout(leftLayout);
 
-    // ========== 右侧：功能按钮（改为绝对定位，不再堆叠） ==========
-    // 以下按钮位置、大小可自行修改，互不重叠
-    QPushButton *settingsBtn = new QPushButton("", this);
-    settingsBtn->setGeometry(20, 20, 70, 70);
-    settingsBtn->setStyleSheet(R"(
->>>>>>> d03f6bc (蛋)
+
+
+    // 右侧透明定位按钮
+
+    QString buttonStyle = R"(
         QPushButton {
-            background-color: blue;
+            background-color: transparent;
             color: transparent;
             border: none;
         }
         QPushButton:hover {
-            background-color: transparent;
-        }
-        QPushButton:pressed {
-            background-color: transparent;
+            background-color: rgba(255, 255, 255, 50); /* 悬停时发亮 */
         }
     )";
 
-    // 按钮大小（你可以自行调整）
     int btnWidth = 200;
     int btnHeight = 110;
 
-    // 定义按钮数据：文字、x坐标、y坐标、槽函数
     struct ButtonData {
         QString text;
         int x;
@@ -161,19 +149,21 @@ SelectSongWindow::~SelectSongWindow() {}
 void SelectSongWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    // 加载背景图（请将 bg_select.png 放在工作目录，或修改路径）
+    // 加载背景图
     QPixmap bg("bg_select.png");
     if (!bg.isNull()) {
         painter.drawPixmap(rect(), bg.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     } else {
         painter.fillRect(rect(), QColor(30, 30, 40));
-        qDebug() << "背景图 bg_select.png 未找到，使用纯色背景";
     }
     QWidget::paintEvent(event);
 }
 
-<<<<<<< HEAD
-=======
+
+
+// 槽函数部分
+
+// 进入游戏
 void SelectSongWindow::onSongCardClicked()
 {
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
@@ -195,8 +185,6 @@ void SelectSongWindow::onSongCardClicked()
     this->hide();  // 隐藏选曲界面
 }
 
-// ---------- 以下为原有的功能按钮槽函数，保持不变 ----------
->>>>>>> d03f6bc (蛋)
 void SelectSongWindow::onSettings()
 {
     SettingsWindow *window = new SettingsWindow(this);
@@ -223,7 +211,6 @@ void SelectSongWindow::onAchievements()
 
 void SelectSongWindow::onBackToMain()
 {
-    // 关闭当前选曲窗口，并确保主窗口显示
     this->close();
     if (parentWidget()) {
         parentWidget()->show();

@@ -1,26 +1,41 @@
 #include "mainwindow.h"
 #include "gamescene.h"
 #include "resultscene.h"
+#include "SelectSongWindow.h" // 【新增】把选曲界面的头文件引进来
+
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    // 为了试验gamescene先注释掉
-    //MainWindow w;
-    //w.show();
+
+    // ==========================================
+    //  测试方案 A：直接看刚修好的【选曲界面】
+    // ==========================================
+    // SelectSongWindow* testSelect = new SelectSongWindow();
+    // testSelect->show();
 
 
-    GameScene* testGame = new GameScene(":/map/maps/song1");
-    testGame->show();
-    //GameState temp("song");
-    //ResultScene* testresult = new ResultScene(temp);
-    //testresult->show();
+    // ==========================================
+    // 测试方案 B：看最开始的【初始主菜单界面】
+    // ==========================================
+    MainWindow* w = new MainWindow();
+    w->show();
 
-    //GameScene* testGame = new GameScene("/Users/rose/code/QT/Meowthm/maps/song1"); // 这里写的是绝对地址，到时候记得改
-    //testGame->show();
 
+    // ==========================================
+    // 测试方案 C：直接跳过UI，进入【打歌测试界面】
+    // ==========================================
+    // GameScene* testGame = new GameScene(":/map/maps/song1");
+    // testGame->show();
+
+
+    // ==========================================
+    // 测试方案 D：直接看【结算界面】
+    // ==========================================
+    // GameState temp("song");
+    // ResultScene* testresult = new ResultScene(temp);
+    // testresult->show();
 
     return a.exec();
-
 }

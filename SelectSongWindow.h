@@ -2,6 +2,8 @@
 #define SELECTSONGWINDOW_H
 
 #include <QWidget>
+#include <QList>
+#include <QPushButton>
 
 class SelectSongWindow : public QWidget
 {
@@ -20,8 +22,12 @@ private slots:
     void onAchievements();  // 成就界面
     void onBackToMain();    // 返回主界面
 
-private:
+    // 点击歌曲卡片槽函数
+    void onSongCardClicked();
 
+private:
+    // 【存放左侧歌曲按钮的列表
+    QList<QPushButton*> m_cardButtons;
 };
 
 #endif // SELECTSONGWINDOW_H
