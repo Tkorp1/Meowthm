@@ -95,7 +95,15 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     player->setAudioOutput(audioOutput);
 
     QString musicPath = dir.filePath("music.mp3");
-    player->setSource(QUrl::fromLocalFile(musicPath));
+
+    // 判断这是内置歌曲，还是外部自定义歌曲
+    if (musicPath.startsWith(":")) {
+        // 如果路径是以 ":" 开头，说明它来自.qrc
+        player->setSource(QUrl("qrc" + musicPath));
+    } else {
+        // 否则，说明它是电脑硬盘上的外部歌曲
+        player->setSource(QUrl::fromLocalFile(musicPath));
+    }
 
     connect(player,
             &QMediaPlayer::mediaStatusChanged,
@@ -114,7 +122,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 4.5设置打击音效引擎
     hitSound = new QSoundEffect(this);
     // 先放绝对地址
-    hitSound->setSource(QUrl::fromLocalFile("/Users/rose/sound_effect/dong.wav"));
+    hitSound->setSource(QUrl("qrc:/sound/sounds/dong.wav"));
     // 声音大小
     hitSound->setVolume(0.65f);
 
@@ -315,28 +323,51 @@ void GameScene::initPauseUI() {
     pauseWidget->setObjectName("pauseMask");
     pauseWidget->setStyleSheet("QWidget#pauseMask { background-color: rgba(0, 0, 0, 180); }");
 
-    // 2. 创建三个按钮
-    int btnWidth = 200;
-    int btnHeight = 60;
-    int centerX = (800 - btnWidth) / 2; // 居中
+    // 2. 创建三个图标（横排）
+    int btnSize = 60;
+    int gap = 70; // 按钮间距
+    int totalWidth = (btnSize * 3) + (gap * 2); // 总宽度
 
-    // 继续
-    btnContinue = new QPushButton("继 续", pauseWidget);
-    btnContinue->setGeometry(centerX, 200, btnWidth, btnHeight);
-    btnContinue->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; font-size: 24px; font-weight: bold; border-radius: 10px; }"
-                               "QPushButton:hover { background-color: #45a049; }"); // 实现悬停变色
+    // 计算第一个按钮的X坐标，让整个按钮组绝对居中
+    int startX = (800 - totalWidth) / 2;
+    // 设定按钮在屏幕上的Y坐标）
+    int btnY = 250;
 
-    // 重来
-    btnRestart = new QPushButton("重 来", pauseWidget);
-    btnRestart->setGeometry(centerX, 290, btnWidth, btnHeight);
-    btnRestart->setStyleSheet("QPushButton { background-color: #FF9800; color: white; font-size: 24px; font-weight: bold; border-radius: 10px; }"
-                              "QPushButton:hover { background-color: #e68a00; }");
+    // 退出按钮 (左)
+    btnQuit = new QPushButton("", pauseWidget);
+    btnQuit->setGeometry(startX, btnY, btnSize, btnSize);
+    btnQuit->setStyleSheet("QPushButton {"
+                           "border-image: url(:/image/images/exit.png);"
+                           "background-color: transparent;" // 背景透明
+                           "}"
+                           "QPushButton:hover {"
+                           "background-color: rgba(255, 255, 255, 50);" //悬停时发亮
+                           "border-radius: 15px;"
+                           "}");
 
-    // 退出
-    btnQuit = new QPushButton("退 出", pauseWidget);
-    btnQuit->setGeometry(centerX, 380, btnWidth, btnHeight);
-    btnQuit->setStyleSheet("QPushButton { background-color: #f44336; color: white; font-size: 24px; font-weight: bold; border-radius: 10px; }"
-                           "QPushButton:hover { background-color: #da190b; }");
+    // 继续按钮 (中)
+    btnContinue = new QPushButton("", pauseWidget);
+    btnContinue->setGeometry(startX + btnSize + gap, btnY, btnSize, btnSize);
+    btnContinue->setStyleSheet("QPushButton {"
+                               "border-image: url(:/image/images/continue.png);"
+                               "background-color: transparent;"
+                               "}"
+                               "QPushButton:hover {"
+                               "background-color: rgba(255, 255, 255, 50);"
+                               "border-radius: 15px;"
+                               "}");
+
+    // 重来按钮 (右)
+    btnRestart = new QPushButton("", pauseWidget);
+    btnRestart->setGeometry(startX + (btnSize + gap) * 2, btnY, btnSize, btnSize);
+    btnRestart->setStyleSheet("QPushButton {"
+                              "border-image: url(:/image/images/restart.png);"
+                              "background-color: transparent;"
+                              "}"
+                              "QPushButton:hover {"
+                              "background-color: rgba(255, 255, 255, 50);"
+                              "border-radius: 15px;"
+                              "}");
 
     // 3. 默认隐藏，等按 ESC 再出来
     pauseWidget->hide();
