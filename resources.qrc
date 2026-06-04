@@ -20,6 +20,30 @@
         <file>maps/song1/Track1.txt</file>
         <file>maps/song1/Track2.txt</file>
         <file>maps/song1/Track3.txt</file>
+        <file>maps/song2/info.txt</file>
+        <file>maps/song2/music.mp3</file>
+        <file>maps/song2/Track0.txt</file>
+        <file>maps/song2/Track1.txt</file>
+        <file>maps/song2/Track2.txt</file>
+        <file>maps/song2/Track3.txt</file>
+        <file>maps/song3/info.txt</file>
+        <file>maps/song3/music.mp3</file>
+        <file>maps/song3/Track0.txt</file>
+        <file>maps/song3/Track1.txt</file>
+        <file>maps/song3/Track2.txt</file>
+        <file>maps/song3/Track3.txt</file>
+        <file>maps/song4/info.txt</file>
+        <file>maps/song4/music.mp3</file>
+        <file>maps/song4/Track0.txt</file>
+        <file>maps/song4/Track1.txt</file>
+        <file>maps/song4/Track2.txt</file>
+        <file>maps/song4/Track3.txt</file>
+        <file>maps/song5/info.txt</file>
+        <file>maps/song5/music.mp3</file>
+        <file>maps/song5/Track0.txt</file>
+        <file>maps/song5/Track1.txt</file>
+        <file>maps/song5/Track2.txt</file>
+        <file>maps/song5/Track3.txt</file>
     </qresource>
     <qresource prefix="/movie">
         <file>movies/video1.mp4</file>
