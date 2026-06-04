@@ -7,6 +7,8 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QSoundEffect>
+#include <QPushButton>
+
 #include "track.h"
 #include "mapparser.h"
 #include "gamestate.h"
@@ -49,6 +51,23 @@ private:
     // 7.打击音效
     QSoundEffect* hitSound;
 
+    // 8.暂停界面
+    bool isPaused;
+    void pauseGame();
+    void resumeGame();
+
+    // 暂停UI组件
+    QWidget* pauseWidget;
+    QPushButton* btnContinue;
+    QPushButton* btnRestart;
+    QPushButton* btnQuit;
+    void initPauseUI();
+
+    // 重启倒计时组件
+    QLabel* countdownLabel;
+    QTimer* countdownTimer;
+    int countdownValue;
+
 public:
 
     // 0.构造函数
@@ -70,6 +89,7 @@ public:
 protected:
 
     // 2.键盘事件监听函数的重载：键盘按下 D F J K 四个键，调用对应轨道的checkHit函数
+    // 新增：按esc后触发暂停设置
     void keyPressEvent(QKeyEvent *event) override;
 
     // 3.键盘事件监听函数的重载：键盘松开。

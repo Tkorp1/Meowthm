@@ -116,8 +116,8 @@ bool Track::isReleased(qint64 currentMusicTime){
 
     qint64 timeUntilEnd = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - currentMusicTime;
     qint64 totalDuration = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - dynamic_cast<Hold*>(currentHoldingNote)->getTargetTime();
-    if (timeUntilEnd > totalDuration * 0.1) {
-        // 提前超过10%松手，miss
+    if (timeUntilEnd > totalDuration * 0.4) {
+        // 提前超过60%松手，miss
         emit noteJudged(1); // 触发 Miss，打断 Combo！
         delete currentHoldingNote;
         currentHoldingNote = nullptr;
@@ -141,6 +141,7 @@ int Track::getTrackId()const{
 void Track::setNoteParent(QWidget* parent){
     for(Note* note : std::as_const(noteInTrack)){
         note->setParent(parent);
+        note->changeTargetTime(2000);
 
         // 这里把音符横向移动到它的轨道上
         // 把初始Y放到屏幕外面（-100），等主循环来接管它的掉落
