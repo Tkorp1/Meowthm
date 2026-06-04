@@ -315,26 +315,25 @@ void GameScene::initPauseUI() {
     pauseWidget->setObjectName("pauseMask");
     pauseWidget->setStyleSheet("QWidget#pauseMask { background-color: rgba(0, 0, 0, 180); }");
 
-    // 2. 创建三个图标按钮（横排）
-    // 假设你的图标是正方形的，比如 100x100 大小。你可以根据实际图片比例修改宽高
-    int btnSize = 100;
-    int gap = 50; // 按钮之间的间距
-    int totalWidth = (btnSize * 3) + (gap * 2); // 三个按钮加两个间距的总宽度
+    // 2. 创建三个图标（横排）
+    int btnSize = 60;
+    int gap = 70; // 按钮间距
+    int totalWidth = (btnSize * 3) + (gap * 2); // 总宽度
 
-    // 计算第一个按钮（最左边）的 X 坐标，让整个按钮组绝对居中
+    // 计算第一个按钮的X坐标，让整个按钮组绝对居中
     int startX = (800 - totalWidth) / 2;
-    // 设定按钮在屏幕上的 Y 坐标（偏下一点，给上面的 "PAUSED" 字样留出空间）
-    int btnY = 300;
+    // 设定按钮在屏幕上的Y坐标）
+    int btnY = 250;
 
     // 退出按钮 (左)
-    btnQuit = new QPushButton("", pauseWidget); // 名字留空，因为有图标了
+    btnQuit = new QPushButton("", pauseWidget);
     btnQuit->setGeometry(startX, btnY, btnSize, btnSize);
     btnQuit->setStyleSheet("QPushButton {"
-                           "border-image: url(:/image/quit.png);" // 替换成你实际的文件名
-                           "background-color: transparent;" // 背景透明，去除默认边框
+                           "border-image: url(:/image/images/exit.png);"
+                           "background-color: transparent;" // 背景透明
                            "}"
                            "QPushButton:hover {"
-                           "background-color: rgba(255, 255, 255, 50);" // 悬停时稍微发亮
+                           "background-color: rgba(255, 255, 255, 50);" //悬停时发亮
                            "border-radius: 15px;"
                            "}");
 
@@ -342,7 +341,7 @@ void GameScene::initPauseUI() {
     btnContinue = new QPushButton("", pauseWidget);
     btnContinue->setGeometry(startX + btnSize + gap, btnY, btnSize, btnSize);
     btnContinue->setStyleSheet("QPushButton {"
-                               "border-image: url(:/image/resume.png);"
+                               "border-image: url(:/image/images/continue.png);"
                                "background-color: transparent;"
                                "}"
                                "QPushButton:hover {"
@@ -354,7 +353,7 @@ void GameScene::initPauseUI() {
     btnRestart = new QPushButton("", pauseWidget);
     btnRestart->setGeometry(startX + (btnSize + gap) * 2, btnY, btnSize, btnSize);
     btnRestart->setStyleSheet("QPushButton {"
-                              "border-image: url(:/image/restart.png);"
+                              "border-image: url(:/image/images/restart.png);"
                               "background-color: transparent;"
                               "}"
                               "QPushButton:hover {"
