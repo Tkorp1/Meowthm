@@ -100,7 +100,6 @@ QList<Note*> MapParser::parse(QString trackPath){
             //现在是hold
             double beginBeats, endBeats;
             in>>beginBeats>>endBeats;
-
             // 下面初始化一个hold
 
             qint64 _targettimeBegin = targetTimeCalculator(beginBeats);
