@@ -27,12 +27,28 @@ void Track::addNotes(const QList<Note*>& noteList){
 void Track::updateTrack(qint64 currentMusicTime, double currentSpeed){
     for(int i = noteInTrack.size() - 1; i >= 0; --i){
         double newY = hitLineY - currentSpeed * (noteInTrack[i]->getTargetTime() - currentMusicTime);
-        noteInTrack[i]->updateY(newY);
+        noteInTrack[i]->updateY(newY - noteInTrack[i]->height());
+
         // 下面判断这个音符是否需要被删除并且发出miss的信号：
-        if(currentMusicTime - noteInTrack[i]->getTargetTime() > 160){
+        if(currentMusicTime > noteInTrack[i]->getTargetTime() &&
+           (currentMusicTime - noteInTrack[i]->getTargetTime() > 160)){
             // 现在这个音符已经出了miss的范围，需要删除
             emit noteJudged(1);
             delete noteInTrack.takeAt(i);
+        }
+    }
+
+    // 更新当前正在长按的Hold
+    if (currentHoldingNote != nullptr) {
+        // 1. 继续掉落
+        double holdY = hitLineY - currentSpeed * (currentHoldingNote->getTargetTime() - currentMusicTime);
+        currentHoldingNote->updateY(holdY - currentHoldingNote->height());
+
+        // 2. 检查是否按到结尾
+        if (currentMusicTime >= dynamic_cast<Hold*>(currentHoldingNote)->getTailTime()) {
+            emit noteJudged(currentHoldHeadResult);
+            delete currentHoldingNote;
+            currentHoldingNote = nullptr; // 安全清空
         }
     }
 }
@@ -63,13 +79,27 @@ void  Track::checkHit(qint64 currentMusicTime){
     }
     else if((deltaT <= 160 && deltaT > 80)||(deltaT >= -160 && deltaT < -80)){
         // 现在是good
-        emit noteJudged(2);
-        delete noteInTrack.takeFirst();
+
+        // 判断是不是 Hold
+        if (note->getType() == NoteType::HOLD) {
+            currentHoldingNote = note; // 挂载到专属指针
+            currentHoldHeadResult = 2;
+            noteInTrack.takeFirst();   // 从队列移除，但不delete！！！
+        } else {
+            emit noteJudged(2); // 普通的Tap立刻加分
+            delete noteInTrack.takeFirst();
+        }
     }
     else if(deltaT <= 80 && deltaT >= -80){
         // 现在是perfect判定
-        emit noteJudged(3);
-        delete noteInTrack.takeFirst();
+        if (note->getType() == NoteType::HOLD) {
+            currentHoldingNote = note;
+            currentHoldHeadResult = 3;
+            noteInTrack.takeFirst();
+        } else {
+            emit noteJudged(3);
+            delete noteInTrack.takeFirst();
+        }
     }
 }
 
@@ -80,7 +110,25 @@ void  Track::checkHit(qint64 currentMusicTime){
      指针悬空*/
 // 如果提前松手导致 Miss，返回 true，否则返回 false
 bool Track::isReleased(qint64 currentMusicTime){
-    // 留给以后的自己
+    if (currentHoldingNote == nullptr) {
+        return false;
+    }
+
+    qint64 timeUntilEnd = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - currentMusicTime;
+    qint64 totalDuration = dynamic_cast<Hold*>(currentHoldingNote)->getTailTime() - dynamic_cast<Hold*>(currentHoldingNote)->getTargetTime();
+    if (timeUntilEnd > totalDuration * 0.1) {
+        // 提前超过10%松手，miss
+        emit noteJudged(1); // 触发 Miss，打断 Combo！
+        delete currentHoldingNote;
+        currentHoldingNote = nullptr;
+        return true;
+    } else {
+        // 发放头判分数！
+        emit noteJudged(currentHoldHeadResult);
+        delete currentHoldingNote;
+        currentHoldingNote = nullptr;
+        return false;
+    }
 }
 
 

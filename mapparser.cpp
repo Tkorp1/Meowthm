@@ -4,6 +4,7 @@
 #include<QDir>
 #include<QDebug>
 #include "mapparser.h"
+#include "gameconfig.h"
 MapParser::MapParser(QString _path):Path(_path)
 {
     // 这里需要通过这个文件路径来获取BPM：
@@ -66,11 +67,18 @@ QList<Note*> MapParser::parse(QString trackPath){
     QTextStream in(&file);
     //现在开始就可以读文件了
     while(!in.atEnd()){
-        int type=0;//默认值
+        int type=-1;//默认值
         // note样式
         int noteWidth = 100;
         int noteHeight = 30;
         in>>type;
+
+
+        // 保险机制，防止没读到
+        if(type == -1){
+            break;
+        }
+
         if(type==0){
             /*
              现在是note
@@ -97,7 +105,12 @@ QList<Note*> MapParser::parse(QString trackPath){
 
             qint64 _targettimeBegin = targetTimeCalculator(beginBeats);
             qint64 _targettimeEnd = targetTimeCalculator(endBeats);
-            Note* noteTemp = new Hold(_targettimeBegin, _targettimeEnd, noteWidth, noteHeight);
+
+            double durationMs = _targettimeEnd - _targettimeBegin;
+            double currentSpeed = GameConfig::instance()->getNoteSpeed();
+            int holdHeight = qRound(durationMs * currentSpeed);
+
+            Note* noteTemp = new Hold(_targettimeBegin, _targettimeEnd, noteWidth, holdHeight);
             result.append(noteTemp);
 
         }

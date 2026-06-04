@@ -173,6 +173,10 @@ QString GameScene::getMapPath() const{
 
 
 void GameScene::keyPressEvent(QKeyEvent *event){
+    // 长按触发的自动重复
+    if (event->isAutoRepeat()) {
+        return;
+    }
     // D F J K
     if(event -> key() == Qt::Key_D){
         tracks[0] -> checkHit(currentMusicTime);
@@ -191,6 +195,20 @@ void GameScene::keyPressEvent(QKeyEvent *event){
 
 void GameScene::keyReleaseEvent(QKeyEvent * event){
     // 留给以后的自己
+    // 长按触发的自动重复
+    if (event->isAutoRepeat()) {
+        return;
+    }
+    // 传给对应的轨道
+    if(event -> key() == Qt::Key_D){
+        tracks[0] -> isReleased(currentMusicTime);
+    }else if(event -> key() == Qt::Key_F){
+        tracks[1] -> isReleased(currentMusicTime);
+    }else if(event -> key() == Qt::Key_J){
+        tracks[2] -> isReleased(currentMusicTime);
+    }else if(event -> key() == Qt::Key_K){
+        tracks[3] -> isReleased(currentMusicTime);
+    }
 }
 
 
