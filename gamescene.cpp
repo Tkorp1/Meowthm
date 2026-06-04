@@ -55,7 +55,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     comboLabel = new QLabel(this);
     comboLabel -> setText("0");
     comboLabel -> setGeometry(400, 200, 150, 50);
-    comboLabel -> setStyleSheet("color: #00BFFF; font-size: 36px; font-weight: bold; background-color: transparent;");
+    comboLabel -> setStyleSheet("color: #FFFFFF; font-size: 36px; font-weight: bold; background-color: transparent;");
     comboLabel -> show();
 
     accuracyLabel = new QLabel(this);
