@@ -2,6 +2,10 @@
 #define RESULTSCENE_H
 
 #include <QWidget>
+#include <QLabel>
+#include <QPushButton>
+#include <QPainter>
+#include <QPixmap>
 #include "gamestate.h"
 
 class ResultScene : public QWidget
@@ -9,13 +13,41 @@ class ResultScene : public QWidget
     Q_OBJECT
 
 private:
+    // 1.成绩数据
     GameState state;
 
-public:
-    // 注意这里结束界面使用state来初始化
-    explicit ResultScene(GameState _state, QWidget *parent = nullptr);
+    // 2.UI控件
+    QLabel* titleLabel;
 
-signals:
+    QLabel* songNameLabel;
+
+    QLabel* scoreLabel;
+
+    QLabel* accLabel;
+
+    QLabel* comboLabel;
+
+    QLabel* perfectLabel;
+
+    QLabel* goodLabel;
+
+    QLabel* missLabel;
+
+    QPushButton* returnButton;
+
+private slots:
+    // 返回主菜单
+    void onReturnMainMenu();
+
+public:
+    explicit ResultScene(const GameState& _state,
+                         QWidget *parent = nullptr);
+
+    ~ResultScene();
+
+protected:
+
+    void paintEvent(QPaintEvent *event)override;
 };
 
 #endif // RESULTSCENE_H
