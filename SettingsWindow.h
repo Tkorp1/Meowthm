@@ -18,6 +18,7 @@ public:
 
     // 设置下落速度（像素/毫秒）
     void setSpeed(double speed);
+    void registerHit();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -27,6 +28,9 @@ private:
     double m_speed;          // 当前速度（像素/毫秒）
     double m_noteY;          // 音符的Y坐标（0~height）
     int m_timerId;           // 定时器ID
+
+    double m_lastHitY;  // 记录按下瞬间的Y坐标
+    int m_hitAlpha;     // 残影的透明度 (0~255)
 };
 
 // 设置界面主窗口
@@ -39,6 +43,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;   // 绘制背景图
+    void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
     void onSpeedButtonClicked(double delta);        // 流速调节按钮（+0.05 / -0.05）
