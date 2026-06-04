@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     // MainWindow w;
     // w.show();
 
-    GameScene* testGame = new GameScene("/Users/tkorp/Documents/GitHub/Meowthm1/maps/song1"); // 这里写的是绝对地址，到时候记得改
+    GameScene* testGame = new GameScene(":/map/maps/song1");
     testGame->show();
     //GameState temp("song");
     //ResultScene* testresult = new ResultScene(temp);
