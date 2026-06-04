@@ -124,7 +124,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 先放绝对地址
     hitSound->setSource(QUrl("qrc:/sound/sounds/dong.wav"));
     // 声音大小
-    hitSound->setVolume(0.65f);
+    hitSound->setVolume(0.8f);
 
 
 
@@ -145,7 +145,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         vLine->setStyleSheet("background-color: rgba(255, 255, 255, 150);");
         vLine->setAttribute(Qt::WA_TransparentForMouseEvents); // 鼠标穿透，防挡底层事件
 
-        // 【核心魔法】：把这条线强行拉到最顶层，死死压在音符上面！
+        // 把这条线强行拉到最顶层，死死压在音符上面！
         vLine->raise();
     }
 
@@ -165,7 +165,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         // 使用 CSS 线性渐变！从底部的半透明白色，向上渐变成完全透明
         trackHighlights[i]->setStyleSheet(
             "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
-            "stop:0 rgba(255, 255, 255, 120), stop:1 rgba(255, 255, 255, 0));"
+            "stop:0 rgba(255, 255, 255, 80), stop:1 rgba(255, 255, 255, 0));"
             );
         trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
 
@@ -178,6 +178,11 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
 
     initPauseUI();
+
+
+    scoreLabel->raise();
+    comboLabel->raise();
+    accuracyLabel->raise();
 
 }
 
