@@ -68,6 +68,9 @@ private:
     QTimer* countdownTimer;
     int countdownValue;
 
+    // 9.轨道发光特效面板
+    QFrame* trackHighlights[4];
+
 public:
 
     // 0.构造函数

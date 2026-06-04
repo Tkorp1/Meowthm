@@ -156,6 +156,26 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     hitLineUI->setAttribute(Qt::WA_TransparentForMouseEvents);
     hitLineUI->raise(); // 同样拉到最顶层！
 
+    // 创建轨道发光特效
+    for (int i = 0; i < 4; ++i) {
+        trackHighlights[i] = new QFrame(this);
+        // 设定位置：和轨道一样宽，高度从屏幕顶部一直到判定线
+        trackHighlights[i]->setGeometry(200 + i * 100, 0, 100, hitLineY);
+
+        // 使用 CSS 线性渐变！从底部的半透明白色，向上渐变成完全透明
+        trackHighlights[i]->setStyleSheet(
+            "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
+            "stop:0 rgba(255, 255, 255, 120), stop:1 rgba(255, 255, 255, 0));"
+            );
+        trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+        // 默认隐藏，不按不亮
+        trackHighlights[i]->hide();
+
+        // 让它稍微靠下一点，不要盖住掉落的音符
+        trackHighlights[i]->lower();
+    }
+
 
     initPauseUI();
 
@@ -231,15 +251,19 @@ void GameScene::keyPressEvent(QKeyEvent *event){
     if(event -> key() == Qt::Key_D){
         tracks[0] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[0]->show();
     }else if(event -> key() == Qt::Key_F){
         tracks[1] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[1]->show();
     }else if(event -> key() == Qt::Key_J){
         tracks[2] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[2]->show();
     }else if(event -> key() == Qt::Key_K){
         tracks[3] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[3]->show();
     }
 }
 
@@ -251,12 +275,16 @@ void GameScene::keyReleaseEvent(QKeyEvent * event){
     // 传给对应的轨道
     if(event -> key() == Qt::Key_D){
         tracks[0] -> isReleased(currentMusicTime);
+        trackHighlights[0]->hide();
     }else if(event -> key() == Qt::Key_F){
         tracks[1] -> isReleased(currentMusicTime);
+        trackHighlights[1]->hide();
     }else if(event -> key() == Qt::Key_J){
         tracks[2] -> isReleased(currentMusicTime);
+        trackHighlights[2]->hide();
     }else if(event -> key() == Qt::Key_K){
         tracks[3] -> isReleased(currentMusicTime);
+        trackHighlights[3]->hide();
     }
 }
 
