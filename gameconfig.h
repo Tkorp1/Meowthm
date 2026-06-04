@@ -3,29 +3,34 @@
 
 #include <QObject>
 #include <QString>
+#include <QList>
 
-// 全局配置类（单例模式），用于存储游戏相关的全局设置
-// 用法：GameConfig::instance()->getNoteSpeed();
-//       GameConfig::instance()->setNoteSpeed(1.2);
+struct SongInfo {
+    QString name;           // 歌曲名称（用于显示）
+    QString coverPath;      // 封面图片路径（相对路径，可选）
+    QString mapFolderPath;  // 谱面文件夹绝对路径或相对路径（相对于可执行文件）
+};
+
 class GameConfig : public QObject
 {
     Q_OBJECT
 
 public:
-    // 获取单例实例
-    static GameConfig* instance();
+    static GameConfig* instance(); // 这是一个全局单例
 
-    // 获取/设置 流速（像素/毫秒）
-    double getNoteSpeed() const { return m_noteSpeed; }
+
+    double getNoteSpeed() const { return m_noteSpeed; } // 流速
     void setNoteSpeed(double speed);
 
-    // 获取/设置 当前玩家昵称
-    QString getCurrentPlayer() const { return m_currentPlayer; }
+    QString getCurrentPlayer() const { return m_currentPlayer; } // 玩家名字
     void setCurrentPlayer(const QString &name);
 
-    // 获取/设置 偏移量（毫秒）
-    qint64 getCurrentOffset() const { return m_currentOffset; }
+    qint64 getCurrentOffset() const { return m_currentOffset; } // 偏移
     void setCurrentOffset(qint64 offset);
+
+    // 歌曲列表接口
+    QList<SongInfo> getSongs() const { return m_songs; }
+    void loadSongs();   // 加载歌曲列表（可扫描 maps 目录或读取配置文件）
 
 signals:
     void noteSpeedChanged(double newSpeed);
@@ -33,18 +38,16 @@ signals:
     void currentOffsetChanged(qint64 newOffset);
 
 private:
-    // 私有构造/析构，禁止外部创建
     explicit GameConfig(QObject *parent = nullptr);
     ~GameConfig();
-
-    // 禁用拷贝和赋值
     GameConfig(const GameConfig&) = delete;
     GameConfig& operator=(const GameConfig&) = delete;
 
-    // 数据成员
     double m_noteSpeed;
     QString m_currentPlayer;
     qint64 m_currentOffset;
+
+    QList<SongInfo> m_songs;
 };
 
 #endif // GAMECONFIG_H
