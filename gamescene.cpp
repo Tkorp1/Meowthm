@@ -330,10 +330,23 @@ void GameScene::initPauseUI() {
     connect(btnContinue, &QPushButton::clicked, this, &GameScene::resumeGame);
 
     connect(btnRestart, &QPushButton::clicked, this, [this]() {
-        // 用相同的谱面路径，直接 new 一个全新的自己，达成
-        GameScene* newScene = new GameScene(this->mapPath);
-        newScene->show();
-        this->close(); // 关闭当前这个废弃的窗口
+        // 1. 备份当前谱面路径
+        QString pathBackup = this->mapPath;
+
+        // 2. 暴力掐断音频流
+        player->stop();
+
+
+        // 4. 延迟 50 毫秒再去创建新世界
+        QTimer::singleShot(50, [this, pathBackup]() {
+            GameScene* newScene = new GameScene(pathBackup);
+            newScene->show();
+
+            // 【关键修改 2】：等新窗口顺利展示出来了，再把藏在暗处的旧窗口彻底杀掉！
+            this->close();
+        });
+
+
     });
 
     connect(btnQuit, &QPushButton::clicked, this, [this]() {
