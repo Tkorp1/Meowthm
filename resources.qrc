@@ -6,5 +6,8 @@
         <file>poke2.png</file>
         <file>poke3.png</file>
         <file>images/resultScene.jpg</file>
+        <file>images/continue.png</file>
+        <file>images/exit.png</file>
+        <file>images/restart.png</file>
     </qresource>
 </RCC>
