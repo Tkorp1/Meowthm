@@ -13,4 +13,12 @@
     <qresource prefix="/sound">
         <file>sounds/dong.wav</file>
     </qresource>
+    <qresource prefix="/map">
+        <file>maps/song1/info.txt</file>
+        <file>maps/song1/music.mp3</file>
+        <file>maps/song1/Track0.txt</file>
+        <file>maps/song1/Track1.txt</file>
+        <file>maps/song1/Track2.txt</file>
+        <file>maps/song1/Track3.txt</file>
+    </qresource>
 </RCC>

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     // MainWindow w;
     // w.show();
 
-    GameScene* testGame = new GameScene("/Users/rose/code/QT/Meowthm/maps/song1"); // 这里写的是绝对地址，到时候记得改
+    GameScene* testGame = new GameScene(":/map/maps/song1"); // 现在在选曲界面还没写的时候，先搞成这个，等选曲界面写完了接
     testGame->show();
 
     return a.exec();

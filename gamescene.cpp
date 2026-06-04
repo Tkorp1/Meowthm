@@ -95,7 +95,15 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     player->setAudioOutput(audioOutput);
 
     QString musicPath = dir.filePath("music.mp3");
-    player->setSource(QUrl::fromLocalFile(musicPath));
+
+    // 判断这是内置歌曲，还是外部自定义歌曲
+    if (musicPath.startsWith(":")) {
+        // 如果路径是以 ":" 开头，说明它来自.qrc
+        player->setSource(QUrl("qrc" + musicPath));
+    } else {
+        // 否则，说明它是电脑硬盘上的外部歌曲
+        player->setSource(QUrl::fromLocalFile(musicPath));
+    }
 
     connect(player,
             &QMediaPlayer::mediaStatusChanged,
