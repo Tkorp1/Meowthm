@@ -225,7 +225,28 @@ void ResultScene::onReturnMainMenu()
 
     close();
 }
+void ResultScene::paintEvent(QPaintEvent *)
 
-void ResultScene::paintEvent(QPaintEvent *event){
+{
+
+    QPainter painter(this);
+
+    QPixmap bg(":/image/images/resultScene.jpg");
+
+    painter.drawPixmap(
+
+        rect(),
+
+        bg.scaled(
+
+            size(),
+
+            Qt::IgnoreAspectRatio,
+
+            Qt::SmoothTransformation
+
+            )
+
+        );
 
 }
