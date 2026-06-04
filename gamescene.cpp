@@ -135,6 +135,47 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 设定闹钟间隔 目前16s
     updateTimer->start(16);
 
+    // 5.5 创建顶层轨道线与判定线
+    // 画 5 条垂直轨道分割线
+    for(int i = 0; i <= 4; ++i){
+        int x = 200 + i * 100;
+        QFrame* vLine = new QFrame(this);
+        vLine->setGeometry(x - 1, 0, 2, this->height()); // 宽度为2
+        // 使用半透明白色
+        vLine->setStyleSheet("background-color: rgba(255, 255, 255, 150);");
+        vLine->setAttribute(Qt::WA_TransparentForMouseEvents); // 鼠标穿透，防挡底层事件
+
+        // 【核心魔法】：把这条线强行拉到最顶层，死死压在音符上面！
+        vLine->raise();
+    }
+
+    // 画 1 条水平判定线
+    QFrame* hitLineUI = new QFrame(this);
+    hitLineUI->setGeometry(200, hitLineY - 2, 400, 4); // 宽度为4
+    hitLineUI->setStyleSheet("background-color: rgba(255, 215, 0, 200);"); // 半透明金色
+    hitLineUI->setAttribute(Qt::WA_TransparentForMouseEvents);
+    hitLineUI->raise(); // 同样拉到最顶层！
+
+    // 创建轨道发光特效
+    for (int i = 0; i < 4; ++i) {
+        trackHighlights[i] = new QFrame(this);
+        // 设定位置：和轨道一样宽，高度从屏幕顶部一直到判定线
+        trackHighlights[i]->setGeometry(200 + i * 100, 0, 100, hitLineY);
+
+        // 使用 CSS 线性渐变！从底部的半透明白色，向上渐变成完全透明
+        trackHighlights[i]->setStyleSheet(
+            "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
+            "stop:0 rgba(255, 255, 255, 120), stop:1 rgba(255, 255, 255, 0));"
+            );
+        trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
+
+        // 默认隐藏，不按不亮
+        trackHighlights[i]->hide();
+
+        // 让它稍微靠下一点，不要盖住掉落的音符
+        trackHighlights[i]->lower();
+    }
+
 
     initPauseUI();
 
@@ -165,18 +206,6 @@ void GameScene::gameOver(){
 void GameScene::paintEvent(QPaintEvent *event){
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-
-    // 0.轨道
-    painter.setPen(QPen(Qt::white, 2));
-    for(int i = 0; i <= 4; ++i){
-        int x = 200 + i * 100;
-        painter.drawLine(x, 0, x, this -> height());
-
-    }
-
-    // 1.判定线
-    painter.setPen(QPen(QColor(255, 215, 0), 4));
-    painter.drawLine(200, hitLineY, 600, hitLineY);
 
 }
 
@@ -222,15 +251,19 @@ void GameScene::keyPressEvent(QKeyEvent *event){
     if(event -> key() == Qt::Key_D){
         tracks[0] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[0]->show();
     }else if(event -> key() == Qt::Key_F){
         tracks[1] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[1]->show();
     }else if(event -> key() == Qt::Key_J){
         tracks[2] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[2]->show();
     }else if(event -> key() == Qt::Key_K){
         tracks[3] -> checkHit(currentMusicTime);
         hitSound->play();
+        trackHighlights[3]->show();
     }
 }
 
@@ -242,12 +275,16 @@ void GameScene::keyReleaseEvent(QKeyEvent * event){
     // 传给对应的轨道
     if(event -> key() == Qt::Key_D){
         tracks[0] -> isReleased(currentMusicTime);
+        trackHighlights[0]->hide();
     }else if(event -> key() == Qt::Key_F){
         tracks[1] -> isReleased(currentMusicTime);
+        trackHighlights[1]->hide();
     }else if(event -> key() == Qt::Key_J){
         tracks[2] -> isReleased(currentMusicTime);
+        trackHighlights[2]->hide();
     }else if(event -> key() == Qt::Key_K){
         tracks[3] -> isReleased(currentMusicTime);
+        trackHighlights[3]->hide();
     }
 }
 

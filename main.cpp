@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "gamescene.h"
-
+#include "resultscene.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -13,6 +13,14 @@ int main(int argc, char *argv[])
     //GameScene* testGame = new GameScene(":/map/maps/song1"); // 现在在选曲界面还没写的时候，先搞成这个，等选曲界面写完了接
     //testGame->show();
 
+
+
+
+    GameScene* testGame = new GameScene(":/map/maps/song1");
+    testGame->show();
+    //GameState temp("song");
+    //ResultScene* testresult = new ResultScene(temp);
+    //testresult->show();
 
     return a.exec();
 
