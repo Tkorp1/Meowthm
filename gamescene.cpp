@@ -135,6 +135,27 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 设定闹钟间隔 目前16s
     updateTimer->start(16);
 
+    // 5.5 创建顶层轨道线与判定线
+    // 画 5 条垂直轨道分割线
+    for(int i = 0; i <= 4; ++i){
+        int x = 200 + i * 100;
+        QFrame* vLine = new QFrame(this);
+        vLine->setGeometry(x - 1, 0, 2, this->height()); // 宽度为2
+        // 使用半透明白色
+        vLine->setStyleSheet("background-color: rgba(255, 255, 255, 150);");
+        vLine->setAttribute(Qt::WA_TransparentForMouseEvents); // 鼠标穿透，防挡底层事件
+
+        // 【核心魔法】：把这条线强行拉到最顶层，死死压在音符上面！
+        vLine->raise();
+    }
+
+    // 画 1 条水平判定线
+    QFrame* hitLineUI = new QFrame(this);
+    hitLineUI->setGeometry(200, hitLineY - 2, 400, 4); // 宽度为4
+    hitLineUI->setStyleSheet("background-color: rgba(255, 215, 0, 200);"); // 半透明金色
+    hitLineUI->setAttribute(Qt::WA_TransparentForMouseEvents);
+    hitLineUI->raise(); // 同样拉到最顶层！
+
 
     initPauseUI();
 
@@ -165,18 +186,6 @@ void GameScene::gameOver(){
 void GameScene::paintEvent(QPaintEvent *event){
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-
-    // 0.轨道
-    painter.setPen(QPen(Qt::white, 2));
-    for(int i = 0; i <= 4; ++i){
-        int x = 200 + i * 100;
-        painter.drawLine(x, 0, x, this -> height());
-
-    }
-
-    // 1.判定线
-    painter.setPen(QPen(QColor(255, 215, 0), 4));
-    painter.drawLine(200, hitLineY, 600, hitLineY);
 
 }
 
