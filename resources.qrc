@@ -10,4 +10,7 @@
         <file>images/exit.png</file>
         <file>images/restart.png</file>
     </qresource>
+    <qresource prefix="/sound">
+        <file>sounds/dong.wav</file>
+    </qresource>
 </RCC>

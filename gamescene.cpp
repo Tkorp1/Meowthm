@@ -114,7 +114,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 4.5设置打击音效引擎
     hitSound = new QSoundEffect(this);
     // 先放绝对地址
-    hitSound->setSource(QUrl::fromLocalFile("/Users/rose/sound_effect/dong.wav"));
+    hitSound->setSource(QUrl("qrc:/sound/sounds/dong.wav"));
     // 声音大小
     hitSound->setVolume(0.65f);
 
