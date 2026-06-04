@@ -9,6 +9,11 @@
         <file>images/continue.png</file>
         <file>images/exit.png</file>
         <file>images/restart.png</file>
+        <file>images/bg_select.png</file>
+        <file>images/s1.png</file>
+        <file>images/s2.png</file>
+        <file>images/s3.png</file>
+        <file>images/s4.png</file>
     </qresource>
     <qresource prefix="/sound">
         <file>sounds/dong.wav</file>

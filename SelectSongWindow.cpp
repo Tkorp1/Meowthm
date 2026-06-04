@@ -4,205 +4,215 @@
 #include "ProfileWindow.h"
 #include "AchievementsWindow.h"
 #include "MainWindow.h"
-
 #include "gamescene.h"
 #include "gameconfig.h"
 
 #include <QPushButton>
-#include <QGraphicsProxyWidget>
-#include <QGraphicsScene>
-#include <QGraphicsView>
 #include <QPainter>
-#include <QPixmap>
+#include <QPainterPath>
+#include <QLinearGradient>
 #include <QDebug>
-#include <functional>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QScrollArea>
 #include <QLabel>
 
-
 SelectSongWindow::SelectSongWindow(QWidget *parent)
     : QWidget(parent)
 {
-    setWindowTitle("选曲界面");
+    setWindowTitle("MUSIC SELECT");
     setFixedSize(1200, 800);
 
 
-    // 歌曲滚动
+    // 1.布局
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
+    mainLayout->setContentsMargins(40, 40, 40, 40);
+    mainLayout->setSpacing(40);
+
+
+    // 2. 左侧
+
     QWidget *leftArea = new QWidget(this);
-    leftArea->setGeometry(20, 100, 500, 600);  // 占据大部分区域，留出右侧和底部空间
+    leftArea->setFixedWidth(550);
     QVBoxLayout *leftLayout = new QVBoxLayout(leftArea);
+    leftLayout->setContentsMargins(0, 0, 0, 0);
 
-    // 歌曲网格的容器
+    // 左侧标题
+    QLabel *listTitle = new QLabel("TRACKS", leftArea);
+    listTitle->setStyleSheet("color: #00BFFF; font-size: 32px; font-weight: 900; letter-spacing: 5px;");
+    leftLayout->addWidget(listTitle);
 
+    QFrame *line = new QFrame(leftArea);
+    line->setFrameShape(QFrame::HLine);
+    line->setStyleSheet("background-color: rgba(0, 191, 255, 100);");
+    leftLayout->addWidget(line);
+
+    // 歌曲网格容器
     QWidget *gridContainer = new QWidget();
     gridContainer->setStyleSheet("background: transparent;");
     QGridLayout *grid = new QGridLayout(gridContainer);
-    grid->setSpacing(25);
-    grid->setContentsMargins(10, 10, 10, 10);
+    grid->setSpacing(20);
+    grid->setContentsMargins(0, 10, 10, 10);
 
     QList<SongInfo> songs = GameConfig::instance()->getSongs();
     if (songs.isEmpty()) {
-        QLabel *noSongLabel = new QLabel("没有找到歌曲，请检查 maps 目录", gridContainer);
-        noSongLabel->setStyleSheet("color: white; font-size: 20px;");
+        QLabel *noSongLabel = new QLabel("NO TRACKS FOUND", gridContainer);
+        noSongLabel->setStyleSheet("color: rgba(255,255,255,100); font-size: 24px; font-weight: bold;");
         grid->addWidget(noSongLabel, 0, 0);
     } else {
-
-        const int cols = 2; // 每行2个卡片
-
         int row = 0, col = 0;
         for (int i = 0; i < songs.size(); ++i) {
             const SongInfo &song = songs[i];
 
+            // 歌曲卡片
             QPushButton *card = new QPushButton();
-            card->setFixedSize(180, 240);
+            card->setFixedSize(250, 120); // 宽卡片
             card->setObjectName(QString("card_%1").arg(i));
             card->setStyleSheet(R"(
                 QPushButton {
-                    background-color: transparent;
-                    border: 2px solid #aaa;
-
-                    border-radius: 0px;
-
+                    background-color: rgba(20, 30, 40, 200);
+                    border-left: 5px solid #4682B4;
+                    border-top: 1px solid rgba(255,255,255,30);
+                    border-right: 1px solid rgba(255,255,255,30);
+                    border-bottom: 1px solid rgba(255,255,255,30);
                     color: white;
-                    font-size: 14px;
+                    font-size: 18px;
                     font-weight: bold;
-                    text-align: center;
-                    padding-top: 160px;
+                    text-align: left;
+                    padding-left: 20px;
                 }
                 QPushButton:hover {
-                    background-color: rgba(255,255,255,150);
-                    border-color: #ffcc00;
-                    color: black;
+                    background-color: rgba(40, 60, 80, 250);
+                    border-left: 5px solid #00BFFF;
+                    padding-left: 30px; /* 悬停时文字微微向右滑动 */
                 }
             )");
-
-            // 加载封面
-            QPixmap cover(song.coverPath);
-            if (!cover.isNull()) {
-                QPixmap scaled = cover.scaled(160, 160, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-                card->setIcon(QIcon(scaled));
-                card->setIconSize(QSize(160, 160));
-
-            }
-
             card->setText(song.name);
-
-
-            // 保存卡片以便索引
             m_cardButtons.append(card);
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
             grid->addWidget(card, row, col);
             col++;
-            if (col >= cols) {
-                col = 0;
-                row++;
-            }
+            if (col >= 2) { col = 0; row++; }
         }
     }
 
-    // 将网格放入滚动区域
     QScrollArea *scrollArea = new QScrollArea();
     scrollArea->setWidget(gridContainer);
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
     leftLayout->addWidget(scrollArea);
-    leftArea->setLayout(leftLayout);
 
-    // ========== 右侧：功能按钮（改为绝对定位，不再堆叠） ==========
-    // 以下按钮位置、大小可自行修改，互不重叠
-    QPushButton *settingsBtn = new QPushButton("", this);
-    settingsBtn->setGeometry(20, 20, 70, 70);
-    settingsBtn->setStyleSheet(R"(
+    // ==========================================
+    // 3. 右侧：纯文字排版 + 极简按钮区
+    // ==========================================
+    QWidget *rightArea = new QWidget(this);
+    QVBoxLayout *rightLayout = new QVBoxLayout(rightArea);
+    rightLayout->setContentsMargins(40, 0, 0, 0);
+    rightLayout->setAlignment(Qt::AlignTop | Qt::AlignRight);
+
+    // 返回主菜单按钮 (纯文字)
+    QPushButton *backBtn = new QPushButton("◀ BACK", rightArea);
+    backBtn->setFixedSize(120, 40);
+    backBtn->setStyleSheet("QPushButton { background: transparent; color: rgba(255,255,255,150); font-size: 18px; font-weight: bold; border: none; text-align: right; } QPushButton:hover { color: white; }");
+    connect(backBtn, &QPushButton::clicked, this, &SelectSongWindow::onBackToMain);
+    rightLayout->addWidget(backBtn, 0, Qt::AlignRight);
+
+    rightLayout->addSpacing(80);
+
+    // 背景水印
+    QLabel *hugeText = new QLabel("MEOWTHM\nSYSTEM", rightArea);
+    hugeText->setAlignment(Qt::AlignRight);
+    hugeText->setStyleSheet("color: rgba(255, 255, 255, 10); font-size: 80px; font-weight: 900; line-height: 80px;");
+    rightLayout->addWidget(hugeText);
+
+    rightLayout->addStretch();
+
+    // 菜单按钮
+    QString menuBtnStyle = R"(
         QPushButton {
             background-color: transparent;
+            border: 2px solid rgba(255,255,255,50);
+            border-radius: 25px;
             color: white;
             font-size: 16px;
-            border-radius: 8px;
+            font-weight: bold;
+            letter-spacing: 2px;
         }
+        QPushButton:hover {
+            background-color: white;
+            color: black;
+            border: 2px solid white;
+        }
+    )";
 
-    )");
-    connect(settingsBtn, &QPushButton::clicked, this, &SelectSongWindow::onSettings);
-
-    QPushButton *pokeBtn = new QPushButton("", this);
-    pokeBtn->setGeometry(1050, 600, 120, 60);
-    pokeBtn->setStyleSheet(settingsBtn->styleSheet());
+    QPushButton *pokeBtn = new QPushButton("INTERACT / 互动", rightArea);
+    pokeBtn->setFixedSize(250, 50);
+    pokeBtn->setStyleSheet(menuBtnStyle);
     connect(pokeBtn, &QPushButton::clicked, this, &SelectSongWindow::onPoke);
+    rightLayout->addWidget(pokeBtn, 0, Qt::AlignRight);
+    rightLayout->addSpacing(15);
 
-    QPushButton *profileBtn = new QPushButton("", this);
-    profileBtn->setGeometry(1080, 680, 100, 100);
-    profileBtn->setStyleSheet(settingsBtn->styleSheet());
+    QPushButton *profileBtn = new QPushButton("PROFILE / 档案", rightArea);
+    profileBtn->setFixedSize(250, 50);
+    profileBtn->setStyleSheet(menuBtnStyle);
     connect(profileBtn, &QPushButton::clicked, this, &SelectSongWindow::onProfile);
+    rightLayout->addWidget(profileBtn, 0, Qt::AlignRight);
+    rightLayout->addSpacing(15);
 
-    QPushButton *achieveBtn = new QPushButton("", this);
-    achieveBtn->setGeometry(1110, 710, 0, 0);
-    achieveBtn->setStyleSheet(settingsBtn->styleSheet());
+    QPushButton *achieveBtn = new QPushButton("ACHIEVEMENTS / 成就", rightArea);
+    achieveBtn->setFixedSize(250, 50);
+    achieveBtn->setStyleSheet(menuBtnStyle);
     connect(achieveBtn, &QPushButton::clicked, this, &SelectSongWindow::onAchievements);
+    rightLayout->addWidget(achieveBtn, 0, Qt::AlignRight);
+    rightLayout->addSpacing(15);
 
-    QPushButton *backBtn = new QPushButton("", this);
-    backBtn->setGeometry(20, 710, 70, 70);
-    backBtn->setStyleSheet(settingsBtn->styleSheet());
-    connect(backBtn, &QPushButton::clicked, this, &SelectSongWindow::onBackToMain);
+    QPushButton *settingsBtn = new QPushButton("SETTINGS / 设置", rightArea);
+    settingsBtn->setFixedSize(250, 50);
+    settingsBtn->setStyleSheet(menuBtnStyle);
+    connect(settingsBtn, &QPushButton::clicked, this, &SelectSongWindow::onSettings);
+    rightLayout->addWidget(settingsBtn, 0, Qt::AlignRight);
 
-    // ========== 四张图片（不拦截鼠标事件） ==========
-    m_image1 = new QLabel(this);
-    m_image1->setPixmap(QPixmap("s1.png"));
-    m_image1->setScaledContents(true);
-    m_image1->setGeometry(20, 20, 70, 70);
-    m_image1->setAttribute(Qt::WA_TransparentForMouseEvents, true); // 鼠标穿透，不拦截点击
-    m_image1->raise();
-
-    m_image2 = new QLabel(this);
-    m_image2->setPixmap(QPixmap("s2.png"));
-    m_image2->setScaledContents(true);
-    m_image2->setGeometry(20, 710, 70, 70);
-    m_image2->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    m_image2->raise();
-
-    m_image3 = new QLabel(this);
-    m_image3->setPixmap(QPixmap("s3.png"));
-    m_image3->setScaledContents(true);
-    m_image3->setGeometry(1080, 680, 100, 100);
-    m_image3->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    m_image3->raise();
-
-    m_image4 = new QLabel(this);
-    m_image4->setPixmap(QPixmap("s4.png"));
-    m_image4->setScaledContents(true);
-    m_image4->setGeometry(1050, 570, 120, 120);
-    m_image4->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    m_image4->raise();
-
+    // 将左右区域加入主布局
+    mainLayout->addWidget(leftArea);
+    mainLayout->addWidget(rightArea);
 }
 
 SelectSongWindow::~SelectSongWindow() {}
-
+//背景
 void SelectSongWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
-    // 加载背景图
+    // 渐变背景
+    QLinearGradient bgGradient(0, 0, width(), height());
+    bgGradient.setColorAt(0.0, QColor(15, 20, 30));   // 左上黑
+    bgGradient.setColorAt(0.5, QColor(25, 35, 55));   // 中间灰蓝
+    bgGradient.setColorAt(1.0, QColor(10, 15, 25));   // 右下黑
+    painter.fillRect(rect(), bgGradient);
 
+    // 半透明几何条
+    QPainterPath path;
+    path.moveTo(width() * 0.6, 0);
+    path.lineTo(width() * 0.9, 0);
+    path.lineTo(width(), height() * 0.5);
+    path.lineTo(width(), height());
+    path.lineTo(width() * 0.5, height());
+    path.closeSubpath();
 
-    QPixmap bg("bg_select.png");
-    if (!bg.isNull()) {
-        painter.drawPixmap(rect(), bg.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    } else {
-        painter.fillRect(rect(), QColor(30, 30, 40));
+    QLinearGradient shapeGradient(width() * 0.5, 0, width(), height());
+    shapeGradient.setColorAt(0.0, QColor(0, 191, 255, 15)); // 发光
+    shapeGradient.setColorAt(1.0, QColor(255, 255, 255, 5));
+    painter.fillPath(path, shapeGradient);
 
-    }
     QWidget::paintEvent(event);
 }
 
 
-
-// 槽函数部分
-
-// 进入游戏
-
+// ==========================================
 void SelectSongWindow::onSongCardClicked()
 {
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
@@ -214,47 +224,14 @@ void SelectSongWindow::onSongCardClicked()
     if (idx >= songs.size()) return;
 
     const SongInfo &song = songs[idx];
-
-
-    // 创建游戏场景并显示
     GameScene *game = new GameScene(song.mapFolderPath, this);
     game->setAttribute(Qt::WA_DeleteOnClose);
-
     game->show();
-    this->hide();  // 隐藏选曲界面
+    this->hide();
 }
 
-
-// ---------- 以下为原有的功能按钮槽函数，保持不变 ----------
-
-void SelectSongWindow::onSettings()
-{
-    SettingsWindow *window = new SettingsWindow(this);
-    window->show();
-}
-
-void SelectSongWindow::onPoke()
-{
-    PokeWindow *window = new PokeWindow(this);
-    window->show();
-}
-
-void SelectSongWindow::onProfile()
-{
-    ProfileWindow *window = new ProfileWindow(this);
-    window->show();
-}
-
-void SelectSongWindow::onAchievements()
-{
-    AchievementsWindow *window = new AchievementsWindow(this);
-    window->show();
-}
-
-void SelectSongWindow::onBackToMain()
-{
-    this->close();
-    if (parentWidget()) {
-        parentWidget()->show();
-    }
-}
+void SelectSongWindow::onSettings() { SettingsWindow *window = new SettingsWindow(this); window->show(); }
+void SelectSongWindow::onPoke() { PokeWindow *window = new PokeWindow(this); window->show(); }
+void SelectSongWindow::onProfile() { ProfileWindow *window = new ProfileWindow(this); window->show(); }
+void SelectSongWindow::onAchievements() { AchievementsWindow *window = new AchievementsWindow(this); window->show(); }
+void SelectSongWindow::onBackToMain() { this->close(); if (parentWidget()) parentWidget()->show(); }
