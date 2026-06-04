@@ -1,6 +1,6 @@
 TARGET = Meowthm
 
-QT += widgets
+QT += core gui widgets multimedia multimediawidgets
 QT += widgets multimedia # 音频
 
 CONFIG += c++17
@@ -10,6 +10,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    SelectSongWindow.cpp \
     gameconfig.cpp \
     gamescene.cpp \
     ProfileWindow.cpp \
@@ -20,19 +21,18 @@ SOURCES += \
     note.cpp \
     resultscene.cpp \
     track.cpp \
-    SelectSongWindow.cpp \
     SettingsWindow.cpp \
     AchievementsWindow.cpp \
     PokeWindow.cpp
 
 
 HEADERS += \
+    SelectSongWindow.h \
     gameconfig.h \
     gamescene.h \
     AchievementsWindow.h \
     PokeWindow.h \
     ProfileWindow.h \
-    SelectSongWindow.h \
     SettingsWindow.h \
     gamestate.h \
     mainwindow.h \
