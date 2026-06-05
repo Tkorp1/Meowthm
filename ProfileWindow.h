@@ -2,9 +2,9 @@
 #define PROFILEWINDOW_H
 
 #include <QWidget>
+#include <QLabel>
 #include <QPushButton>
 #include <QLineEdit>
-#include <QLabel>
 #include <QTextEdit>
 
 class ProfileWindow : public QWidget
@@ -18,36 +18,27 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private slots:
-    // 昵称相关
-    void onNicknameTriggerClicked();  // 修改昵称按钮
-    void onNicknameSaveClicked();     // 保存昵称
-
-    // 简介相关（多行文本）
-    void onBioTriggerClicked();       // 编辑简介按钮
-    void onBioSaveClicked();          // 保存简介
-
-    // 返回主界面
-    void onBackClicked();
+    void onEditNickname();
+    void onSaveNickname();
+    void onEditBio();
+    void onSaveBio();
+    void onLoginClicked(); // 预留的登录/注册接口
 
 private:
-    // 昵称控件
-    QPushButton *m_nicknameTriggerBtn;
-    QLineEdit   *m_nicknameEdit;
+    // UI 控件指针
+    QLabel *m_avatarLabel;
+
+    // 昵称模块
+    QLabel *m_nicknameDisplay;
+    QLineEdit *m_nicknameEdit;
+    QPushButton *m_nicknameEditBtn;
     QPushButton *m_nicknameSaveBtn;
-    QLabel      *m_nicknameDisplayLabel;
 
-    // 简介控件（多行文本）
-    QPushButton *m_bioTriggerBtn;
-    QTextEdit   *m_bioEdit;
+    // 简介模块
+    QLabel *m_bioDisplay;
+    QTextEdit *m_bioEdit;
+    QPushButton *m_bioEditBtn;
     QPushButton *m_bioSaveBtn;
-    QLabel      *m_bioDisplayLabel;
-
-    // 返回按钮
-    QPushButton *m_backBtn;
-
-    // 预留功能：显示rating
-    // 预留功能：根据获取的成就更改背景图
-    // 预留功能：根据获取的成就更改头像
 };
 
 #endif // PROFILEWINDOW_H
