@@ -78,7 +78,10 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         tracks[i] = new Track(i, hitLineY, leftX + trackWidth * i, this);
         connect(tracks[i], &Track::noteJudged, this, &GameScene::hitNoteJudge);
 
-        // 【新增】：铺设常驻的极低透明度底色轨道 (透明度 20)
+        connect(tracks[i], &Track::hitDetails, this, [this](int trackId, qint64 deltaT, qint64 musicTime){
+            state.recordHit(trackId, deltaT, musicTime);
+        });
+        // 铺设低透明度底色轨道 (透明度 20)
         QFrame* trackBg = new QFrame(this);
         trackBg->setGeometry(leftX + trackWidth * i, 0, trackWidth, hitLineY);
         trackBg->setStyleSheet(QString("background-color: rgba(%1, %2, %3, 20);").arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));

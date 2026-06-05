@@ -95,6 +95,7 @@ void  Track::checkHit(qint64 currentMusicTime){
     }
     else if((deltaT <= 160 && deltaT > 80)||(deltaT >= -160 && deltaT < -80)){
         // 现在是good
+        emit hitDetails(trackIndex, deltaT, currentMusicTime);
 
         // 判断是不是 Hold
         if (note->getType() == NoteType::HOLD) {
@@ -110,6 +111,7 @@ void  Track::checkHit(qint64 currentMusicTime){
     }
     else if(deltaT <= 80 && deltaT >= -80){
         // 现在是perfect判定
+        emit hitDetails(trackIndex, deltaT, currentMusicTime);
         if (note->getType() == NoteType::HOLD) {
             if (currentHoldingNote != nullptr) delete currentHoldingNote;
             currentHoldingNote = note;

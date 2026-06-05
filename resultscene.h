@@ -7,6 +7,8 @@
 #include <QPainter>
 #include <QPixmap>
 #include "gamestate.h"
+#include "gameconfig.h"
+#include "gamescene.h"
 
 class ResultScene : public QWidget
 {
