@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include "mainwindow.h"
+#include "AnalysisWindow.h"
 
 ResultScene::ResultScene(const GameState& _state, QWidget *parent)
     : QWidget(parent), state(_state)
@@ -108,10 +109,32 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
     // =========================
     // 7. 底部双按钮 (重试 / 结束)
     // =========================
+    // [新增] 神经链接分析报告按钮：极具科幻感
+    QPushButton* reportButton = new QPushButton("GENERATE YOUR MEOWTHM REPORT / 生成你的分析报告", this);
+    reportButton->setGeometry(700, 780, 600, 50);
+    reportButton->setStyleSheet(R"(
+        QPushButton {
+            background-color: rgba(0, 255, 255, 20);
+            border: 1px solid #00FFFF;
+            color: #00FFFF;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+        QPushButton:hover { background-color: #00FFFF; color: black; border: 2px solid white; }
+    )");
+
+    connect(reportButton, &QPushButton::clicked, this, [this]() {
+        // 【核心修改】：在 new 的时候传入 `this`，让它成为当前界面的子图层！
+        AnalysisWindow* aw = new AnalysisWindow(state, this);
+        aw->setGeometry(0, 0, this->width(), this->height()); // 绝对覆盖全屏
+        aw->raise(); // 强制提升到最顶层，盖住所有按钮和文字
+        aw->show();
+    });
 
     // [新增] 重试按钮：科技蓝色调
     QPushButton* restartButton = new QPushButton("RETRY / 重试", this);
-    restartButton->setGeometry(700, 700, 260, 60);
+    restartButton->setGeometry(700, 660, 260, 60);
     restartButton->setStyleSheet(R"(
         QPushButton {
             background-color: transparent;
@@ -137,7 +160,7 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
 
     // 结束按钮：霓虹紫色调
     returnButton = new QPushButton("FINISH / 结束", this);
-    returnButton->setGeometry(1040, 700, 260, 60); // 放在重试按钮右侧
+    returnButton->setGeometry(1040, 660, 260, 60); // 放在重试按钮右侧
     returnButton->setStyleSheet(R"(
         QPushButton {
             background-color: transparent;

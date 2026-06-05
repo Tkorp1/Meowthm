@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     SelectSongWindow.cpp \
+    analysiswindow.cpp \
     gameconfig.cpp \
     gamescene.cpp \
     ProfileWindow.cpp \
@@ -28,6 +29,7 @@ SOURCES += \
 
 HEADERS += \
     SelectSongWindow.h \
+    analysiswindow.h \
     gameconfig.h \
     gamescene.h \
     AchievementsWindow.h \
@@ -42,6 +44,7 @@ HEADERS += \
     track.h \
 
 FORMS += \
+    analysiswindow.ui \
     mainwindow.ui
 
 
