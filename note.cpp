@@ -99,11 +99,11 @@ void Hold::paintEvent(QPaintEvent* event){
     // 1. body（尾巴）
     painter.setPen(Qt::NoPen);
     QColor bodyColor;
-    if(m_state == HOLD_PRESSED){
+    if(m_state == HOLD_PRESSED || m_state == HOLD_FINISHED){
         bodyColor = m_tailPressedColor;
     }
     else if(m_state == HOLD_MISS){
-        bodyColor = QColor(m_r, m_g, m_b, 60);
+        bodyColor = QColor(0,0,0);
     }
     else{
         bodyColor = QColor(m_r, m_g, m_b, 120);
@@ -116,7 +116,15 @@ void Hold::paintEvent(QPaintEvent* event){
         height() - headHeight
         );
     // 2. head（tap部分）
-    painter.setBrush(getHeadColor());
+    QColor headColor = getHeadColor();
+    if(m_state == HOLD_PRESSED ||
+            m_state == HOLD_FINISHED){
+        headColor = headColor.lighter(120);
+    }
+    else if(m_state == HOLD_MISS){
+        headColor.setAlpha(80);
+    }
+    painter.setBrush(headColor);
     painter.drawRoundedRect(
         0,
         height() - headHeight,
