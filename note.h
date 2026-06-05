@@ -10,9 +10,10 @@ enum NoteType{TAP, HOLD};
 
 // hold的状态
 enum HoldState {
-    HOLD_NORMAL,
-    HOLD_PRESSED,
-    HOLD_MISS
+    HOLD_NORMAL,      // 未判定
+    HOLD_PRESSED,      // 已命中头判，正在按
+    HOLD_MISS,        // 头判miss
+    HOLD_FINISHED     // 已完成
 };
 
 // note是音符基类，继承自QLabel，后续添加贴图

@@ -172,15 +172,16 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     hitLineUI->raise(); // 同样拉到最顶层！
 
     // 创建轨道按键发光特效
+    const int lightHeight = 250;
     for (int i = 0; i < 4; ++i) {
         trackHighlights[i] = new QFrame(this);
-        trackHighlights[i]->setGeometry(200 + i * 100, 0, 100, hitLineY);
+        trackHighlights[i]->setGeometry(200 + i * 100, hitLineY - lightHeight, 100, lightHeight);
 
         // 使用该轨道的专属颜色生成线性渐变
         // 底部(stop:0)透明度 180，顶部(stop:1)完全透明 0
         trackHighlights[i]->setStyleSheet(QString(
                                               "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
-                                              "stop:0 rgba(%1, %2, %3, 180), stop:1 rgba(%1, %2, %3, 0));"
+                                              "stop:0 rgba(%1, %2, %3, 100), stop:1 rgba(%1, %2, %3, 0));"
                                               ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
 
         trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
