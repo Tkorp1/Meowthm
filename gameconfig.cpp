@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 
+
 GameConfig* GameConfig::instance()
 {
     static GameConfig inst;
@@ -17,6 +18,12 @@ GameConfig::GameConfig(QObject *parent) : QObject(parent)
     m_currentPlayer = settings.value("game/currentPlayer", "Player").toString();
     m_currentOffset = settings.value("game/currentOffset", 0).toLongLong();
     m_hitSoundVolume = settings.value("game/hitSoundVolume", 100).toInt();
+
+    m_tracksCleared = settings.value("stats/tracksCleared", 0).toInt();
+    m_fullCombos = settings.value("stats/fullCombos", 0).toInt();
+    m_totalAccuracySum = settings.value("stats/totalAccuracySum", 0.0).toDouble();
+    m_peakKPS = settings.value("stats/peakKPS", 0).toInt();
+    m_totalPlayTimeSec = settings.value("stats/totalPlayTimeSec", 0).toLongLong();
 
     // 加载歌曲列表
     loadSongs();
@@ -131,4 +138,48 @@ void GameConfig::setHitSoundVolume(int volume)
     m_hitSoundVolume = volume;
     QSettings().setValue("game/hitSoundVolume", volume);
     emit hitSoundVolumeChanged(volume); // 发出信号，通知全服！
+}
+
+// ==========================================
+// 写入作战记录
+// ==========================================
+void GameConfig::addCombatRecord(const GameState& state)
+{
+    // 1. 基础数据累计
+    m_tracksCleared++;
+    if (state.getCurrentMiss() == 0) {
+        m_fullCombos++; // 没有 Miss，就是 Full Combo！
+    }
+    m_totalAccuracySum += state.getCurrentAcc();
+
+    // 2. 解析反射时间戳，计算高阶数据
+    QList<qint64> times = state.getHitTimestamps();
+
+    // 突破极限计算：这局的 KPS 有没有打破历史最高记录？
+    int sessionPeakKPS = 0;
+    for (int i = 0; i < times.size(); ++i) {
+        int currentKPS = 0;
+        for (int j = i; j < times.size(); ++j) {
+            if (times[j] - times[i] <= 1000) currentKPS++;
+            else break;
+        }
+        if (currentKPS > sessionPeakKPS) sessionPeakKPS = currentKPS;
+    }
+    if (sessionPeakKPS > m_peakKPS) {
+        m_peakKPS = sessionPeakKPS; // 破纪录啦！
+    }
+
+    // 计算这首歌的实际游玩时长 (最后一个音符减去第一个音符)
+    if (times.size() >= 2) {
+        qint64 durationMs = times.last() - times.first();
+        m_totalPlayTimeSec += (durationMs / 1000);
+    }
+
+    // 3. 立即存入本地注册表，防止游戏崩溃丢失数据！
+    QSettings settings;
+    settings.setValue("stats/tracksCleared", m_tracksCleared);
+    settings.setValue("stats/fullCombos", m_fullCombos);
+    settings.setValue("stats/totalAccuracySum", m_totalAccuracySum);
+    settings.setValue("stats/peakKPS", m_peakKPS);
+    settings.setValue("stats/totalPlayTimeSec", m_totalPlayTimeSec);
 }
