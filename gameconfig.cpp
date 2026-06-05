@@ -25,6 +25,8 @@ GameConfig::GameConfig(QObject *parent) : QObject(parent)
     m_peakKPS = settings.value("stats/peakKPS", 0).toInt();
     m_totalPlayTimeSec = settings.value("stats/totalPlayTimeSec", 0).toLongLong();
 
+    m_playerBio = settings.value("game/playerBio", "这个人很神秘，还没有留下打歌记录...").toString();
+
     // 加载歌曲列表
     loadSongs();
 
@@ -182,4 +184,14 @@ void GameConfig::addCombatRecord(const GameState& state)
     settings.setValue("stats/totalAccuracySum", m_totalAccuracySum);
     settings.setValue("stats/peakKPS", m_peakKPS);
     settings.setValue("stats/totalPlayTimeSec", m_totalPlayTimeSec);
+}
+
+
+// 【新增】：将简介保存到本地注册表/配置中
+void GameConfig::setPlayerBio(const QString &bio)
+{
+    if (m_playerBio == bio)
+        return;
+    m_playerBio = bio;
+    QSettings().setValue("game/playerBio", bio); // 写进硬盘！
 }

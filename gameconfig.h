@@ -46,8 +46,11 @@ public:
     int getPeakKPS() const { return m_peakKPS; }
     qint64 getTotalPlayTimeSec() const { return m_totalPlayTimeSec; }
 
-    // 【新增】：打完一首歌后，向系统上报数据的接口！
+    // 打完一首歌后，向系统上报数据的接口！
     void addCombatRecord(const GameState& state);
+
+    QString getPlayerBio() const { return m_playerBio; }  // 【新增】获取简介
+    void setPlayerBio(const QString &bio);
 
 signals:
     void noteSpeedChanged(double newSpeed);
@@ -74,6 +77,8 @@ private:
     double m_totalAccuracySum = 0.0;
     int m_peakKPS = 0;
     qint64 m_totalPlayTimeSec = 0;
+
+    QString m_playerBio;
 };
 
 #endif // GAMECONFIG_H

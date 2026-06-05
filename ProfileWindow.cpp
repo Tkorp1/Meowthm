@@ -86,7 +86,11 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     bioHeader->setStyleSheet("color: #A9A9A9; font-size: 16px; background: transparent; border: none;");
     leftLayout->addWidget(bioHeader);
 
-    m_bioDisplay = new QLabel("这个人很神秘，还没有留下神经连接记录...", leftPanel);
+    // 【修改】：从全局配置读取真实简介
+    QString savedBio = GameConfig::instance()->getPlayerBio();
+    if (savedBio.isEmpty()) savedBio = "这个人很神秘，还没有留下打歌记录...";
+
+    m_bioDisplay = new QLabel(savedBio, leftPanel);
     m_bioDisplay->setWordWrap(true);
     m_bioDisplay->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     m_bioDisplay->setStyleSheet("color: white; font-size: 18px; background: rgba(0,0,0,100); border-radius: 5px; padding: 10px; border: none;");
@@ -263,6 +267,7 @@ void ProfileWindow::onSaveBio()
     QString text = m_bioEdit->toPlainText().trimmed();
     if (text.isEmpty()) text = "这个人很神秘，还没有留下打歌记录...";
 
+    GameConfig::instance()->setPlayerBio(text);
     m_bioDisplay->setText(text);
 
     m_bioEdit->hide();

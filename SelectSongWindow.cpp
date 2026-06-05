@@ -21,6 +21,7 @@
 SelectSongWindow::SelectSongWindow(QWidget *parent)
     : QWidget(parent)
 {
+
     setWindowTitle("MUSIC SELECT");
     setFixedSize(1200, 800);
 
