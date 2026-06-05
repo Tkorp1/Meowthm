@@ -131,7 +131,6 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
     audioOutput->setVolume(0.5);
 
-    player->play();
 
     // 4.5设置打击音效引擎
     hitSound = new QSoundEffect(this);
@@ -147,7 +146,21 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 连接信号槽：每次闹钟响就执行gameLoop
     connect(updateTimer, &QTimer::timeout, this, &GameScene::gameLoop);
     // 设定闹钟间隔 目前16s
-    updateTimer->start(16);
+    updateTimer->start(16);QTimer::singleShot(
+
+        2000,
+
+        this,
+
+        [this]()
+
+        {
+
+            player->play();
+
+        }
+
+        );
 
     // 5.5 创建顶层轨道线与判定线
     // 画 5 条垂直轨道分割线
@@ -308,11 +321,11 @@ void GameScene::keyReleaseEvent(QKeyEvent * event){
 // 主循环函数
 void GameScene::gameLoop(){
     // 实时播报时间
-    currentMusicTime = player->position();
+    currentMusicTime = player->position() - offset;
 
     // 更新轨道
     for (int i = 0; i < 4; ++i) {
-        tracks[i]->updateTrack(currentMusicTime - offset, globalSpeed);
+        tracks[i]->updateTrack(currentMusicTime, globalSpeed);
     }
 
     // 如果游戏结束了
