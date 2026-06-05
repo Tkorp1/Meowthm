@@ -27,6 +27,14 @@ GameConfig::GameConfig(QObject *parent) : QObject(parent)
 
     m_playerBio = settings.value("game/playerBio", "这个人很神秘，还没有留下打歌记录...").toString();
 
+    // 【新增】：读取硬盘里的成就数据
+    int achCount = settings.beginReadArray("achievements");
+    for (int i = 0; i < achCount; ++i) {
+        settings.setArrayIndex(i);
+        m_unlockedAchievements.insert(settings.value("id").toInt());
+    }
+    settings.endArray();
+
     // 加载歌曲列表
     loadSongs();
 
@@ -143,7 +151,7 @@ void GameConfig::setHitSoundVolume(int volume)
 }
 
 // ==========================================
-// 写入作战记录
+// 写入打歌记录
 // ==========================================
 void GameConfig::addCombatRecord(const GameState& state)
 {
@@ -184,6 +192,9 @@ void GameConfig::addCombatRecord(const GameState& state)
     settings.setValue("stats/totalAccuracySum", m_totalAccuracySum);
     settings.setValue("stats/peakKPS", m_peakKPS);
     settings.setValue("stats/totalPlayTimeSec", m_totalPlayTimeSec);
+
+    // 每次更新完作战记录，立刻看一下有没有解锁新成就！
+    checkAchievements(state);
 }
 
 
@@ -194,4 +205,55 @@ void GameConfig::setPlayerBio(const QString &bio)
         return;
     m_playerBio = bio;
     QSettings().setValue("game/playerBio", bio); // 写进硬盘！
+}
+
+// ==========================================
+// 成就系统：判断与解锁逻辑
+// ==========================================
+bool GameConfig::isAchievementUnlocked(int id) const {
+    return m_unlockedAchievements.contains(id);
+}
+
+void GameConfig::unlockAchievement(int id) {
+    // 如果还没解锁，就解锁并立即存入硬盘！
+    if (!m_unlockedAchievements.contains(id)) {
+        m_unlockedAchievements.insert(id);
+
+        QSettings settings;
+        settings.beginWriteArray("achievements");
+        int i = 0;
+        for (int achId : std::as_const(m_unlockedAchievements)) {
+            settings.setArrayIndex(i++);
+            settings.setValue("id", achId);
+        }
+        settings.endArray();
+
+        qDebug() << "🏆 恭喜解锁成就 ID:" << id;
+        // （未来这里可以加一个 emit 信号，在游戏里弹出一个“成就解锁”的横幅！）
+    }
+}
+
+void GameConfig::checkAchievements(const GameState& state) {
+    // 1. 滚木：在一首歌曲里得分为 0
+    if (state.getCurrentScore() == 0) unlockAchievement(1);
+
+    // 2. 打一首歌：有手就行
+    if (m_tracksCleared >= 1) unlockAchievement(2);
+
+    // 基于评级的成就（必须打过歌才算）
+    if (m_tracksCleared > 0) {
+        double avgAcc = getAverageAccuracy() * 100.0;
+
+        // 3. 菜就多练：C及以下 (Acc < 80.0)
+        if (avgAcc < 80.0) unlockAchievement(3);
+
+        // 4. 我承认你有点鸟不起：B及以上 (Acc >= 80.0)
+        if (avgAcc >= 80.0) unlockAchievement(4);
+
+        // 5. 大神啊：A及以上 (Acc >= 90.0)
+        if (avgAcc >= 90.0) unlockAchievement(5);
+
+        // 6. 令 人 忍 俊 不 禁：S+及以上 (Acc >= 98.0)
+        if (avgAcc >= 98.0) unlockAchievement(6);
+    }
 }
