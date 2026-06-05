@@ -3,9 +3,17 @@
 
 #include <QLabel>
 #include <QObject>
+#include <QColor>
 
 // 定义音符枚举
 enum NoteType{TAP, HOLD};
+
+// hold的状态
+enum HoldState {
+    HOLD_NORMAL,
+    HOLD_PRESSED,
+    HOLD_MISS
+};
 
 // note是音符基类，继承自QLabel，后续添加贴图
 // 对于note的显示，“哪里new出来哪里就负责show”，所以note的显示在谱面解析器里面！！！
@@ -21,7 +29,7 @@ protected:
     NoteType type;
 
     // 2.颜色
-    int m_r, m_g, m_b;
+    int m_r = 255, m_g = 255, m_b = 255;
 
 
 public:
@@ -48,6 +56,9 @@ public:
     void setNoteColor(int r, int g, int b);
     void setMissed();
 
+
+    // 6.颜色函数
+    QColor getHeadColor() const;
 };
 
 
@@ -66,6 +77,14 @@ protected:
     // Hold独有的数据：尾部判定时间
     qint64 tailTime;
 
+    HoldState m_state = HOLD_NORMAL;
+
+    QColor m_tailNormalColor;
+
+    QColor m_tailPressedColor;
+    // Hold画图特殊：
+    void paintEvent(QPaintEvent* event) override;
+
 public:
     // 注意：相比 Tap，多了一个 _tailTime 参数，同样去掉了 _type 参数
     // 注意，hold的 noteHeight 是需要创建时根据时间和流速实时计算的
@@ -75,6 +94,11 @@ public:
 
     // 检查是否结束的接口
     qint64 getTailTime() const;
+
+    // 画图相关函数
+    void setState(HoldState state);
+
+    void setTailColors(const QColor& normal, const QColor& pressed);
 
 
 };
