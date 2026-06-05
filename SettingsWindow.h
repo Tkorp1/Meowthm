@@ -7,12 +7,14 @@
 #include <QTimer>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QSoundEffect>
 
 // 预览轨道控件：用于演示音符下落
 class PreviewTrack : public QWidget
 {
     Q_OBJECT
 public:
+    void setHitSoundVolume(int vol);
     explicit PreviewTrack(QWidget *parent = nullptr);
     ~PreviewTrack();
 
@@ -31,6 +33,8 @@ private:
 
     double m_lastHitY;  // 记录按下瞬间的Y坐标
     int m_hitAlpha;     // 残影的透明度 (0~255)
+
+    QSoundEffect *m_hitSound;
 };
 
 // 设置界面主窗口
@@ -53,6 +57,9 @@ private slots:
     void updateSpeedLabel(double speed);            // 更新流速显示标签
     void updateOffsetLabel(qint64 offset);          // 更新偏移显示标签
 
+    void onVolButtonClicked(int delta);  // 音量调节槽函数
+    void updateVolLabel(int vol);        // 更新音量文本
+
 private:
     // UI控件
     QLabel *m_speedLabel;          // 显示当前流速
@@ -69,6 +76,8 @@ private:
     // 背景音乐
     QMediaPlayer *m_player;
     QAudioOutput *m_audioOutput;
+
+    QLabel *m_volLabel; // 把音量文本框变成成员变量
 };
 
 #endif // SETTINGSWINDOW_H

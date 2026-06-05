@@ -25,6 +25,10 @@ PreviewTrack::PreviewTrack(QWidget *parent)
 
     // 启动定时器（每16ms一帧，约60fps）
     m_timerId = startTimer(16);
+
+    m_hitSound = new QSoundEffect(this);
+    m_hitSound->setSource(QUrl("qrc:/sound/sounds/dong.wav"));
+    m_hitSound->setVolume(GameConfig::instance()->getHitSoundVolume() / 100.0f);
 }
 
 PreviewTrack::~PreviewTrack()
@@ -73,11 +77,6 @@ void PreviewTrack::paintEvent(QPaintEvent *event)
     painter.drawEllipse(QPointF(width()/2, m_noteY), noteRadius, noteRadius);
 }
 
-void PreviewTrack::registerHit()
-{
-    m_lastHitY = m_noteY; // 当前音符的位置
-    m_hitAlpha = 255;     // 触发残影
-}
 
 void PreviewTrack::timerEvent(QTimerEvent *event)
 {
@@ -85,9 +84,8 @@ void PreviewTrack::timerEvent(QTimerEvent *event)
     // 每帧移动距离 = 速度(像素/毫秒) * 时间间隔(16ms)
     m_noteY += m_speed * 16;
 
-    // 超出底部时重置到顶部，并随机或固定偏移（模拟重复下落）
-    if (m_noteY > height() - 15) {
-        m_noteY = 15;   // 重置到顶部附近
+    if (m_noteY > height() + 100) {
+        m_noteY = -(m_speed * 800);
     }
 
     // 残影淡出动画
@@ -100,6 +98,21 @@ void PreviewTrack::timerEvent(QTimerEvent *event)
     // 触发重绘
     update();
 }
+
+void PreviewTrack::setHitSoundVolume(int vol) {
+    m_hitSound->setVolume(vol / 100.0f);
+}
+
+// 敲击时发声
+void PreviewTrack::registerHit()
+{
+    m_lastHitY = m_noteY;
+    m_hitAlpha = 255;
+    m_hitSound->play(); // 播放“咚”！
+
+}
+
+
 
 // ==================== SettingsWindow 实现 ====================
 SettingsWindow::SettingsWindow(QWidget *parent)
@@ -214,14 +227,48 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     offsetLayout->addWidget(m_offsetPlusBtn);
     leftLayout->addWidget(offsetPanel);
 
+    // 5. 打击音量调节模块 (Hit Sound Volume)
+    QFrame *volPanel = new QFrame(this);
+    volPanel->setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 10); border-radius: 15px; }");
+    QHBoxLayout *volLayout = new QHBoxLayout(volPanel);
+    volLayout->setContentsMargins(20, 20, 20, 20);
+
+    QLabel *volTitle = new QLabel("判定音量 (Hit Sound)", volPanel);
+    volTitle->setStyleSheet("color: white; font-size: 18px; background: transparent;");
+    QPushButton *volMinusBtn = new QPushButton("-5", volPanel);
+    volMinusBtn->setFixedSize(80, 40);
+    volMinusBtn->setStyleSheet(btnStyle);
+    connect(volMinusBtn, &QPushButton::clicked, this, [this](){ onVolButtonClicked(-5); });
+
+    m_volLabel = new QLabel(QString::number(GameConfig::instance()->getHitSoundVolume()), volPanel);
+    m_volLabel->setFixedSize(100, 40);
+    m_volLabel->setAlignment(Qt::AlignCenter);
+    m_volLabel->setStyleSheet(valStyle);
+
+
+    QPushButton *volPlusBtn = new QPushButton("+5", volPanel);
+    volPlusBtn->setFixedSize(80, 40);
+    volPlusBtn->setStyleSheet(btnStyle);
+    connect(volPlusBtn, &QPushButton::clicked, this, [this](){ onVolButtonClicked(5); });
+
+    volLayout->addWidget(volTitle);
+    volLayout->addStretch();
+    volLayout->addWidget(volMinusBtn);
+    volLayout->addWidget(m_volLabel);
+    volLayout->addWidget(volPlusBtn);
+    leftLayout->addWidget(volPanel);
+
     // 把左侧剩余的空间推到最下面
     leftLayout->addStretch();
+
+
+
 
     // ================= 右侧：预览面板与退出 =================
     QVBoxLayout *rightLayout = new QVBoxLayout();
     rightLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 
-    // 4. 轨道预览
+    // 轨道预览
     m_previewTrack = new PreviewTrack(this);
     m_previewTrack->setFixedSize(150, 450); // 稍微拉长一点，更好看
     m_previewTrack->setStyleSheet("background-color: rgba(0, 0, 0, 150); border: 2px solid rgba(255, 255, 255, 50); border-radius: 10px;");
@@ -236,7 +283,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
     rightLayout->addStretch();
 
-    // 5. 退出按钮
+    // 退出按钮
     m_exitBtn = new QPushButton("BACK / 退出", this);
     m_exitBtn->setFixedSize(200, 60);
     m_exitBtn->setStyleSheet(R"(
@@ -274,6 +321,11 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     m_player->setSource(QUrl::fromLocalFile("setting_bgm.mp3"));
     m_player->setLoops(-1);
     m_player->play();
+
+    connect(GameConfig::instance(), &GameConfig::hitSoundVolumeChanged,
+            m_previewTrack, &PreviewTrack::setHitSoundVolume);
+
+
 }
 
 SettingsWindow::~SettingsWindow()
@@ -364,4 +416,23 @@ void SettingsWindow::keyPressEvent(QKeyEvent *event)
     } else {
         QWidget::keyPressEvent(event); // 其他按键交给父类处理
     }
+}
+
+
+// 音量调节槽函数
+void SettingsWindow::onVolButtonClicked(int delta)
+{
+    int newVol = GameConfig::instance()->getHitSoundVolume() + delta;
+    if (newVol < 0) newVol = 0;
+    if (newVol > 100) newVol = 100;
+
+    GameConfig::instance()->setHitSoundVolume(newVol);
+    updateVolLabel(newVol);
+
+    this->setFocus(); // 不要忘了抢回焦点！
+}
+
+void SettingsWindow::updateVolLabel(int vol)
+{
+    m_volLabel->setText(QString::number(vol));
 }

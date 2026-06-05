@@ -16,6 +16,7 @@ GameConfig::GameConfig(QObject *parent) : QObject(parent)
     m_noteSpeed = settings.value("game/noteSpeed", 1).toDouble();
     m_currentPlayer = settings.value("game/currentPlayer", "Player").toString();
     m_currentOffset = settings.value("game/currentOffset", 0).toLongLong();
+    m_hitSoundVolume = settings.value("game/hitSoundVolume", 100).toInt();
 
     // 加载歌曲列表
     loadSongs();
@@ -32,6 +33,7 @@ GameConfig::~GameConfig()
     settings.setValue("game/noteSpeed", m_noteSpeed);
     settings.setValue("game/currentPlayer", m_currentPlayer);
     settings.setValue("game/currentOffset", m_currentOffset);
+    settings.setValue("game/hitSoundVolume", m_hitSoundVolume);
 }
 
 void GameConfig::setNoteSpeed(double speed)
@@ -121,4 +123,12 @@ void GameConfig::loadSongs()
         qDebug() << "Loaded song from qrc:" << songName << "path:" << folderPath;
 
     }
+}
+
+void GameConfig::setHitSoundVolume(int volume)
+{
+    if (m_hitSoundVolume == volume) return;
+    m_hitSoundVolume = volume;
+    QSettings().setValue("game/hitSoundVolume", volume);
+    emit hitSoundVolumeChanged(volume); // 发出信号，通知全服！
 }

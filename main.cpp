@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
     // ==========================================
     // 测试方案 B：看最开始的【初始主菜单界面】
     // ==========================================
-    // MainWindow* w = new MainWindow();
-    // w->show();
+    MainWindow* w = new MainWindow();
+    w->show();
 
 
     // ==========================================
@@ -34,9 +34,9 @@ int main(int argc, char *argv[])
     // ==========================================
     // 测试方案 D：直接看【结算界面】
     // ==========================================
-    GameState temp(":/map/maps/song1");
-    ResultScene* testresult = new ResultScene(temp);
-    testresult->show();
+    // GameState temp(":/map/maps/song1");
+    // ResultScene* testresult = new ResultScene(temp);
+    // testresult->show();
 
 
     return a.exec();

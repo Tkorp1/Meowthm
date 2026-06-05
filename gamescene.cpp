@@ -140,7 +140,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
     hitSound->setSource(QUrl("qrc:/sound/sounds/dong.wav"));
     // 声音大小
-    hitSound->setVolume(0.5f);
+    hitSound->setVolume(GameConfig::instance()->getHitSoundVolume() / 100.0f);
 
 
 

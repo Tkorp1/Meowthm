@@ -32,10 +32,14 @@ public:
     QList<SongInfo> getSongs() const { return m_songs; }
     void loadSongs();   // 加载歌曲列表（可扫描 maps 目录或读取配置文件）
 
+    int getHitSoundVolume() const { return m_hitSoundVolume; }
+    void setHitSoundVolume(int volume);
+
 signals:
     void noteSpeedChanged(double newSpeed);
     void currentPlayerChanged(const QString &newName);
     void currentOffsetChanged(qint64 newOffset);
+    void hitSoundVolumeChanged(int volume);
 
 private:
     explicit GameConfig(QObject *parent = nullptr);
@@ -48,6 +52,8 @@ private:
     qint64 m_currentOffset;
 
     QList<SongInfo> m_songs;
+
+    int m_hitSoundVolume;
 };
 
 #endif // GAMECONFIG_H
