@@ -76,8 +76,6 @@ public:
     // 检查是否结束的接口
     qint64 getTailTime() const;
 
-    void changeTargetTime(qint64 ti) override;
-
 
 };
 

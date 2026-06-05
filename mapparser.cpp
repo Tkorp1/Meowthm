@@ -38,20 +38,14 @@ MapParser::MapParser(QString _path):Path(_path)
 
     }
 }
-
 qint64 MapParser::targetTimeCalculator(double beats){
-    beats--;// 首先就将beats换成0开始的索引
+    beats--;
 
-    //下面的时间都是一个以毫秒为单位的数字
+    double result =beats * (60000.0) / currentBPM;
 
-    double result = beats * (60000.0)/currentBPM;
-
-    qint64 resulttime = qRound64(result);
-
-    return resulttime;
+    return qRound64(result);
 
 }
-
 
 QList<Note*> MapParser::parse(QString trackPath){
     QList<Note*> result;
