@@ -1,5 +1,6 @@
 #include "ProfileWindow.h"
 #include "gameconfig.h"
+#include "loginwindow.h"
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -272,10 +273,15 @@ void ProfileWindow::onSaveBio()
 
 void ProfileWindow::onLoginClicked()
 {
-    // 这里为你们之后写“登录/注册”功能预留了接口！
-    QMessageBox msgBox(this);
-    msgBox.setStyleSheet("QLabel{ color: white; font-size: 16px; } QMessageBox{ background-color: #1e1e1e; } QPushButton{ background-color: #00BFFF; color: black; padding: 5px; border-radius: 3px; }");
-    msgBox.setWindowTitle("System Alert");
-    msgBox.setText("服务器连接建立中...\n\n(提示：登录/注册模块后端搭建中，敬请期待！)");
-    msgBox.exec();
+    /// 创建我们炫酷的登录窗口！
+    LoginWindow *loginWin = new LoginWindow(this);
+
+    // 让弹窗自动跑到整个界面的正中央
+    int dx = (this->width() - loginWin->width()) / 2;
+    int dy = (this->height() - loginWin->height()) / 2;
+    loginWin->move(dx, dy);
+
+    // 强制显示在最顶层
+    loginWin->raise();
+    loginWin->show();
 }

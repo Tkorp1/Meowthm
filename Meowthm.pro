@@ -16,6 +16,7 @@ SOURCES += \
     gamescene.cpp \
     ProfileWindow.cpp \
     gamestate.cpp \
+    loginwindow.cpp \
     main.cpp \
     mainwindow.cpp \
     mapparser.cpp \
@@ -37,6 +38,7 @@ HEADERS += \
     ProfileWindow.h \
     SettingsWindow.h \
     gamestate.h \
+    loginwindow.h \
     mainwindow.h \
     mapparser.h \
     note.h \
