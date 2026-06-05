@@ -182,7 +182,7 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     statsLine->setStyleSheet("background-color: rgba(0, 191, 255, 100); border: none;");
     rightLayout->addWidget(statsLine);
 
-    QLabel *footerQuote = new QLabel("\"Rhythm is the soul's link.\"", rightPanel);
+    QLabel *footerQuote = new QLabel("\"Meowthm is the soul's link.Meow~~\"", rightPanel);
     footerQuote->setStyleSheet("color: rgba(255,255,255,100); font-style: italic; font-size: 16px; background: transparent; border: none;");
     footerQuote->setAlignment(Qt::AlignCenter);
     rightLayout->addWidget(footerQuote);
