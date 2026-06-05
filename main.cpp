@@ -20,11 +20,11 @@ int main(int argc, char *argv[])
     // ==========================================
     // 测试方案 B：看最开始的【初始主菜单界面】
     // ==========================================
-    MainWindow *w = new MainWindow();
-    w->setAttribute(Qt::WA_DeleteOnClose); // 确保关闭时彻底释放内存
-    w->showFullScreen(); // 初始界面的全屏
+    // MainWindow *w = new MainWindow();
+    // w->setAttribute(Qt::WA_DeleteOnClose); // 确保关闭时彻底释放内存
+    // w->showFullScreen(); // 初始界面的全屏
 
-    return a.exec();
+    // return a.exec();
 
 
     // ==========================================
@@ -45,8 +45,8 @@ int main(int argc, char *argv[])
     // ==========================================
     // 测试方案 E：直接看【录制界面】
     // ==========================================
-    // RecordWindow* w = new RecordWindow();
-    // w -> show();
+    RecordWindow* w = new RecordWindow();
+    w -> show();
 
 
 

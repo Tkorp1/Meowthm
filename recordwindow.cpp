@@ -1,4 +1,4 @@
-#include "RecordWindow.h"
+#include "recordwindow.h"
 #include "gameconfig.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include <QDateTime>
 #include <QDir>
+#include <QFileDialog>
 
 RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
 {
@@ -17,6 +18,7 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     showFullScreen();
 
     m_isRecording = false;
+    for (int i = 0; i < 4; ++i) m_pressTime[i] = -1;
 
     // ==========================================
     // 音频引擎初始化
@@ -26,8 +28,8 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     m_player->setAudioOutput(m_audioOutput);
     m_audioOutput->setVolume(0.8);
 
-    // 【TODO】：这里填入你想要制谱的歌曲路径
-    m_player->setSource(QUrl("qrc:/sound/sounds/test_song.mp3"));
+    // // 【TODO】：这里填入你想要制谱的歌曲路径
+    // m_player->setSource(QUrl("qrc:/sound/sounds/test_song.mp3"));
 
     // ==========================================
     // 极简科幻 UI 布局
@@ -103,47 +105,81 @@ void RecordWindow::paintEvent(QPaintEvent *event) {
 // 盲打录制核心逻辑
 // ==========================================
 void RecordWindow::onStartRecord() {
-    // 1. 清空上一次的残余记录
+    // 1. 【新增】：如果还没选歌，先弹窗让用户选
+    if (m_player->source().isEmpty()) {
+        QString fileName = QFileDialog::getOpenFileName(this,
+                                                        "选择音频文件",
+                                                        "",
+                                                        "Audio Files (*.mp3 *.wav *.ogg)");
+
+        if (fileName.isEmpty()) return; // 用户取消了选择
+
+        m_player->setSource(QUrl::fromLocalFile(fileName));
+    }
+
+    // 2. 清空上一次的残余记录
     m_recordedNotes.clear();
     m_countLabel->setText("RECORDED NOTES: 0");
 
-    // 2. 状态切换
+    // ... 后面的逻辑保持不变 ...
     m_isRecording = true;
-    m_statusLabel->setText("STATUS: RECORDING... (正在录制中，请随音乐敲击 D/F/J/K)");
-    m_statusLabel->setStyleSheet("color: #FF4500; font-size: 24px; font-weight: bold;"); // 红色警告色
-
-    // 3. 从头开始放音乐
     m_player->setPosition(0);
     m_player->play();
-
-    // 焦点抢回来，准备接收键盘
-    this->setFocus();
 }
 
 void RecordWindow::keyPressEvent(QKeyEvent *event) {
-    // 防呆：长按不放不应该算作无限个音符
-    if (event->isAutoRepeat()) return;
+    if (event->isAutoRepeat() || !m_isRecording) return;
 
-    if (m_isRecording) {
-        int trackId = -1;
-        if (event->key() == Qt::Key_D) trackId = 0;
-        else if (event->key() == Qt::Key_F) trackId = 1;
-        else if (event->key() == Qt::Key_J) trackId = 2;
-        else if (event->key() == Qt::Key_K) trackId = 3;
+    int trackId = -1;
+    if (event->key() == Qt::Key_D) trackId = 0;
+    else if (event->key() == Qt::Key_F) trackId = 1;
+    else if (event->key() == Qt::Key_J) trackId = 2;
+    else if (event->key() == Qt::Key_K) trackId = 3;
 
-        // 如果按下了音游按键，立马记录下当前的时间戳！
-        if (trackId != -1) {
-            RecordNote note;
-            note.trackId = trackId;
-            note.timeMs = m_player->position(); // 【核心魔法】获取当前音乐播放到了哪一毫秒！
-
-            m_recordedNotes.append(note);
-
-            // 更新 UI 计数器
-            m_countLabel->setText(QString("RECORDED NOTES: %1").arg(m_recordedNotes.size()));
-        }
+    // 按下时：不立刻生成音符，而是把当前时间“存”在对应的轨道里
+    if (trackId != -1 && m_pressTime[trackId] == -1) {
+        m_pressTime[trackId] = m_player->position();
     }
 }
+
+void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
+    if (event->isAutoRepeat() || !m_isRecording) return;
+
+    int trackId = -1;
+    if (event->key() == Qt::Key_D) trackId = 0;
+    else if (event->key() == Qt::Key_F) trackId = 1;
+    else if (event->key() == Qt::Key_J) trackId = 2;
+    else if (event->key() == Qt::Key_K) trackId = 3;
+
+    // 松开时：结账！计算按了多久！
+    if (trackId != -1 && m_pressTime[trackId] != -1) {
+        qint64 startTime = m_pressTime[trackId];
+        qint64 endTime = m_player->position();
+        qint64 duration = endTime - startTime;
+
+        RecordNote note;
+        note.trackId = trackId;
+        note.timeMs = startTime;
+
+        // 【分水岭】：150毫秒
+        if (duration < 150) {
+            note.type = 1; // 这是一个 Tap
+            note.endTime = startTime; // Tap 的结束时间等于开始时间（或者填0也可以）
+        } else {
+            note.type = 2; // 这是一个 Hold 长条！
+            note.endTime = endTime;
+        }
+
+        m_recordedNotes.append(note);
+
+        // 结账完毕，清空这个轨道的按下状态
+        m_pressTime[trackId] = -1;
+
+        // 更新 UI
+        m_countLabel->setText(QString("RECORDED NOTES: %1").arg(m_recordedNotes.size()));
+    }
+}
+
 
 // ==========================================
 // 导出工程逻辑 (生成完整的谱面文件夹)
@@ -174,7 +210,10 @@ void RecordWindow::onStopAndSave() {
         // 按照你们的格式写入音符数据
         out << m_recordedNotes.size() << "\n";
         for (const RecordNote& note : m_recordedNotes) {
-            out << note.trackId << " " << note.timeMs << "\n";
+            // 现在的格式：[类型 1=Tap/2=Hold] [轨道ID] [起始时间] [结束时间]
+
+            out << note.type << " " << note.trackId << " " << note.timeMs << " " << note.endTime << "\n";
+
         }
         notesFile.close();
     } else {
@@ -187,6 +226,7 @@ void RecordWindow::onStopAndSave() {
     QFile infoFile(folderName + "/info.txt");
     if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&infoFile);
+        QFileInfo audioInfo(m_player->source().toLocalFile());
 
         out << "SongName: 新建自制谱面\n";
         out << "Composer: Unknown\n";
@@ -196,6 +236,7 @@ void RecordWindow::onStopAndSave() {
         out << "Offset: 0\n";
 
         infoFile.close();
+        QFile::copy(audioInfo.filePath(), folderName + "/" + audioInfo.fileName());
     }
 
     // 4. 完美收官提示
