@@ -5,6 +5,7 @@
         <file>poke1.png</file>
         <file>poke2.png</file>
         <file>poke3.png</file>
+        <file>poke_bg.png</file>
         <file>images/resultScene.jpg</file>
         <file>images/continue.png</file>
         <file>images/exit.png</file>
@@ -56,5 +57,9 @@
     </qresource>
     <qresource prefix="/">
         <file>static/Orbitron-Bold.ttf</file>
+        <file>poke1.png</file>
+        <file>poke2.png</file>
+        <file>poke3.png</file>
+        <file>images/poke_bg.png</file>
     </qresource>
 </RCC>

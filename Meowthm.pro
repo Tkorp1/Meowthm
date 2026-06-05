@@ -56,3 +56,9 @@ QMAKE_POST_LINK += $$quote(cp -r $$PWD/maps $$OUT_PWD/)
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES += \
+    poke1.png \
+    poke2.png \
+    poke3.png \
+    poke_bg.png

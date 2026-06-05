@@ -40,7 +40,7 @@ PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
     m_backBtn->setStyleSheet("background-color:transparent; color: white; font-size: 16px; border-radius: 8px;");
     connect(m_backBtn, &QPushButton::clicked, this, &PokeWindow::onBackClicked);
 
-    // 动态图片和文本框（位置、大小后续可根据背景图调整）
+    // 动态图片和文本框
     m_dynamicImage = new QLabel(this);
     m_dynamicImage->setGeometry(492, 116, 200, 250);
     m_dynamicImage->setScaledContents(true);  // 缩放图片适应标签大小
@@ -59,7 +59,7 @@ PokeWindow::~PokeWindow() {}
 void PokeWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    QPixmap bg("poke_bg.png");   // 背景图
+    QPixmap bg(":/image/poke_bg.png");   // 背景图
     if (!bg.isNull()) {
         painter.drawPixmap(rect(), bg.scaled(size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     } else {
