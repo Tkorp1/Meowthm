@@ -20,6 +20,9 @@ protected:
     // 1.音符类型
     NoteType type;
 
+    // 2.颜色
+    int m_r, m_g, m_b;
+
 
 public:
 
@@ -40,6 +43,10 @@ public:
 
     // 4.新增，修改时间函数
     virtual void changeTargetTime(qint64 ti);
+
+    // 5.美化
+    void setNoteColor(int r, int g, int b);
+    void setMissed();
 
 };
 

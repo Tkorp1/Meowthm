@@ -34,7 +34,20 @@ void Track::updateTrack(qint64 currentMusicTime, double currentSpeed){
            (currentMusicTime - noteInTrack[i]->getTargetTime() > 160)){
             // 现在这个音符已经出了miss的范围，需要删除
             emit noteJudged(1);
-            delete noteInTrack.takeAt(i);
+            if (noteInTrack[i]->getType() == NoteType::HOLD) {
+                Note* missedHold = noteInTrack.takeAt(i);
+                missedHold->setMissed(); // 调用你刚写的虚化函数
+
+                // 之前有残留的尸体？先清理掉防止内存泄漏
+                if (currentHoldingNote != nullptr) delete currentHoldingNote;
+
+                // 移交给 currentHoldingNote 让它作为“尸体”继续掉落
+                currentHoldingNote = missedHold;
+                currentHoldHeadResult = 1; // 标记 1 代表它是尸体，别再给它发分了
+            } else {
+                // Tap 音符漏掉了，没救了，直接火化 (delete)
+                delete noteInTrack.takeAt(i);
+            }
         }
     }
 
@@ -46,7 +59,10 @@ void Track::updateTrack(qint64 currentMusicTime, double currentSpeed){
 
         // 2. 检查是否按到结尾
         if (currentMusicTime >= dynamic_cast<Hold*>(currentHoldingNote)->getTailTime()) {
-            emit noteJudged(currentHoldHeadResult);
+            if (currentHoldHeadResult != 1) {
+                emit noteJudged(currentHoldHeadResult);
+            }
+            // 【核心】：不管是活着的长条还是尸体，掉到底了就彻底 delete，释放内存！
             delete currentHoldingNote;
             currentHoldingNote = nullptr; // 安全清空
         }
@@ -82,6 +98,8 @@ void  Track::checkHit(qint64 currentMusicTime){
 
         // 判断是不是 Hold
         if (note->getType() == NoteType::HOLD) {
+            if (currentHoldingNote != nullptr) delete currentHoldingNote;
+
             currentHoldingNote = note; // 挂载到专属指针
             currentHoldHeadResult = 2;
             noteInTrack.takeFirst();   // 从队列移除，但不delete！！！
@@ -93,6 +111,7 @@ void  Track::checkHit(qint64 currentMusicTime){
     else if(deltaT <= 80 && deltaT >= -80){
         // 现在是perfect判定
         if (note->getType() == NoteType::HOLD) {
+            if (currentHoldingNote != nullptr) delete currentHoldingNote;
             currentHoldingNote = note;
             currentHoldHeadResult = 3;
             noteInTrack.takeFirst();
@@ -119,8 +138,8 @@ bool Track::isReleased(qint64 currentMusicTime){
     if (timeUntilEnd > totalDuration * 0.4) {
         // 提前超过60%松手，miss
         emit noteJudged(1); // 触发 Miss，打断 Combo！
-        delete currentHoldingNote;
-        currentHoldingNote = nullptr;
+        currentHoldingNote->setMissed();
+        currentHoldHeadResult = 1; // 标记为尸体
         return true;
     } else {
         // 发放头判分数！

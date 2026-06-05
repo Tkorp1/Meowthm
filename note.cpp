@@ -5,12 +5,23 @@ Note::Note(qint64 _targetTime, int _noteWidth, int _noteHeight, NoteType _type, 
 
     this->setFixedSize(_noteWidth, _noteHeight);
 
-    // 最简单的皮肤
+}
+
+
+void Note::setNoteColor(int r, int g, int b) {
+    m_r = r; m_g = g; m_b = b;
     if (type == TAP) {
-        this->setStyleSheet("background-color: #00BFFF; border-radius: 5px;"); // 蓝色
+        // Tap 完全不透明，带圆角
+        this->setStyleSheet(QString("background-color: rgb(%1, %2, %3); border-radius: 5px;").arg(r).arg(g).arg(b));
     } else {
-        this->setStyleSheet("background-color: #32CD32;"); // 绿色
+        // Hold 稍微透明 (透明度 200/255)
+        this->setStyleSheet(QString("background-color: rgba(%1, %2, %3, 200);").arg(r).arg(g).arg(b));
     }
+}
+
+// Hold 断掉
+void Note::setMissed() {
+    this->setStyleSheet(QString("background-color: rgba(%1, %2, %3, 50);").arg(m_r).arg(m_g).arg(m_b));
 }
 
 Note::~Note(){

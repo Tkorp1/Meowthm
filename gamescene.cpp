@@ -67,25 +67,39 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 3.创建轨道
     int trackWidth = 100;
     int leftX = 200;
-
-
     QDir dir(mapPath);
-
     MapParser mp = MapParser(mapPath);
+
+    // 0:浅紫(200,160,255) | 1:浅粉(255,180,200) | 2:纯白(255,255,255) | 3:浅蓝(135,210,255)
+    int colorR[4] = {200, 255, 255, 135};
+    int colorG[4] = {160, 180, 255, 210};
+    int colorB[4] = {255, 200, 255, 255};
     for(int i = 0; i < 4; i++){
         tracks[i] = new Track(i, hitLineY, leftX + trackWidth * i, this);
         connect(tracks[i], &Track::noteJudged, this, &GameScene::hitNoteJudge);
-        //文件操作，获取轨道的路径
-        QString fileName = QString("Track%1.txt").arg(i);
 
+        // 【新增】：铺设常驻的极低透明度底色轨道 (透明度 20)
+        QFrame* trackBg = new QFrame(this);
+        trackBg->setGeometry(leftX + trackWidth * i, 0, trackWidth, hitLineY);
+        trackBg->setStyleSheet(QString("background-color: rgba(%1, %2, %3, 20);").arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
+        trackBg->setAttribute(Qt::WA_TransparentForMouseEvents);
+        trackBg->lower();
+
+        QString fileName = QString("Track%1.txt").arg(i);
         QString path = dir.filePath(fileName);
 
-        //获取list
-        QList<Note*> noteListTemp=mp.parse(path);
+        QList<Note*> noteListTemp = mp.parse(path);
+
+        // 在塞入轨道前，给这根轨道上的每一个音符染上专属颜色！
+        for(Note* note : noteListTemp) {
+            note->setNoteColor(colorR[i], colorG[i], colorB[i]);
+        }
+
         tracks[i]->addNotes(noteListTemp);
-        // 同时增加两秒的时间
         tracks[i]->setNoteParent(this);
     }
+
+
 
     allMusicTime = mp.getMusicTime();
 
@@ -121,10 +135,10 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
     // 4.5设置打击音效引擎
     hitSound = new QSoundEffect(this);
-    // 先放绝对地址
+
     hitSound->setSource(QUrl("qrc:/sound/sounds/dong.wav"));
     // 声音大小
-    hitSound->setVolume(0.8f);
+    hitSound->setVolume(0.5f);
 
 
 
@@ -156,23 +170,20 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     hitLineUI->setAttribute(Qt::WA_TransparentForMouseEvents);
     hitLineUI->raise(); // 同样拉到最顶层！
 
-    // 创建轨道发光特效
+    // 创建轨道按键发光特效
     for (int i = 0; i < 4; ++i) {
         trackHighlights[i] = new QFrame(this);
-        // 设定位置：和轨道一样宽，高度从屏幕顶部一直到判定线
         trackHighlights[i]->setGeometry(200 + i * 100, 0, 100, hitLineY);
 
-        // 使用 CSS 线性渐变！从底部的半透明白色，向上渐变成完全透明
-        trackHighlights[i]->setStyleSheet(
-            "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
-            "stop:0 rgba(255, 255, 255, 80), stop:1 rgba(255, 255, 255, 0));"
-            );
+        // 使用该轨道的专属颜色生成线性渐变
+        // 底部(stop:0)透明度 180，顶部(stop:1)完全透明 0
+        trackHighlights[i]->setStyleSheet(QString(
+                                              "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
+                                              "stop:0 rgba(%1, %2, %3, 180), stop:1 rgba(%1, %2, %3, 0));"
+                                              ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
+
         trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
-
-        // 默认隐藏，不按不亮
         trackHighlights[i]->hide();
-
-        // 让它稍微靠下一点，不要盖住掉落的音符
         trackHighlights[i]->lower();
     }
 
