@@ -9,6 +9,10 @@
 ResultScene::ResultScene(const GameState& _state, QWidget *parent)
     : QWidget(parent), state(_state)
 {
+
+    // 在结算界面弹出的那一瞬间，把这局的数据上报给全局档案库！
+    GameConfig::instance()->addCombatRecord(state);
+
     // =========================
     // 1. 字体加载
     // =========================

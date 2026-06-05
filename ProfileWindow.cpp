@@ -130,16 +130,43 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     rightTitle->setStyleSheet(titleStyle);
     rightLayout->addWidget(rightTitle);
 
-    // 高级数据排版 (使用 HTML 表格实现两端对齐)
-    QString statsHtml =
-        "<table width='100%' style='font-size: 20px; line-height: 2.5;'>"
-        "<tr><td style='color:#A9A9A9;'>SYSTEM RATING (系统评级)</td><td align='right' style='color:#FFD700; font-weight:bold; font-size: 28px;'>S+</td></tr>"
-        "<tr><td style='color:#A9A9A9;'>TOTAL PLAY TIME (总连接时长)</td><td align='right' style='color:white; font-weight:bold;'>12h 45m</td></tr>"
-        "<tr><td style='color:#A9A9A9;'>TRACKS CLEARED (完成曲目)</td><td align='right' style='color:white; font-weight:bold;'>34</td></tr>"
-        "<tr><td style='color:#A9A9A9;'>FULL COMBOS (全连击次数)</td><td align='right' style='color:#00FFFF; font-weight:bold;'>8</td></tr>"
-        "<tr><td style='color:#A9A9A9;'>AVERAGE ACCURACY (平均精准度)</td><td align='right' style='color:#32CD32; font-weight:bold;'>96.84%</td></tr>"
-        "<tr><td style='color:#A9A9A9;'>PEAK KPS (最高爆发手速)</td><td align='right' style='color:#FF4500; font-weight:bold;'>14.2</td></tr>"
-        "</table>";
+    // ==========================================
+    // 【核心魔法】：动态抽取游戏数据并赋予酷炫样式！
+    // ==========================================
+    int cleared = GameConfig::instance()->getTracksCleared();
+    int fcs = GameConfig::instance()->getFullCombos();
+    double avgAcc = GameConfig::instance()->getAverageAccuracy() * 100.0;
+    int kps = GameConfig::instance()->getPeakKPS();
+    qint64 playTime = GameConfig::instance()->getTotalPlayTimeSec();
+
+    // 换算时长为 hh:mm
+    int hours = playTime / 3600;
+    int minutes = (playTime % 3600) / 60;
+
+    // 智能评级系统
+    QString rating = "C";
+    QString ratingColor = "#A9A9A9"; // 灰色
+    if (cleared == 0) { rating = "N/A"; ratingColor = "#FFFFFF"; }
+    else if (avgAcc >= 98.0) { rating = "S+"; ratingColor = "#FFD700"; } // 金色
+    else if (avgAcc >= 95.0) { rating = "S"; ratingColor = "#FF8C00"; }  // 橙色
+    else if (avgAcc >= 90.0) { rating = "A"; ratingColor = "#00FFFF"; }  // 青色
+    else if (avgAcc >= 80.0) { rating = "B"; ratingColor = "#32CD32"; }  // 绿色
+
+    // 使用 QString::arg() 把真实数据嵌入进去！
+    QString statsHtml = QString(
+                            "<table width='100%' style='font-size: 20px; line-height: 2.5;'>"
+                            "<tr><td style='color:#A9A9A9;'>SYSTEM RATING (系统评级)</td><td align='right' style='color:%1; font-weight:bold; font-size: 28px;'>%2</td></tr>"
+                            "<tr><td style='color:#A9A9A9;'>TOTAL PLAY TIME (打歌时长)</td><td align='right' style='color:white; font-weight:bold;'>%3h %4m</td></tr>"
+                            "<tr><td style='color:#A9A9A9;'>TRACKS CLEARED (完成曲目)</td><td align='right' style='color:white; font-weight:bold;'>%5</td></tr>"
+                            "<tr><td style='color:#A9A9A9;'>FULL COMBOS (全连击次数)</td><td align='right' style='color:#00FFFF; font-weight:bold;'>%6</td></tr>"
+                            "<tr><td style='color:#A9A9A9;'>AVERAGE ACCURACY (平均精准度)</td><td align='right' style='color:#32CD32; font-weight:bold;'>%7%</td></tr>"
+                            "<tr><td style='color:#A9A9A9;'>PEAK KPS (最高爆发手速)</td><td align='right' style='color:#FF4500; font-weight:bold;'>%8</td></tr>"
+                            "</table>"
+                            ).arg(ratingColor).arg(rating)
+                            .arg(hours, 2, 10, QChar('0')).arg(minutes, 2, 10, QChar('0'))
+                            .arg(cleared).arg(fcs).arg(avgAcc, 0, 'f', 2).arg(kps);
+
+    // QLabel *statsInfo = new QLabel(statsHtml, rightPanel);
 
     QLabel *statsInfo = new QLabel(statsHtml, rightPanel);
     statsInfo->setStyleSheet("background: transparent; border: none;");
@@ -151,7 +178,7 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     statsLine->setStyleSheet("background-color: rgba(0, 191, 255, 100); border: none;");
     rightLayout->addWidget(statsLine);
 
-    QLabel *footerQuote = new QLabel("\"Rhythm is the soul's neural link.\"", rightPanel);
+    QLabel *footerQuote = new QLabel("\"Rhythm is the soul's link.\"", rightPanel);
     footerQuote->setStyleSheet("color: rgba(255,255,255,100); font-style: italic; font-size: 16px; background: transparent; border: none;");
     footerQuote->setAlignment(Qt::AlignCenter);
     rightLayout->addWidget(footerQuote);
