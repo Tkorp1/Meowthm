@@ -100,3 +100,22 @@ void GameState::changeCurrentState(int judge){
         break;
     }
 }
+
+
+// 数据分析
+void GameState::recordHit(int trackId, qint64 deltaT, qint64 musicTime) {
+    m_hitOffsets.append(deltaT);
+    m_hitTimestamps.append(musicTime);
+
+    // 轨道 0(D), 1(F) 算左手；轨道 2(J), 3(K) 算右手
+    if (trackId == 0 || trackId == 1) {
+        m_leftHandHits++;
+    } else if (trackId == 2 || trackId == 3) {
+        m_rightHandHits++;
+    }
+}
+
+QList<qint64> GameState::getHitOffsets() const { return m_hitOffsets; }
+QList<qint64> GameState::getHitTimestamps() const { return m_hitTimestamps; }
+int GameState::getLeftHandHits() const { return m_leftHandHits; }
+int GameState::getRightHandHits() const { return m_rightHandHits; }

@@ -79,6 +79,8 @@ signals:
     // 9.向gamescene报告判定的信号，只需要声明不需要实现
     // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect
     void noteJudged(int result);
+    // 10.数据分析
+    void hitDetails(int trackId, qint64 deltaT, qint64 musicTime);
 
 
 };
