@@ -77,9 +77,3 @@ Hold::~Hold(){
 qint64 Hold::getTailTime() const{
     return tailTime;
 }
-
-void Hold::changeTargetTime(qint64 ti){
-    targetTime += ti;
-    tailTime += ti;
-    return;
-}

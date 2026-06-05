@@ -10,7 +10,7 @@
 GameScene::GameScene(QString _mapPath, QWidget *parent)
     : QWidget{parent},
     mapPath(_mapPath),
-    currentMusicTime(0), //初始化为 0！！！
+    currentMusicTime(-2000),
     state(GameState()),
     gameEnded(false),
     isPaused(false)
@@ -146,22 +146,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     // 连接信号槽：每次闹钟响就执行gameLoop
     connect(updateTimer, &QTimer::timeout, this, &GameScene::gameLoop);
     // 设定闹钟间隔 目前16s
-    updateTimer->start(16);QTimer::singleShot(
-
-        2000,
-
-        this,
-
-        [this]()
-
-        {
-
-            player->play();
-
-        }
-
-        );
-
+    updateTimer->start(16);
     // 5.5 创建顶层轨道线与判定线
     // 画 5 条垂直轨道分割线
     for(int i = 0; i <= 4; ++i){
@@ -321,7 +306,14 @@ void GameScene::keyReleaseEvent(QKeyEvent * event){
 // 主循环函数
 void GameScene::gameLoop(){
     // 实时播报时间
-    currentMusicTime = player->position() - offset;
+
+    currentMusicTime +=16;
+    // 2秒后启动音乐
+    if(currentMusicTime >= 0 &&
+            player->playbackState() != QMediaPlayer::PlayingState)
+    {
+        player->play();
+    }
 
     // 更新轨道
     for (int i = 0; i < 4; ++i) {
@@ -329,7 +321,7 @@ void GameScene::gameLoop(){
     }
 
     // 如果游戏结束了
-    if(currentMusicTime >= allMusicTime + 2000){
+    if(currentMusicTime >= allMusicTime + 3000){
         gameOver();
     }
 
