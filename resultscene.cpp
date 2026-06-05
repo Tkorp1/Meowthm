@@ -1,5 +1,5 @@
 #include "resultscene.h"
-
+#include <QFontDatabase>
 #include <QFont>
 #include <QPainter>
 
@@ -11,11 +11,20 @@ ResultScene::ResultScene(const GameState& _state,
     : QWidget(parent),
     state(_state)
 {
+    int fontId =
+        QFontDatabase::addApplicationFont(
+            ":/static/Orbitron-Bold.ttf"
+            );
+    QString fontFamily =
+
+        QFontDatabase::applicationFontFamilies(fontId)
+
+            .at(0);
     // =========================
     // 1.窗口
     // =========================
-
-    setFixedSize(800,600);
+    resize(1600,900);
+    showFullScreen();
 
     setStyleSheet(
         "background-color:#2b2b2b;"
@@ -28,21 +37,22 @@ ResultScene::ResultScene(const GameState& _state,
     songNameLabel = new QLabel(this);
 
     songNameLabel->setText(
-        QString("Result")
+        QString(state.getCurrentSong())
         );
-
     songNameLabel->setGeometry(
-        250,
-        30,
-        300,
-        60
+        80,
+        60,
+        500,
+        80
         );
 
     songNameLabel->setStyleSheet(
         "color:white;"
-        "font-size:36px;"
+        "font-size:42px;"
         "font-weight:bold;"
         );
+
+    songNameLabel->setAlignment(Qt::AlignLeft);
 
     // =========================
     // 3.Score
@@ -51,21 +61,23 @@ ResultScene::ResultScene(const GameState& _state,
     scoreLabel = new QLabel(this);
 
     scoreLabel->setText(
-        QString("Score : %1")
+        QString("%1")
             .arg(state.getCurrentScore())
         );
-
     scoreLabel->setGeometry(
-        250,
+        820,
         120,
-        300,
-        50
+        500,
+        150
+        );
+    QFont scoreFont(
+        fontFamily,
+        72,
+        QFont::Bold
         );
 
-    scoreLabel->setStyleSheet(
-        "color:#FFD700;"
-        "font-size:28px;"
-        );
+    scoreLabel->setFont(scoreFont);
+    scoreLabel->setAlignment(Qt::AlignCenter);
 
     // =========================
     // 4.Acc
@@ -74,7 +86,7 @@ ResultScene::ResultScene(const GameState& _state,
     accLabel = new QLabel(this);
 
     accLabel->setText(
-        QString("Acc : %1%")
+        QString("Acc    %1%")
             .arg(
                 state.getCurrentAcc()*100,
                 0,
@@ -84,17 +96,21 @@ ResultScene::ResultScene(const GameState& _state,
         );
 
     accLabel->setGeometry(
-        250,
-        180,
+        980,
+        350,
         300,
-        50
+        60
         );
 
-    accLabel->setStyleSheet(
-        "color:#98FB98;"
-        "font-size:24px;"
+    QFont accFont(
+
+        fontFamily,
+
+        28
+
         );
 
+    accLabel->setFont(accFont);
     // =========================
     // 5.Combo
     // =========================
@@ -102,22 +118,17 @@ ResultScene::ResultScene(const GameState& _state,
     comboLabel = new QLabel(this);
 
     comboLabel->setText(
-        QString("Max Combo : %1")
+        QString("Max Combo    %1")
             .arg(state.getMaxCombo())
         );
 
     comboLabel->setGeometry(
-        250,
-        240,
-        300,
-        50
+        850,
+        320,
+        500,
+        60
         );
-
-    comboLabel->setStyleSheet(
-        "color:#00BFFF;"
-        "font-size:24px;"
-        );
-
+    comboLabel->setFont(accFont);
     // =========================
     // 6.Perfect
     // =========================
@@ -125,15 +136,14 @@ ResultScene::ResultScene(const GameState& _state,
     perfectLabel = new QLabel(this);
 
     perfectLabel->setText(
-        QString("Perfect : %1")
+        QString("Perfect    %1")
             .arg(state.getCurrentPerfect())
         );
-
     perfectLabel->setGeometry(
-        250,
-        320,
-        250,
-        40
+        850,
+        430,
+        500,
+        50
         );
 
     perfectLabel->setStyleSheet(
@@ -148,15 +158,14 @@ ResultScene::ResultScene(const GameState& _state,
     goodLabel = new QLabel(this);
 
     goodLabel->setText(
-        QString("Good : %1")
+        QString("Good       %1")
             .arg(state.getCurrentGood())
         );
-
     goodLabel->setGeometry(
-        250,
-        370,
-        250,
-        40
+        850,
+        500,
+        500,
+        50
         );
 
     goodLabel->setStyleSheet(
@@ -171,15 +180,14 @@ ResultScene::ResultScene(const GameState& _state,
     missLabel = new QLabel(this);
 
     missLabel->setText(
-        QString("Miss : %1")
+        QString("Miss         %1")
             .arg(state.getCurrentMiss())
         );
-
     missLabel->setGeometry(
-        250,
-        420,
-        250,
-        40
+        850,
+        570,
+        500,
+        50
         );
 
     missLabel->setStyleSheet(
@@ -195,12 +203,11 @@ ResultScene::ResultScene(const GameState& _state,
         "Return",
         this
         );
-
     returnButton->setGeometry(
-        300,
-        500,
-        200,
-        50
+        850,
+        700,
+        250,
+        60
         );
 
     connect(
@@ -209,6 +216,15 @@ ResultScene::ResultScene(const GameState& _state,
         this,
         &ResultScene::onReturnMainMenu
         );
+
+    songNameLabel->show();
+    scoreLabel->show();
+    accLabel->show();
+    comboLabel->show();
+    perfectLabel->show();
+    goodLabel->show();
+    missLabel->show();
+    returnButton->show();
 }
 
 ResultScene::~ResultScene()
@@ -225,28 +241,31 @@ void ResultScene::onReturnMainMenu()
 
     close();
 }
-void ResultScene::paintEvent(QPaintEvent *)
+void ResultScene::paintEvent(QPaintEvent *event)
 
 {
+    QWidget::paintEvent(event);
 
     QPainter painter(this);
 
     QPixmap bg(":/image/images/resultScene.jpg");
 
-    painter.drawPixmap(
+    painter.drawPixmap(this->rect(), bg);
 
-        rect(),
+    painter.setRenderHint(QPainter::Antialiasing);
 
-        bg.scaled(
+    QPolygon panel;
 
-            size(),
+    panel << QPoint(780,40)
+          << QPoint(1450,40)
+          << QPoint(1350,860)
+          << QPoint(680,860);
 
-            Qt::IgnoreAspectRatio,
+    painter.setPen(Qt::NoPen);
 
-            Qt::SmoothTransformation
-
-            )
-
+    painter.setBrush(
+        QColor(10,10,10,150)
         );
 
+    painter.drawPolygon(panel);
 }

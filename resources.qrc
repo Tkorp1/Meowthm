@@ -54,4 +54,7 @@
         <file>movies/video1.mp4</file>
         <file>movies/video2.mp4</file>
     </qresource>
+    <qresource prefix="/">
+        <file>static/Orbitron-Bold.ttf</file>
+    </qresource>
 </RCC>
