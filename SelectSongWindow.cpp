@@ -136,7 +136,15 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     QPushButton *backBtn = new QPushButton("◀ BACK", rightArea);
     backBtn->setFixedSize(120, 40);
     backBtn->setStyleSheet("QPushButton { background: transparent; color: rgba(255,255,255,150); font-size: 18px; font-weight: bold; border: none; text-align: right; } QPushButton:hover { color: white; }");
-    connect(backBtn, &QPushButton::clicked, this, &SelectSongWindow::onBackToMain);
+    connect(backBtn, &QPushButton::clicked, this, [this]() {
+        // 1. 召唤一个全新的初始主界面
+        MainWindow* startMenu = new MainWindow();
+        startMenu->setAttribute(Qt::WA_DeleteOnClose);
+        startMenu->show(); // 或者是 startMenu->showFullScreen();
+
+        // 2. 把当前的选曲大厅彻底销毁
+        this->close();
+    });
     rightLayout->addWidget(backBtn, 0, Qt::AlignRight);
 
     rightLayout->addSpacing(80); // 留白是高级感的来源

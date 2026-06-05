@@ -24,7 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_audioOutput2(new QAudioOutput(this))
     , m_isFirstVideo(true)
 {
-    setFixedSize(1200, 900); // 窗口大小
+    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->showFullScreen();
 
     view->setScene(scene);
     view->setRenderHint(QPainter::Antialiasing);
@@ -122,15 +123,12 @@ void MainWindow::onSelectSong()
 
 
     window->setAttribute(Qt::WA_DeleteOnClose);
+    window->showFullScreen();
+
+    this->deleteLater();
 
 
-    connect(window, &SelectSongWindow::destroyed, this, &MainWindow::show);
-
-
-    window->show();
-
-
-    this->hide();
+    delete this;
 }
 
 
