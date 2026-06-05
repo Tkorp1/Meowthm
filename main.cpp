@@ -2,7 +2,7 @@
 #include "gamescene.h"
 #include "resultscene.h"
 #include "SelectSongWindow.h" // 【新增】把选曲界面的头文件引进来
-
+#include "recordwindow.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -40,6 +40,14 @@ int main(int argc, char *argv[])
     // GameState temp(":/map/maps/song1");
     // ResultScene* testresult = new ResultScene(temp);
     // testresult->show();
+
+
+    // ==========================================
+    // 测试方案 E：直接看【录制界面】
+    // ==========================================
+    // RecordWindow* w = new RecordWindow();
+    // w -> show();
+
 
 
     return a.exec();

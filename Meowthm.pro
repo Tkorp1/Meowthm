@@ -20,6 +20,7 @@ SOURCES += \
     mainwindow.cpp \
     mapparser.cpp \
     note.cpp \
+    recordwindow.cpp \
     resultscene.cpp \
     track.cpp \
     SettingsWindow.cpp \
@@ -40,6 +41,7 @@ HEADERS += \
     mainwindow.h \
     mapparser.h \
     note.h \
+    recordwindow.h \
     resultscene.h \
     track.h \
 
