@@ -22,7 +22,6 @@ private slots:
     void onSaveNickname();
     void onEditBio();
     void onSaveBio();
-    void onLoginClicked(); // 预留的登录/注册接口
 
 private:
     // UI 控件指针
