@@ -88,20 +88,20 @@ void PokeWindow::initDynamicContent()   // 随机人物和文本
 
     switch (r) {
     case 1:
-        imagePath = "poke1.png";
+        imagePath = ":/image/poke1.png";
         textContent = "戳到本蛋了喵呜！\n你这个蛋ꐦ";
         break;
     case 2:
-        imagePath = "poke2.png";
+        imagePath = ":/image/poke2.png";
         textContent = "这么喜欢戳我？欺负我没法戳你是吧，已将你的账号列入黑名单，"
                       "请Vxxy4216 50吃疯狂星期四解封，要不然别想玩Meowthm了喵～";
         break;
     case 3:
-        imagePath = "poke3.png";
+        imagePath = ":/image/poke3.png";
         textContent = "滚木的消息被设为了精华消息";
         break;
     default:
-        imagePath = "poke1.png";
+        imagePath = ":/image/poke1.png";
         textContent = "出错了喵";
         break;
     }
