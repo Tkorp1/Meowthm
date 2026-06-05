@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QList>
+#include <QSet>
 
 #include "gamestate.h" // 【新增】因为我们要解析战斗数据
 
@@ -52,6 +53,12 @@ public:
     QString getPlayerBio() const { return m_playerBio; }  // 【新增】获取简介
     void setPlayerBio(const QString &bio);
 
+    // 成就系统的三大核心接口
+    bool isAchievementUnlocked(int id) const;
+    void unlockAchievement(int id);
+    void checkAchievements(const GameState& state); // 每次打完歌触发审核
+
+
 signals:
     void noteSpeedChanged(double newSpeed);
     void currentPlayerChanged(const QString &newName);
@@ -79,6 +86,8 @@ private:
     qint64 m_totalPlayTimeSec = 0;
 
     QString m_playerBio;
+
+    QSet<int> m_unlockedAchievements; // 存储已解锁成就的 ID
 };
 
 #endif // GAMECONFIG_H
