@@ -113,7 +113,7 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
     // =========================
     // 7. 底部双按钮 (重试 / 结束)
     // =========================
-    // [新增] 神经链接分析报告按钮：极具科幻感
+    // 分析报告按钮
     QPushButton* reportButton = new QPushButton("GENERATE YOUR MEOWTHM REPORT / 生成你的分析报告", this);
     reportButton->setGeometry(700, 780, 600, 50);
     reportButton->setStyleSheet(R"(
@@ -136,7 +136,7 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
         aw->show();
     });
 
-    // [新增] 重试按钮：科技蓝色调
+    // 重试按钮
     QPushButton* restartButton = new QPushButton("RETRY / 重试", this);
     restartButton->setGeometry(700, 660, 260, 60);
     restartButton->setStyleSheet(R"(
@@ -152,17 +152,22 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
         QPushButton:hover { background-color: #00BFFF; color: white; border: 2px solid white; }
     )");
 
-    // 【核心魔法】：使用 Lambda 匿名函数，无需修改 .h 头文件即可实现重新开局！
     connect(restartButton, &QPushButton::clicked, this, [this, mapPath]() {
         if (!mapPath.isEmpty()) {
+            // 先立刻把当前的结算画面藏起来，防止视觉残留！
+            this->hide();
+
+            // 新的游戏
             GameScene* game = new GameScene(mapPath);
             game->setAttribute(Qt::WA_DeleteOnClose);
             game->show();
-            this->close(); // 关闭当前结算界面
+
+            // 不要用 close()，用 deleteLater() 让 Qt 在安全的空闲时间自动回收它
+            this->deleteLater();
         }
     });
 
-    // 结束按钮：霓虹紫色调
+    // 结束按钮
     returnButton = new QPushButton("FINISH / 结束", this);
     returnButton->setGeometry(1040, 660, 260, 60); // 放在重试按钮右侧
     returnButton->setStyleSheet(R"(

@@ -2,6 +2,7 @@
 #include "mapparser.h"
 #include "gameconfig.h"
 #include "resultscene.h"
+#include "SelectSongWindow.h" //
 
 #include <QPainter>
 #include <QDir>
@@ -93,7 +94,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
         QList<Note*> noteListTemp = mp.parse(path);
 
-        // 在塞入轨道前，给这根轨道上的每一个音符染上专属颜色！
+        // 在塞入轨道前，给这根轨道上的每一个音符染上颜色！
         for(Note* note : noteListTemp) {
             note->setNoteColor(colorR[i], colorG[i], colorB[i]);
         }
@@ -455,7 +456,7 @@ void GameScene::initPauseUI() {
     });
 
 
-    // 4. 绑定按钮的“三岔路口”逻辑
+    // 4. 绑定按钮
 
     // “继续”按钮，开始倒计时
     connect(btnContinue, &QPushButton::clicked, this, [this]() {
@@ -474,7 +475,7 @@ void GameScene::initPauseUI() {
     });
 
 
-
+    // 重来
 
     connect(btnRestart, &QPushButton::clicked, this, [this]() {
         // 1. 备份当前谱面路径
@@ -496,10 +497,24 @@ void GameScene::initPauseUI() {
 
     });
 
+    // 返回
+
     connect(btnQuit, &QPushButton::clicked, this, [this]() {
-        // TODO
-        // 选歌界面没写好，先直接关闭。之后这里可以emit一个信号
-        this->close();
+        // 1. 彻底掐断游戏引擎
+        player->stop();
+        if (updateTimer->isActive()) updateTimer->stop();
+        if (countdownTimer->isActive()) countdownTimer->stop();
+
+        // 立刻隐藏旧的谱面画面！
+        this->hide();
+
+        // 2. 新的选曲
+        SelectSongWindow* selectWin = new SelectSongWindow();
+        selectWin->setAttribute(Qt::WA_DeleteOnClose);
+        selectWin->show();
+
+        // 安全回收旧场景
+        this->deleteLater();
     });
 }
 
