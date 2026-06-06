@@ -22,6 +22,7 @@ SOURCES += \
     note.cpp \
     recordwindow.cpp \
     resultscene.cpp \
+    scenemanager.cpp \
     track.cpp \
     SettingsWindow.cpp \
     AchievementsWindow.cpp \
@@ -43,6 +44,7 @@ HEADERS += \
     note.h \
     recordwindow.h \
     resultscene.h \
+    scenemanager.h \
     track.h \
 
 FORMS += \

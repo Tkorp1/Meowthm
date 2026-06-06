@@ -9,6 +9,8 @@
 #include <QSoundEffect>
 #include <QPushButton>
 
+
+#include "scenemanager.h"
 #include "track.h"
 #include "mapparser.h"
 #include "gamestate.h"

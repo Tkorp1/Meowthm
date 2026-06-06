@@ -9,6 +9,8 @@
 #include <QTimer>
 #include <QPixmap>
 
+#include "scenemanager.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
