@@ -1,0 +1,5 @@
+BPM: 180
+SongName: Fragrance
+MusicTime: 262000
+AudioFile: music.mp3
+CoverFile: cover.png

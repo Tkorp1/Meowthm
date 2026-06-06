@@ -24,7 +24,8 @@ private:
     void initDynamicContent();   // 根据随机数初始化动态内容----随机三个蛋之一以及语录
 
     QLabel      *m_dynamicImage;   // 动态图片
-    QTextEdit   *m_dynamicText;    // 动态文本框
+    QTextEdit   *m_dynamicText;    // 动态文本框（人物语录）
+    QTextEdit   *m_extraText;      // 新增的额外随机文本框
     QPushButton *m_backBtn;        // 返回按钮
 
     // 两个固定的多行文本框

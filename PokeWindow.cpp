@@ -6,13 +6,6 @@
 #include <QVBoxLayout>
 #include <QDebug>
 #include <QMouseEvent>
-//  调试用显示鼠标位置
-/*void PokeWindow::mousePressEvent(QMouseEvent *event)
-{
-    QPoint pos = event->pos();
-    qDebug() << "鼠标点击坐标:" << pos.x() << pos.y();
-    QWidget::mousePressEvent(event);
-}*/
 
 PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
 {
@@ -40,15 +33,22 @@ PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
     m_backBtn->setStyleSheet("background-color:transparent; color: white; font-size: 16px; border-radius: 8px;");
     connect(m_backBtn, &QPushButton::clicked, this, &PokeWindow::onBackClicked);
 
-    // 动态图片和文本框
+    // 动态图片和第一个动态文本框（人物语录）
     m_dynamicImage = new QLabel(this);
     m_dynamicImage->setGeometry(492, 116, 200, 250);
-    m_dynamicImage->setScaledContents(true);  // 缩放图片适应标签大小
+    m_dynamicImage->setScaledContents(true);
 
     m_dynamicText = new QTextEdit(this);
     m_dynamicText->setGeometry(700, 155, 400, 180);
     m_dynamicText->setReadOnly(true);
     m_dynamicText->setStyleSheet("background-color:transparent; color:rgb(108,83,241) ; font-size: 24px; padding: 5px;");
+
+    // 新增的额外随机文本框（位置、大小可自行调整）
+    m_extraText = new QTextEdit(this);
+    m_extraText->setGeometry(700, 400, 400, 150);   // 临时位置，后面可改
+    m_extraText->setReadOnly(true);
+    m_extraText->setStyleSheet("background-color:transparent; color:black; font-size: 18px;"); // 黑色字体，多行
+    m_extraText->setPlainText(""); // 初始为空
 
     // 生成随机内容
     initDynamicContent();
@@ -69,7 +69,7 @@ void PokeWindow::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
 }
 
-void PokeWindow::onBackClicked()    // 返回主界面
+void PokeWindow::onBackClicked()
 {
     this->close();
     if (parentWidget()) {
@@ -77,43 +77,49 @@ void PokeWindow::onBackClicked()    // 返回主界面
     }
 }
 
-void PokeWindow::initDynamicContent()   // 随机人物和文本
+void PokeWindow::initDynamicContent()
 {
-    // 生成 1~3 之间的随机数
-    int r = QRandomGenerator::global()->bounded(1, 4);
+    int r = QRandomGenerator::global()->bounded(1, 4); // 1,2,3
     QString imagePath;
-    QString textContent;
-
-    // 预留功能：随机玩家成绩并且输出评价文本
+    QString textContent;      // 第一个文本框（人物语录）
+    QString extraContent;     // 第二个文本框（额外随机文本）
 
     switch (r) {
     case 1:
         imagePath = ":/image/poke1.png";
         textContent = "戳到本蛋了喵呜！\n你这个蛋ꐦ";
+        extraContent = "智慧小咸鱼，三个蛋中的炸蛋，Meowthm项目的主力，负责了工程量巨大的许多页面的美化和修bug"
+                       "因此这个游戏也选用了这个蛋喜欢的风格";
         break;
     case 2:
         imagePath = ":/image/poke2.png";
         textContent = "这么喜欢戳我？欺负我没法戳你是吧，已将你的账号列入黑名单，"
                       "请Vxxy4216 50吃疯狂星期四解封，要不然别想玩Meowthm了喵～";
+        extraContent = "xueqiu，三个蛋中唯一真正蛋，把剩下两个人类带坏成为蛋了。因为喜欢跳舞的线，选用了雪球这个名字，实际上"
+                       "和雪球完全相反，像一个火方，又或者更贴切的，蛋。没错，这个令人忍俊不禁的戳页面，就是本蛋负责的！";
         break;
     case 3:
         imagePath = ":/image/poke3.png";
         textContent = "滚木的消息被设为了精华消息";
+        extraContent = "Tkorp，4kex2，phigros16.9，arcaea13.00，舞萌伪装成15834的16601，在Dynamix范式起源等领域也很强，是"
+                       "毋庸置疑的音游大神（实际上这游戏的谱就他一个人能玩）平日里也是修数双的大学神，看起来和蛋一点都不沾边"
+                        "可是在深夜里，也是会独自想□□□。！的可爱男生";
         break;
     default:
         imagePath = ":/image/poke1.png";
         textContent = "出错了喵";
+        extraContent = "【错误】\n随机数异常。";
         break;
     }
 
-    QPixmap pix(imagePath); // 随机人物图片加载
+    QPixmap pix(imagePath);
     if (!pix.isNull()) {
         m_dynamicImage->setPixmap(pix);
     } else {
-        // 如果图片加载失败，显示文字或默认颜色
         m_dynamicImage->setStyleSheet("background-color: gray;");
         qDebug() << "未找到图片" << imagePath;
     }
 
     m_dynamicText->setPlainText(textContent);
+    m_extraText->setPlainText(extraContent);
 }
