@@ -60,19 +60,11 @@ QList<Note*> MapParser::parse(QString trackPath){
 
     QTextStream in(&file);
     //现在开始就可以读文件了
-    while(!in.atEnd()){
-        int type=-1;//默认值
-        // note样式
+    while(true){
+        int type;
+        if (!(in >> type)) break;
         const int noteWidth = 92;
         const int noteHeight = 25;
-        in>>type;
-
-
-        // 保险机制，防止没读到
-        if(type == -1){
-            break;
-        }
-
         if(type==0){
             /*
              现在是note
@@ -109,6 +101,7 @@ QList<Note*> MapParser::parse(QString trackPath){
         }
 
     }
+    qDebug() << "Track file:" << trackPath << "notes:" << result.size();
     return result;
 
 }
