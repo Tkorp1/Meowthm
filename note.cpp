@@ -12,7 +12,7 @@ void Note::setNoteColor(int r, int g, int b) {
     m_r = r; m_g = g; m_b = b;
     if (type == TAP) {
         // Tap 完全不透明，带圆角
-        this->setStyleSheet(QString("background-color: rgb(%1, %2, %3); border-radius: 5px;").arg(r).arg(g).arg(b));
+        this->setStyleSheet(QString("background-color: rgb(%1, %2, %3); border-radius: 10px;").arg(r).arg(g).arg(b));
     } else {
         // Hold的逻辑改变
         update();
@@ -121,12 +121,13 @@ void Hold::paintEvent(QPaintEvent* event){
     else{
         bodyColor = QColor(m_r, m_g, m_b, 120);
     }
-    painter.setBrush(bodyColor);
-    painter.drawRect(
+    painter.setBrush(bodyColor);painter.drawRoundedRect(
         0,
         0,
         width(),
-        height() - HOLD_HEAD_HEIGHT
+        height() - HOLD_HEAD_HEIGHT,
+        8,
+        8
         );
     // 2. head（tap部分）
     QColor headColor = getHeadColor();
@@ -149,8 +150,8 @@ void Hold::paintEvent(QPaintEvent* event){
             height() - HOLD_HEAD_HEIGHT,
             width(),
             HOLD_HEAD_HEIGHT,
-            5,
-            5
+            8,
+            8
             );
     }
 }

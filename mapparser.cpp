@@ -63,8 +63,8 @@ QList<Note*> MapParser::parse(QString trackPath){
     while(!in.atEnd()){
         int type=-1;//默认值
         // note样式
-        int noteWidth = 100;
-        int noteHeight = 30;
+        const int noteWidth = 92;
+        const int noteHeight = 25;
         in>>type;
 
 

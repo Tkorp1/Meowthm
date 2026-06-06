@@ -32,7 +32,7 @@ protected:
     // 2.颜色
     int m_r = 255, m_g = 255, m_b = 255;
 
-    static constexpr int HOLD_HEAD_HEIGHT = 20;
+    static constexpr int HOLD_HEAD_HEIGHT = 25;
 
 
 public:

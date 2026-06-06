@@ -133,7 +133,6 @@ void  Track::checkHit(qint64 currentMusicTime){
 }
 
 
-//下面是 hold 的逻辑可以先不写
 // 6.对hold的长按释放判定
 /* 当此时 currentHoldingNote 不为 nullptr 且松开按键，说明玩家松手了，触发miss并 delete 这个音符，
      指针悬空*/
@@ -178,7 +177,7 @@ void Track::setNoteParent(QWidget* parent){
 
         // 这里把音符横向移动到它的轨道上
         // 把初始Y放到屏幕外面（-100），等主循环来接管它的掉落
-        note->move(this->xPos, -100);
+        note->move(this->xPos + 4, -100);
         note->show();
 
     }

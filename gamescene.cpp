@@ -165,32 +165,48 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         vLine->raise();
     }
 
-    // 画 1 条水平判定线
-    QFrame* hitLineUI = new QFrame(this);
-    hitLineUI->setGeometry(200, hitLineY - 2, 400, 4); // 宽度为4
-    hitLineUI->setStyleSheet("background-color: rgba(255, 215, 0, 200);"); // 半透明金色
-    hitLineUI->setAttribute(Qt::WA_TransparentForMouseEvents);
-    hitLineUI->raise(); // 同样拉到最顶层！
-
+    // 画判定框
+    const int judgeBoxHeight = 16;
+    for (int i = 0; i < 4; ++i) {
+    QFrame* hitBox = new QFrame(this);
+        hitBox->setGeometry(200 + i * 100, hitLineY - judgeBoxHeight / 2, 100, judgeBoxHeight);
+        hitBox->setStyleSheet(QString(
+                                "background-color: rgba(%1,%2,%3,120);"
+                                "border: 2px solid rgba(%1,%2,%3,220);"
+                                "border-radius: 8px;"
+                                ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
+        hitBox->setAttribute(Qt::WA_TransparentForMouseEvents);
+        hitBox->lower();
+    }
     // 创建轨道按键发光特效
     const int lightHeight = 250;
+    // const int boxTopY = hitLineY - judgeBoxHeight / 2;
     for (int i = 0; i < 4; ++i) {
         trackHighlights[i] = new QFrame(this);
-        trackHighlights[i]->setGeometry(200 + i * 100, hitLineY - lightHeight, 100, lightHeight);
 
+        trackHighlights[i]->setGeometry(
+
+                200 + i * 100,
+
+            hitLineY + judgeBoxHeight / 2 - lightHeight,
+
+            100,
+
+            lightHeight
+
+            );
         // 使用该轨道的专属颜色生成线性渐变
         // 底部(stop:0)透明度 180，顶部(stop:1)完全透明 0
         trackHighlights[i]->setStyleSheet(QString(
                                               "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
                                               "stop:0 rgba(%1, %2, %3, 100), stop:1 rgba(%1, %2, %3, 0));"
+                                              "border-bottom-left-radius: 8px;"
+                                              "border-bottom-right-radius: 8px;"
                                               ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
-
         trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
         trackHighlights[i]->hide();
         trackHighlights[i]->lower();
     }
-
-
     initPauseUI();
 
 
