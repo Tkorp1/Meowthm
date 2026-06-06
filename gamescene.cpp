@@ -2,7 +2,8 @@
 #include "mapparser.h"
 #include "gameconfig.h"
 #include "resultscene.h"
-#include "SelectSongWindow.h" //
+#include "SelectSongWindow.h"
+#include "scenemanager.h"
 
 #include <QPainter>
 #include <QDir>
@@ -241,23 +242,14 @@ void GameScene::gameOver(){
         return;
     }
     gameEnded = true;
-
     updateTimer->stop();
-
     player->stop();
 
-    // 假设你在 GameScene 里保存路径的变量叫 m_mapPath 或者是传进来的 mapPath
+    // 【架构同步】：完美切入结算幕布
     ResultScene* result = new ResultScene(state, mapPath);
-    result->setAttribute(Qt::WA_DeleteOnClose);
-    result->showFullScreen();
-    this->hide();
-    this->deleteLater();
-
-
-
-    close();
-
+    SceneManager::switchScene(result);
 }
+
 
 void GameScene::paintEvent(QPaintEvent *event){
     QPainter painter(this);
@@ -541,43 +533,25 @@ void GameScene::initPauseUI() {
     // 重来
 
     connect(btnRestart, &QPushButton::clicked, this, [this]() {
-        // 1. 备份当前谱面路径
         QString pathBackup = this->mapPath;
-
-        // 2. 掐断音频
         player->stop();
 
-
-        // 4. 延迟50ms再去创建新界面
-        QTimer::singleShot(50, [this, pathBackup]() {
+        // 延迟50ms，等音频彻底释放后再切幕布
+        QTimer::singleShot(50, [pathBackup]() {
             GameScene* newScene = new GameScene(pathBackup);
-            newScene->show();
-
-            // 等新窗口顺利显示出来了，再把旧窗口彻底释放掉
-            this->close();
+            SceneManager::switchScene(newScene);
         });
-
-
     });
 
     // 返回
 
     connect(btnQuit, &QPushButton::clicked, this, [this]() {
-        // 1. 彻底掐断游戏引擎
         player->stop();
         if (updateTimer->isActive()) updateTimer->stop();
         if (countdownTimer->isActive()) countdownTimer->stop();
 
-        // 立刻隐藏旧的谱面画面！
-        this->hide();
-
-        // 2. 新的选曲
-        SelectSongWindow* selectWin = new SelectSongWindow();
-        selectWin->setAttribute(Qt::WA_DeleteOnClose);
-        selectWin->show();
-
-        // 安全回收旧场景
-        this->deleteLater();
+        // 【架构同步】：瞬间切回大厅！
+        SceneManager::switchScene(new SelectSongWindow());
     });
 }
 

@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include "mainwindow.h"
 #include "AnalysisWindow.h"
+#include "scenemanager.h"
 
 ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *parent)
     : QWidget(parent), state(_state), m_mapPath(mapPath)
@@ -197,13 +198,8 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
 
     connect(restartButton, &QPushButton::clicked, this, [this]() {
         if (!m_mapPath.isEmpty()) {
-            this->hide();
-
             GameScene* game = new GameScene(m_mapPath);
-            game->setAttribute(Qt::WA_DeleteOnClose);
-            game->showFullScreen(); // 【架构同步】：必须强制全屏！
-
-            this->deleteLater();
+            SceneManager::switchScene(game);
         }
     });
 
@@ -228,7 +224,7 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     // 8. 组装完毕，统一全屏展示
     // =========================
     resize(1600, 900);
-    showFullScreen();
+    //showFullScreen();
 }
 
 ResultScene::~ResultScene()
@@ -237,14 +233,8 @@ ResultScene::~ResultScene()
 
 void ResultScene::onReturnMainMenu()
 {
-    // 召唤全新的选曲大厅（会自动重新扫描你的最新谱面）
-    SelectSongWindow* selectWin = new SelectSongWindow();
-    selectWin->setAttribute(Qt::WA_DeleteOnClose);
-    selectWin->showFullScreen();
-
-    // 优雅销毁当前结算界面
-    this->hide();
-    this->deleteLater();
+    // 【架构同步】：丝滑返回选曲大厅！
+    SceneManager::switchScene(new SelectSongWindow());
 }
 
 // =========================
