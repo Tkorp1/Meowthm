@@ -7,6 +7,7 @@
 #include "gamescene.h"
 #include "gameconfig.h"
 #include "recordwindow.h"
+#include "scenemanager.h" // 【新增】：引入场景管理器
 
 #include <QPushButton>
 #include <QPainter>
@@ -416,34 +417,27 @@ void SelectSongWindow::onSongCardClicked()
 {
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
     if (!btn) return;
-
-    // 直接从被点击的按钮身上，把路径“撕”下来
     QString mapPath = btn->property("mapFolderPath").toString();
     if (mapPath.isEmpty()) return;
 
-    // 召唤游戏场景
+    // 【终极丝滑连招】：只管 new 出来，剩下全交给舞台！
     GameScene *game = new GameScene(mapPath);
-    game->setAttribute(Qt::WA_DeleteOnClose);
-    game->showFullScreen(); // 【架构同步】：统一使用全屏
-
-    this->hide();
-    this->deleteLater(); // 【架构同步】：安全销毁当前选曲窗口
+    SceneManager::switchScene(game);
 }
 
 void SelectSongWindow::onSettings() { SettingsWindow *window = new SettingsWindow(this); window->show(); }
 void SelectSongWindow::onPoke() { PokeWindow *window = new PokeWindow(this); window->show(); }
 void SelectSongWindow::onProfile() { ProfileWindow *window = new ProfileWindow(this); window->show(); }
 void SelectSongWindow::onAchievements() { AchievementsWindow *window = new AchievementsWindow(this); window->show(); }
-void SelectSongWindow::onBackToMain() { this->close(); if (parentWidget()) parentWidget()->show(); }
+void SelectSongWindow::onBackToMain()
+{
+    MainWindow* startMenu = new MainWindow();
+    SceneManager::switchScene(startMenu);
+}
 
 
-// 【新增】：跳转到制谱仪的接力连招
 void SelectSongWindow::onRecord()
 {
     RecordWindow *recordWin = new RecordWindow();
-    recordWin->setAttribute(Qt::WA_DeleteOnClose);
-    recordWin->showFullScreen();
-
-    this->hide();
-    this->deleteLater(); // 安全销毁大厅
+    SceneManager::switchScene(recordWin);
 }

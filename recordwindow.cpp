@@ -1,6 +1,7 @@
 #include "recordwindow.h"
 #include "gameconfig.h"
-#include "SelectSongWindow.h" // 【新增】
+#include "SelectSongWindow.h"
+#include "scenemanager.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -14,9 +15,9 @@
 
 RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
 {
-    // 全屏无边框
-    setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-    showFullScreen();
+    // // 全屏无边框
+    // setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    // showFullScreen();
 
     m_isRecording = false;
     for (int i = 0; i < 4; ++i) m_pressTime[i] = -1;
@@ -86,15 +87,11 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     connect(m_backBtn, &QPushButton::clicked, this, [this](){
         m_player->stop();
 
-        // 1. 召唤全新的选曲大厅，这样它就会自动重新扫描 maps 文件夹！
-        SelectSongWindow *selectWin = new SelectSongWindow();
-        selectWin->setAttribute(Qt::WA_DeleteOnClose);
-        selectWin->showFullScreen();
-
-        // 2. 安全销毁录音仪
-        this->hide();
-        this->deleteLater();
+        // 【架构同步】：让舞台一秒切回大厅！
+        SceneManager::switchScene(new SelectSongWindow());
     });
+
+
     // 【新增】：监听音乐状态，放完直接自动结算！
     connect(m_player, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
         if (status == QMediaPlayer::EndOfMedia && m_isRecording) {
