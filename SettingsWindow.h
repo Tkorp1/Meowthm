@@ -8,6 +8,7 @@
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QSoundEffect>
+#include <QSlider> // <-- 新增：引入滑块头文件
 
 // 预览轨道控件：用于演示音符下落
 class PreviewTrack : public QWidget
@@ -52,6 +53,7 @@ protected:
 private slots:
     void onSpeedButtonClicked(double delta);        // 流速调节按钮（+0.05 / -0.05）
     void onOffsetButtonClicked(qint64 delta);       // 偏移调节按钮（+5 / -5）
+    void onOffsetSliderChanged(int value);          // <-- 新增：滑块拖动事件槽函数
     void onExitClicked();                           // 退出按钮
 
     void updateSpeedLabel(double speed);            // 更新流速显示标签
@@ -68,6 +70,7 @@ private:
     QPushButton *m_speedMinusBtn;  // 流速-0.05
     QPushButton *m_offsetPlusBtn;  // 偏移+5
     QPushButton *m_offsetMinusBtn; // 偏移-5
+    QSlider     *m_offsetSlider;   // <-- 新增：偏移值调节滑块
     QPushButton *m_exitBtn;        // 退出按钮
 
     // 预览轨道

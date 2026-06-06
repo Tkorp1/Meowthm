@@ -13,17 +13,15 @@
 // ==================== PreviewTrack 实现 ====================
 PreviewTrack::PreviewTrack(QWidget *parent)
     : QWidget(parent)
-    , m_speed(4)          // 默认速度，与 GameConfig 初始值一致
+    , m_speed(4)
     , m_noteY(0)
     , m_timerId(0)
-    , m_lastHitY(-1) //
-    , m_hitAlpha(0)  // 初始完全透明
+    , m_lastHitY(-1)
+    , m_hitAlpha(0)
 {
-    //this->setFocusPolicy(Qt::StrongFocus);
-    setFixedSize(100, 300);          // 轨道宽度100，高度300
+    setFixedSize(100, 300);
     setStyleSheet("background-color: rgba(0,0,0,100); border: 1px solid white;");
 
-    // 启动定时器（每16ms一帧，约60fps）
     m_timerId = startTimer(16);
 
     m_hitSound = new QSoundEffect(this);
@@ -48,54 +46,42 @@ void PreviewTrack::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 绘制轨道线
     painter.setPen(QPen(Qt::white, 2));
     painter.drawLine(width()/2, 0, width()/2, height());
 
-    // 绘制判定线（底部附近）
     int hitLineY = height() - 30;
     painter.setPen(QPen(Qt::yellow, 3));
     painter.drawLine(10, hitLineY, width()-10, hitLineY);
 
-
-    // 绘制残影
     if (m_hitAlpha > 0) {
-        // 1. 画一条白色的击打参考线
         painter.setPen(QPen(QColor(255, 255, 255, m_hitAlpha), 2));
         painter.drawLine(20, m_lastHitY, width() - 20, m_lastHitY);
 
-        // 2. 画一个半透明的残影音符
         painter.setBrush(QBrush(QColor(0, 191, 255, m_hitAlpha / 2)));
         painter.setPen(Qt::NoPen);
         painter.drawEllipse(QPointF(width()/2, m_lastHitY), 15, 15);
     }
 
-    // 绘制音符（蓝色圆形）
     painter.setBrush(QBrush(QColor(0, 191, 255)));
     painter.setPen(Qt::NoPen);
     int noteRadius = 15;
     painter.drawEllipse(QPointF(width()/2, m_noteY), noteRadius, noteRadius);
 }
 
-
 void PreviewTrack::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
-    // 每帧移动距离 = 速度(像素/毫秒) * 时间间隔(16ms)
     m_noteY += m_speed * 16;
 
     if (m_noteY > height() + 100) {
         m_noteY = -(m_speed * 800);
     }
 
-    // 残影淡出动画
     if (m_hitAlpha > 0) {
-        m_hitAlpha -= 10; // 每帧减淡
+        m_hitAlpha -= 10;
         if (m_hitAlpha < 0) m_hitAlpha = 0;
     }
 
-
-    // 触发重绘
     update();
 }
 
@@ -103,53 +89,40 @@ void PreviewTrack::setHitSoundVolume(int vol) {
     m_hitSound->setVolume(vol / 100.0f);
 }
 
-// 敲击时发声
 void PreviewTrack::registerHit()
 {
     m_lastHitY = m_noteY;
     m_hitAlpha = 255;
-    m_hitSound->play(); // 播放“咚”！
-
+    m_hitSound->play();
 }
-
-
 
 // ==================== SettingsWindow 实现 ====================
 SettingsWindow::SettingsWindow(QWidget *parent)
     : QWidget(parent)
 {
-    // 窗口基本设置
     setFixedSize(1200, 800);
     setWindowTitle("设置");
 
     this->setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
 
-    // ==========================================
-    // UI 重构：使用布局管理器与高级 QSS 样式
-    // ==========================================
-
-    // 整体水平主布局
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
-    mainLayout->setContentsMargins(60, 60, 60, 60); // 留出四周的高级留白
+    mainLayout->setContentsMargins(60, 60, 60, 60);
     mainLayout->setSpacing(50);
 
     // ================= 左侧：控制面板 =================
     QVBoxLayout *leftLayout = new QVBoxLayout();
     leftLayout->setSpacing(30);
 
-    // 1. 巨大且极简的标题
     QLabel *titleLabel = new QLabel("SETTINGS", this);
     titleLabel->setStyleSheet("color: white; font-size: 50px; font-weight: 900; letter-spacing: 5px;");
     leftLayout->addWidget(titleLabel);
 
-    // 分割线
     QFrame *line = new QFrame(this);
     line->setFrameShape(QFrame::HLine);
     line->setStyleSheet("background-color: rgba(255, 255, 255, 50);");
     leftLayout->addWidget(line);
 
-    // 通用的高级按钮样式
     QString btnStyle = R"(
         QPushButton {
             background-color: rgba(70, 130, 180, 180);
@@ -168,10 +141,36 @@ SettingsWindow::SettingsWindow(QWidget *parent)
         }
     )";
 
-    // 通用的数值标签样式
     QString valStyle = "background-color: rgba(0, 0, 0, 100); border-radius: 10px; color: #00BFFF; font-size: 24px; font-weight: bold;";
 
-    // 2. 流速调节模块（用一个半透明面板包裹起来）
+    // 滑块专属赛博朋克QSS样式（高画质无损发光感）
+    QString sliderStyle = R"(
+        QSlider::groove:horizontal {
+            border: 1px solid rgba(255, 255, 255, 30);
+            height: 8px;
+            background: rgba(0, 0, 0, 150);
+            border-radius: 4px;
+        }
+        QSlider::sub-page:horizontal {
+            background: #00BFFF;
+            border-radius: 4px;
+        }
+        QSlider::handle:horizontal {
+            background: white;
+            border: 2px solid #00BFFF;
+            width: 18px;
+            height: 18px;
+            margin-top: -5px;
+            margin-bottom: -5px;
+            border-radius: 9px;
+        }
+        QSlider::handle:horizontal:hover {
+            background: #00BFFF;
+            border-color: white;
+        }
+    )";
+
+    // 2. 流速调节模块
     QFrame *speedPanel = new QFrame(this);
     speedPanel->setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 10); border-radius: 15px; }");
     QHBoxLayout *speedLayout = new QHBoxLayout(speedPanel);
@@ -199,7 +198,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     speedLayout->addWidget(m_speedPlusBtn);
     leftLayout->addWidget(speedPanel);
 
-    // 3. 偏移调节模块
+    // 3. 偏移调节模块（已整合高集成度布局控制）
     QFrame *offsetPanel = new QFrame(this);
     offsetPanel->setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 10); border-radius: 15px; }");
     QHBoxLayout *offsetLayout = new QHBoxLayout(offsetPanel);
@@ -207,9 +206,17 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
     QLabel *offsetTitle = new QLabel("偏移 (Offset)", offsetPanel);
     offsetTitle->setStyleSheet("color: white; font-size: 18px; background: transparent;");
+
     m_offsetMinusBtn = new QPushButton("-5 ms", offsetPanel);
     m_offsetMinusBtn->setFixedSize(80, 40);
     m_offsetMinusBtn->setStyleSheet(btnStyle);
+
+    // 初始化并注入高级动态滑块
+    m_offsetSlider = new QSlider(Qt::Horizontal, offsetPanel);
+    m_offsetSlider->setRange(-500, 500);
+    m_offsetSlider->setValue(GameConfig::instance()->getCurrentOffset());
+    m_offsetSlider->setFixedWidth(200); // 设定契合左侧比例的滑块宽度
+    m_offsetSlider->setStyleSheet(sliderStyle);
 
     m_offsetLabel = new QLabel(QString::number(GameConfig::instance()->getCurrentOffset()), offsetPanel);
     m_offsetLabel->setFixedSize(100, 40);
@@ -223,11 +230,12 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     offsetLayout->addWidget(offsetTitle);
     offsetLayout->addStretch();
     offsetLayout->addWidget(m_offsetMinusBtn);
-    offsetLayout->addWidget(m_offsetLabel);
+    offsetLayout->addWidget(m_offsetSlider); // 滑块优雅插在控频组件中
     offsetLayout->addWidget(m_offsetPlusBtn);
+    offsetLayout->addWidget(m_offsetLabel);
     leftLayout->addWidget(offsetPanel);
 
-    // 5. 打击音量调节模块 (Hit Sound Volume)
+    // 5. 打击音量调节模块
     QFrame *volPanel = new QFrame(this);
     volPanel->setStyleSheet("QFrame { background-color: rgba(255, 255, 255, 10); border-radius: 15px; }");
     QHBoxLayout *volLayout = new QHBoxLayout(volPanel);
@@ -245,7 +253,6 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     m_volLabel->setAlignment(Qt::AlignCenter);
     m_volLabel->setStyleSheet(valStyle);
 
-
     QPushButton *volPlusBtn = new QPushButton("+5", volPanel);
     volPlusBtn->setFixedSize(80, 40);
     volPlusBtn->setStyleSheet(btnStyle);
@@ -258,24 +265,18 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     volLayout->addWidget(volPlusBtn);
     leftLayout->addWidget(volPanel);
 
-    // 把左侧剩余的空间推到最下面
     leftLayout->addStretch();
-
-
-
 
     // ================= 右侧：预览面板与退出 =================
     QVBoxLayout *rightLayout = new QVBoxLayout();
     rightLayout->setAlignment(Qt::AlignRight | Qt::AlignTop);
 
-    // 轨道预览
     m_previewTrack = new PreviewTrack(this);
-    m_previewTrack->setFixedSize(150, 450); // 稍微拉长一点，更好看
+    m_previewTrack->setFixedSize(150, 450);
     m_previewTrack->setStyleSheet("background-color: rgba(0, 0, 0, 150); border: 2px solid rgba(255, 255, 255, 50); border-radius: 10px;");
     connect(GameConfig::instance(), &GameConfig::noteSpeedChanged, m_previewTrack, &PreviewTrack::setSpeed);
     m_previewTrack->setSpeed(GameConfig::instance()->getNoteSpeed());
 
-    // 让预览轨道居中靠右
     QHBoxLayout* trackCenterLayout = new QHBoxLayout();
     trackCenterLayout->addStretch();
     trackCenterLayout->addWidget(m_previewTrack);
@@ -283,7 +284,6 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
     rightLayout->addStretch();
 
-    // 退出按钮
     m_exitBtn = new QPushButton("BACK / 退出", this);
     m_exitBtn->setFixedSize(200, 60);
     m_exitBtn->setStyleSheet(R"(
@@ -302,7 +302,6 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     )");
     rightLayout->addWidget(m_exitBtn, 0, Qt::AlignRight);
 
-    // 拼装左右两部分 (比例设为 3:2)
     mainLayout->addLayout(leftLayout, 3);
     mainLayout->addLayout(rightLayout, 2);
 
@@ -311,26 +310,22 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     connect(m_speedPlusBtn, &QPushButton::clicked, this, [this](){ onSpeedButtonClicked(0.05); });
     connect(m_offsetMinusBtn, &QPushButton::clicked, this, [this](){ onOffsetButtonClicked(-5); });
     connect(m_offsetPlusBtn, &QPushButton::clicked, this, [this](){ onOffsetButtonClicked(5); });
+    connect(m_offsetSlider, &QSlider::valueChanged, this, &SettingsWindow::onOffsetSliderChanged); // 滑块连接
     connect(m_exitBtn, &QPushButton::clicked, this, &SettingsWindow::onExitClicked);
 
-    // ---------- 4. 背景音乐 ----------
     m_audioOutput = new QAudioOutput(this);
     m_player = new QMediaPlayer(this);
     m_player->setAudioOutput(m_audioOutput);
-    // TODO: 记得以后把这里改成 "qrc:/" 的资源路径哦！
     m_player->setSource(QUrl::fromLocalFile("setting_bgm.mp3"));
     m_player->setLoops(-1);
     m_player->play();
 
     connect(GameConfig::instance(), &GameConfig::hitSoundVolumeChanged,
             m_previewTrack, &PreviewTrack::setHitSoundVolume);
-
-
 }
 
 SettingsWindow::~SettingsWindow()
 {
-    // 停止并释放音乐资源
     m_player->stop();
 }
 
@@ -339,45 +334,48 @@ void SettingsWindow::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 【魔法】：纯代码绘制深邃的径向渐变背景，替代丢失的图片！
     QRadialGradient gradient(rect().center(), rect().width() / 1.5);
-    gradient.setColorAt(0.0, QColor(45, 55, 72));   // 中心亮一点的深蓝灰
-    gradient.setColorAt(1.0, QColor(15, 20, 30));   // 边缘暗下去的极夜黑
+    gradient.setColorAt(0.0, QColor(45, 55, 72));
+    gradient.setColorAt(1.0, QColor(15, 20, 30));
 
     painter.fillRect(rect(), gradient);
 
     QWidget::paintEvent(event);
 }
 
-
-// 流速调节槽函数
 void SettingsWindow::onSpeedButtonClicked(double delta)
 {
     double newSpeed = GameConfig::instance()->getNoteSpeed() + delta;
-    // 限制流速范围（0.2 ~ 2.0）
     if (newSpeed < 0.2) newSpeed = 0.2;
     if (newSpeed > 2.0) newSpeed = 2.0;
     GameConfig::instance()->setNoteSpeed(newSpeed);
-    // 显示标签的更新由 updateSpeedLabel 完成
 
     updateSpeedLabel(newSpeed);
     this->setFocus();
 }
 
-// 偏移值调节槽函数
+// 偏移值按钮调节槽函数（现在同步推动滑块）
 void SettingsWindow::onOffsetButtonClicked(qint64 delta)
 {
     qint64 newOffset = GameConfig::instance()->getCurrentOffset() + delta;
-    // 偏移范围可以设为 -500 ~ 500
     if (newOffset < -500) newOffset = -500;
     if (newOffset > 500) newOffset = 500;
-    GameConfig::instance()->setCurrentOffset(newOffset);
-    updateOffsetLabel(newOffset);
+
+    // 直接操作滑块更新，滑块会触发 valueChanged 信号连带修改配置及文本
+    m_offsetSlider->setValue(newOffset);
 
     this->setFocus();
 }
 
-// 更新流速显示（也可以直接连接 GameConfig::noteSpeedChanged 信号）
+// 核心处理：滑块拖拽事件响应槽函数
+void SettingsWindow::onOffsetSliderChanged(int value)
+{
+    GameConfig::instance()->setCurrentOffset(value);
+    updateOffsetLabel(value);
+
+    this->setFocus(); // 确保鼠标释放后按键焦点回到主窗口，键盘捕获不失效
+}
+
 void SettingsWindow::updateSpeedLabel(double speed)
 {
     m_speedLabel->setText(QString::number(speed, 'f', 2));
@@ -390,36 +388,28 @@ void SettingsWindow::updateOffsetLabel(qint64 offset)
 
 void SettingsWindow::onExitClicked()
 {
-    // 停止BGM
     m_player->stop();
-    // 关闭当前窗口
     this->close();
-    // 如果主窗口被隐藏了，显示它
     if (parentWidget()) {
         parentWidget()->show();
     }
 }
 
-
 void SettingsWindow::keyPressEvent(QKeyEvent *event)
 {
-    // 忽略长按连发
     if (event->isAutoRepeat()) return;
 
-    // 按下了音游的四个按键
     if (event->key() == Qt::Key_D || event->key() == Qt::Key_F ||
         event->key() == Qt::Key_J || event->key() == Qt::Key_K) {
 
         if (m_previewTrack) {
-            m_previewTrack->registerHit(); // 生成残影！
+            m_previewTrack->registerHit();
         }
     } else {
-        QWidget::keyPressEvent(event); // 其他按键交给父类处理
+        QWidget::keyPressEvent(event);
     }
 }
 
-
-// 音量调节槽函数
 void SettingsWindow::onVolButtonClicked(int delta)
 {
     int newVol = GameConfig::instance()->getHitSoundVolume() + delta;
@@ -429,10 +419,12 @@ void SettingsWindow::onVolButtonClicked(int delta)
     GameConfig::instance()->setHitSoundVolume(newVol);
     updateVolLabel(newVol);
 
-    this->setFocus(); // 不要忘了抢回焦点！
+    this->setFocus();
 }
 
 void SettingsWindow::updateVolLabel(int vol)
 {
     m_volLabel->setText(QString::number(vol));
 }
+
+

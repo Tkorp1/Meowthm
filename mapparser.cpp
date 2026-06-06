@@ -62,7 +62,7 @@ QList<Note*> MapParser::parse(QString trackPath){
     //现在开始就可以读文件了
     while(true){
         int type;
-        if (!(in >> type)) break;
+        //if (!(in >> type)) break;
         const int noteWidth = 92;
         const int noteHeight = 25;
         if(type==0){
