@@ -29,19 +29,29 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     // 2. 从真实路径动态获取曲绘
     // =========================
     QString coverPath = "";
+    QString realSongName = "UNKNOWN TRACK"; // 默认保底歌名
+
     QFile infoFile(m_mapPath + "/info.txt");
     if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&infoFile);
         while (!in.atEnd()) {
             QString line = in.readLine();
-            if (line.startsWith("CoverFile:")) {
+            if (line.startsWith("CoverFile:", Qt::CaseInsensitive)) {
                 QString cName = line.mid(10).trimmed();
-                if (!cName.isEmpty() && cName != "cover.jpg") {
-                    coverPath = m_mapPath + "/" + cName;
+                if (!cName.isEmpty()) {
+                    coverPath = m_mapPath + "/" + cName; // 修复：去掉了奇葩拦截
                 }
+            } else if (line.startsWith("SongName:", Qt::CaseInsensitive)) {
+                realSongName = line.mid(9).trimmed(); // 顺手把真正的歌名读出来！
             }
         }
         infoFile.close();
+    }
+
+    // 智能保底机制：自动探测图片
+    if (coverPath.isEmpty() || !QFile::exists(coverPath)) {
+        if (QFile::exists(m_mapPath + "/cover.jpg")) coverPath = m_mapPath + "/cover.jpg";
+        else if (QFile::exists(m_mapPath + "/cover.png")) coverPath = m_mapPath + "/cover.png";
     }
 
     // 绘制曲绘面板 (x=700, y=70)
@@ -62,7 +72,7 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     // 3. 标题 (Song Name) -> 向右推移到曲绘旁边 (x=930)
     // =========================
     songNameLabel = new QLabel(this);
-    songNameLabel->setText(QString(state.getCurrentSong()));
+    songNameLabel->setText(realSongName);
     songNameLabel->setGeometry(930, 70, 600, 60);
     songNameLabel->setStyleSheet("color: white; font-size: 52px; font-weight: 900; letter-spacing: 3px; background: transparent;");
 

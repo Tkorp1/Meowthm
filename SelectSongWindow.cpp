@@ -111,16 +111,28 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 QTextStream in(&infoFile);
                 while (!in.atEnd()) {
                     QString line = in.readLine();
-                    if (line.startsWith("SongName:")) {
-                        songName = line.mid(9).trimmed(); // 截取歌名
-                    } else if (line.startsWith("CoverFile:")) {
+                    // 加入 Qt::CaseInsensitive，大小写 SongName 都能认！
+                    if (line.startsWith("SongName:", Qt::CaseInsensitive)) {
+                        songName = line.mid(9).trimmed();
+                    } else if (line.startsWith("CoverFile:", Qt::CaseInsensitive)) {
                         QString cName = line.mid(10).trimmed();
-                        if (!cName.isEmpty() && cName != "cover.jpg") {
-                            coverPath = mapFolderPath + "/" + cName; // 拼接真实图片路径
+                        // 【修复】：删掉了那个奇葩的 != "cover.jpg" 判断
+                        if (!cName.isEmpty()) {
+                            coverPath = mapFolderPath + "/" + cName;
                         }
                     }
                 }
                 infoFile.close();
+            }
+
+            // 【新增黑科技】：智能保底机制。
+            // 如果 info.txt 里没写曲绘，或者写错了，我们自动去文件夹里找！
+            if (coverPath.isEmpty() || !QFile::exists(coverPath)) {
+                if (QFile::exists(mapFolderPath + "/cover.jpg")) {
+                    coverPath = mapFolderPath + "/cover.jpg";
+                } else if (QFile::exists(mapFolderPath + "/cover.png")) {
+                    coverPath = mapFolderPath + "/cover.png";
+                }
             }
 
             // --- 开始生成 UI 卡片 ---
