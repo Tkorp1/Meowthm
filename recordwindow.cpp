@@ -109,11 +109,67 @@ RecordWindow::~RecordWindow() {
     m_player->stop();
 }
 
+// ==========================================
+// 动感视觉反馈绘制
+// ==========================================
 void RecordWindow::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainter painter(this);
-    // 画一个简单的深色背景
+    painter.setRenderHint(QPainter::Antialiasing); // 开启抗锯齿，让圆角更平滑
+
+    // 1. 画深色工业风背景
     painter.fillRect(rect(), QColor(20, 20, 25));
+
+    // 2. 准备四个轨道的参数
+    int keyWidth = 120;
+    int keyHeight = 200;
+    int spacing = 30;
+    int totalWidth = 4 * keyWidth + 3 * spacing;
+
+    // 让四个按键永远完美居中，并放在屏幕偏下方
+    int startX = (this->width() - totalWidth) / 2;
+    int startY = this->height() - keyHeight - 80;
+
+    QString keyNames[4] = {"D", "F", "J", "K"};
+    // 轨道的专属颜色
+    QColor glowColors[4] = {
+        QColor(200,160,255),   // 轨道 0 (Cyan)
+        QColor(255,180,200),  // 轨道 1 (DeepPink)
+        QColor(255,255,255),  // 轨道 2 (DeepPink)
+        QColor(135,210,255)    // 轨道 3 (Cyan)
+    };
+
+    // 3. 遍历画出四个按键
+    for (int i = 0; i < 4; ++i) {
+        QRect keyRect(startX + i * (keyWidth + spacing), startY, keyWidth, keyHeight);
+
+        // 【核心魔法】：通过 m_pressTime 数组判断当前这个键有没有被按着！
+        bool isPressed = (m_pressTime[i] != -1);
+
+        if (isPressed) {
+            // 被按下时：高亮发光填充 + 纯白边框
+            painter.setBrush(QColor(glowColors[i].red(), glowColors[i].green(), glowColors[i].blue(), 200));
+            painter.setPen(QPen(Qt::white, 4));
+        } else {
+            // 待机时：半透明暗色填充 + 灰色边框
+            painter.setBrush(QColor(glowColors[i].red(), glowColors[i].green(), glowColors[i].blue(), 30));
+            painter.setPen(QPen(QColor(100, 100, 100, 150), 2));
+        }
+
+        // 画出带圆角的玻璃块
+        painter.drawRoundedRect(keyRect, 15, 15);
+
+        // 画出按键字母 (D, F, J, K)
+        painter.setPen(isPressed ? Qt::white : QColor(255, 255, 255, 100));
+        painter.setFont(QFont("Arial", 40, QFont::Bold));
+        painter.drawText(keyRect, Qt::AlignCenter, keyNames[i]);
+
+        // 如果按下了，在按键底部再画一条高亮的判定线，增加打击感
+        if (isPressed) {
+            painter.setPen(QPen(Qt::white, 8));
+            painter.drawLine(keyRect.bottomLeft() + QPoint(10, -10), keyRect.bottomRight() + QPoint(-10, -10));
+        }
+    }
 }
 
 // ==========================================
@@ -154,6 +210,7 @@ void RecordWindow::keyPressEvent(QKeyEvent *event) {
     // 按下时：不立刻生成音符，而是把当前时间“存”在对应的轨道里
     if (trackId != -1 && m_pressTime[trackId] == -1) {
         m_pressTime[trackId] = m_player->position();
+        update();
     }
 }
 
@@ -192,6 +249,9 @@ void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
 
         // 更新 UI
         m_countLabel->setText(QString("RECORDED NOTES: %1").arg(m_recordedNotes.size()));
+        update();
+
+
     }
 }
 
