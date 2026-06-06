@@ -8,6 +8,8 @@
 
 #include "gamestate.h" // 【新增】因为我们要解析战斗数据
 
+
+
 struct SongInfo {
     QString name;           // 歌曲名称（用于显示）
     QString coverPath;      // 封面图片路径（相对路径，可选）

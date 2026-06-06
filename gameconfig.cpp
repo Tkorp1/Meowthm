@@ -5,6 +5,7 @@
 #include <QFile>
 
 
+
 GameConfig* GameConfig::instance()
 {
     static GameConfig inst;
