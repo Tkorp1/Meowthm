@@ -22,26 +22,11 @@
     </qresource>
     <qresource prefix="/map">
         <file>maps/song1/info.txt</file>
-        <file>maps/song1/music.mp3</file>
         <file>maps/song1/Track0.txt</file>
         <file>maps/song1/Track1.txt</file>
         <file>maps/song1/Track2.txt</file>
         <file>maps/song1/Track3.txt</file>
-        <file>maps/song1/cover.png</file>
-        <file>maps/MEGALOVANIA/cover.png</file>
-        <file>maps/MEGALOVANIA/info.txt</file>
-        <file>maps/MEGALOVANIA/music.mp3</file>
-        <file>maps/MEGALOVANIA/Track0.txt</file>
-        <file>maps/MEGALOVANIA/Track1.txt</file>
-        <file>maps/MEGALOVANIA/Track2.txt</file>
-        <file>maps/MEGALOVANIA/Track3.txt</file>
-        <file>maps/HollowKnight/cover.png</file>
-        <file>maps/HollowKnight/info.txt</file>
-        <file>maps/HollowKnight/music.mp3</file>
-        <file>maps/HollowKnight/Track0.txt</file>
-        <file>maps/HollowKnight/Track1.txt</file>
-        <file>maps/HollowKnight/Track2.txt</file>
-        <file>maps/HollowKnight/Track3.txt</file>
+        <file>maps/song1/music.mp3</file>
     </qresource>
     <qresource prefix="/movie">
         <file>movies/video1.mp4</file>
