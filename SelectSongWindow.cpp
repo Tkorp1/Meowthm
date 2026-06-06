@@ -169,7 +169,21 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 }
             )").arg(bgStyle));
 
-            card->setText(songName); // 显示真实的歌名
+            // ==========================================
+            // 【UI 升级】：智能文字截断与悬浮提示
+            // ==========================================
+            // 1. 设置悬浮提示（鼠标放上去会弹出一个小黑框显示全名）
+            card->setToolTip(songName);
+
+            // 2. 使用文字测量仪，模拟 18px 粗体的大小
+            QFont tempFont("Arial", 14, QFont::Bold);
+            QFontMetrics fm(tempFont);
+
+            // 3. 如果名字宽度超过 190 像素（卡片宽 250），自动切断并加上 "..."
+            QString elidedName = fm.elidedText(songName, Qt::ElideRight, 190);
+
+            card->setText(elidedName); // 显示处理过的歌名
+            // ==========================================
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
             // ... 上面是你的生成卡片代码 ...
