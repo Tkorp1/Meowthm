@@ -106,7 +106,7 @@ void  Track::checkHit(qint64 currentMusicTime){
             currentHoldingNote = note; // 挂载到专属指针
             // 设置为按下状态
             dynamic_cast<Hold*>(note)->setState(HOLD_PRESSED);
-            dynamic_cast<Hold*>(note)->setAttachedHead(true);
+            // dynamic_cast<Hold*>(note)->setAttachedHead(true);
             currentHoldHeadResult = 2;
             noteInTrack.takeFirst();   // 从队列移除，但不delete！！！
         } else {
@@ -122,7 +122,7 @@ void  Track::checkHit(qint64 currentMusicTime){
             currentHoldingNote = note;
             // 设置为按下状态
             dynamic_cast<Hold*>(note)->setState(HOLD_PRESSED);
-            dynamic_cast<Hold*>(note)->setAttachedHead(true);
+            // dynamic_cast<Hold*>(note)->setAttachedHead(true);
             currentHoldHeadResult = 3;
             noteInTrack.takeFirst();
         } else {
@@ -150,7 +150,7 @@ bool Track::isReleased(qint64 currentMusicTime){
         emit noteJudged(1); // 触发 Miss，打断 Combo！
         // 更改为MISS
         dynamic_cast<Hold*>(currentHoldingNote)->setState(HOLD_MISS);
-        dynamic_cast<Hold*>(currentHoldingNote)->setAttachedHead(false);
+        // dynamic_cast<Hold*>(currentHoldingNote)->setAttachedHead(false);
         currentHoldHeadResult = 1; // 标记为尸体
         return true;
     } else {
@@ -160,7 +160,7 @@ bool Track::isReleased(qint64 currentMusicTime){
         // currentHoldingNote = nullptr;
         // 更改为FINISHED
         dynamic_cast<Hold*>(currentHoldingNote)->setState(HOLD_FINISHED);
-        dynamic_cast<Hold*>(currentHoldingNote)->setAttachedHead(false);
+        // dynamic_cast<Hold*>(currentHoldingNote)->setAttachedHead(false);
         return false;
     }
 }

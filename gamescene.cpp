@@ -225,6 +225,7 @@ void GameScene::gameOver(){
 void GameScene::paintEvent(QPaintEvent *event){
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
+    /*
     for(Track* track : tracks){
         Note* note =
             track->getCurrentHoldingNote();
@@ -250,6 +251,7 @@ void GameScene::paintEvent(QPaintEvent *event){
             5
             );
     }
+    */
 }
 
 
