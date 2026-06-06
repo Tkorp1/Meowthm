@@ -2,13 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QGraphicsView>
-#include <QGraphicsScene>
-#include <QMediaPlayer>
-#include <QGraphicsVideoItem>
-#include <QAudioOutput>
+#include <QLabel>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QResizeEvent>
+#include <QTimer>
+#include <QPixmap>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,34 +22,25 @@ public:
     ~MainWindow();
 
 protected:
+    void paintEvent(QPaintEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
-
-private slots:
-    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
-    void onSelectSong();
-    /* 如果需要，可以取消下面这些槽函数的注释
-    void onSettings();
-    void onAchievements();
-    void onPoke();
-    void onExitGame();
-    void onProfile();
-    */
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void onSelectSong();
+
     Ui::MainWindow *ui;
-    QGraphicsView *view;
-    QGraphicsScene *scene;
+    QLabel *titleLabel;
 
-    // ======= 双缓冲区：无缝切换核心组件 =======
-    QMediaPlayer *m_player1;
-    QMediaPlayer *m_player2;
-    QGraphicsVideoItem *m_videoItem1;
-    QGraphicsVideoItem *m_videoItem2;
-    QAudioOutput *m_audioOutput1;
-    QAudioOutput *m_audioOutput2;
-
-    bool m_isFirstVideo;
+    // 精灵图动画变量
+    QTimer *animTimer;
+    QPixmap spriteSheet;
+    int currentFrame;
+    int totalFrames;
+    int columns;
+    int frameWidth;
+    int frameHeight;
 };
 
 #endif // MAINWINDOW_H

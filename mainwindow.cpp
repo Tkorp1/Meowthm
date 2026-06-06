@@ -1,141 +1,193 @@
 #include "MainWindow.h"
 #include "SelectSongWindow.h"
-#include <QBrush>
+#include <QPainter>
+#include <QLinearGradient>
+#include <QRadialGradient>
+#include <QPainterPath>
 #include <QFont>
-#include <QGraphicsTextItem>
-#include <QDebug>
-#include <QPushButton>
-#include <QGraphicsProxyWidget>
-#include <QDir>
-#include <QUrl>
-#include <QFileInfo>
+#include <QDebug> // <-- 新增：引入Debug头文件
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(nullptr)
-    , view(new QGraphicsView(this))
-    , scene(new QGraphicsScene(this))
-    // 初始化双播放器与双视频图层
-    , m_player1(new QMediaPlayer(this))
-    , m_player2(new QMediaPlayer(this))
-    , m_videoItem1(new QGraphicsVideoItem())
-    , m_videoItem2(new QGraphicsVideoItem())
-    , m_audioOutput1(new QAudioOutput(this))
-    , m_audioOutput2(new QAudioOutput(this))
-    , m_isFirstVideo(true)
+    , titleLabel(nullptr)
+    , currentFrame(0)
+    , totalFrames(32)
+    , columns(8)
+    , frameWidth(0)
+    , frameHeight(0)
 {
     this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+
+
+    spriteSheet.load(":/image/big_image.png");
+
+
+
+
+        frameWidth = spriteSheet.width() / columns;
+        frameHeight = spriteSheet.height() / (totalFrames / columns);
+
+
+    // 2. 初始化动画定时器
+    animTimer = new QTimer(this);
+    connect(animTimer, &QTimer::timeout, this, [this]() {
+        currentFrame = (currentFrame + 1) % totalFrames;
+        this->update();
+    });
+    animTimer->start(33);
+
+    // 3. 创建子控件并配置样式
+    titleLabel = new QLabel(this);
+    titleLabel->setText("Me   wthm");
+    titleLabel->setStyleSheet("background: transparent; color: rgba(200, 180, 255, 220);");
+    QFont font("Arial Black", 180, QFont::Bold);
+    font.setLetterSpacing(QFont::AbsoluteSpacing, 5);
+    titleLabel->setFont(font);
+    titleLabel->adjustSize();
+
+    // 4. 调用显示函数
     this->showFullScreen();
 
-    view->setScene(scene);
-    view->setRenderHint(QPainter::Antialiasing);
-    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    view->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setCentralWidget(view);
-
-    // ========== Debug 信息：打印当前工作目录 ==========
-    qDebug() << "=== Current working directory ===" << QDir::currentPath();
-
-    // ========== 视频输出与图层初始化 ==========
-    m_player1->setVideoOutput(m_videoItem1);
-    m_player2->setVideoOutput(m_videoItem2);
-
-    scene->addItem(m_videoItem1);
-    scene->addItem(m_videoItem2);
-
-    // 初始层级：视频 1 在前 (-1)，视频 2 在后 (-2) 潜伏
-    m_videoItem1->setZValue(-1);
-    m_videoItem2->setZValue(-2);
-
-    m_videoItem1->setSize(QSizeF(width(), height()));
-    m_videoItem2->setSize(QSizeF(width(), height()));
-
-    // 音频输出静音
-    m_audioOutput1->setVolume(0);
-    m_audioOutput2->setVolume(0);
-    m_player1->setAudioOutput(m_audioOutput1);
-    m_player2->setAudioOutput(m_audioOutput2);
-
-    // 连接播放器 1 的状态变化信号（用于视频 1 播放结束）
-    connect(m_player1, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
-
-    // ========== 获取绝对路径 ==========
-    // QFileInfo video1Info("video1.mp4");
-    // QFileInfo video2Info("video2.mp4");
-
-    // QString video1Path = video1Info.absoluteFilePath();
-    // QString video2Path = video2Info.absoluteFilePath();
-    // 有问题，删了
-
-    // 检查文件是否存在
-    //if (!video1Info.exists()) qDebug() << "ERROR: video1.mp4 NOT found at:" << video1Path;
-    //if (!video2Info.exists()) qDebug() << "ERROR: video2.mp4 NOT found at:" << video2Path;
-
-    // ========== 双缓冲加载与预播放 ==========
-    // 1. 播放器 1 立即开始播放视频 1
-
-    m_player1->setSource(QUrl("qrc:/movie/movies/video1.mp4")); // 已修改
-    m_player1->play();
-
-    // 2. 播放器 2 提前【预加载】视频 2，并直接设为【无限循环】
-    m_player2->setSource(QUrl("qrc:/movie/movies/video2.mp4")); // 已修改
-
-    m_player2->setLoops(QMediaPlayer::Infinite);
-
-
-    view->setFocus();
+    setFocus();
 }
 
 MainWindow::~MainWindow()
 {
-    m_player1->stop();
-    m_player2->stop();
-    delete ui;
 }
 
-void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
+void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    // qDebug() << "Player1 MediaStatus changed:" << status;
+    QMainWindow::resizeEvent(event);
 
-    // 当视频 1 播放到末尾时
-    if (status == QMediaPlayer::EndOfMedia) {
-        if (m_isFirstVideo) {
-            // qDebug() << "First video finished! Seamlessly switching to video 2...";
-            m_isFirstVideo = false;
+    if (titleLabel) {
+        int x = (this->width() - titleLabel->width()) / 2;
+        int y = (this->height() - titleLabel->height()) / 2;
+        titleLabel->move(x, y);
+        titleLabel->raise();
+    }
+}
 
-            // 1. 瞬间启动早已准备就绪的视频 2
-            m_player2->play();
+void MainWindow::paintEvent(QPaintEvent *event)
+{
+    Q_UNUSED(event);
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
-            // 2. 瞬间调换 Z 轴层级，把视频 2 顶到最前，把视频 1 压到幕后
-            m_videoItem2->setZValue(-1);
-            m_videoItem1->setZValue(-2);
+    // ========== 1. 极暗紫黑基底 ==========
+    painter.fillRect(rect(), QColor(8, 6, 12));
 
-            // 3. 悄悄停止视频 1 以释放内存
-            m_player1->stop();
+    // ========== 2. 主渐变 ==========
+    QLinearGradient bgGrad(0, 0, width(), height());
+    bgGrad.setColorAt(0.0, QColor(15, 5, 25));
+    bgGrad.setColorAt(0.4, QColor(40, 15, 50));
+    bgGrad.setColorAt(0.7, QColor(25, 10, 40));
+    bgGrad.setColorAt(1.0, QColor(8, 3, 18));
+    painter.fillRect(rect(), bgGrad);
+
+    // ========== 3. 霓虹光晕 ==========
+    QRadialGradient glow1(QPointF(120, 100), 350);
+    glow1.setColorAt(0.0, QColor(150, 50, 180, 90));
+    glow1.setColorAt(0.5, QColor(100, 30, 130, 40));
+    glow1.setColorAt(1.0, QColor(0, 0, 0, 0));
+    painter.fillRect(rect(), glow1);
+
+    QRadialGradient glow2(QPointF(width()-100, height()-80), 400);
+    glow2.setColorAt(0.0, QColor(200, 70, 150, 70));
+    glow2.setColorAt(0.6, QColor(120, 40, 100, 25));
+    glow2.setColorAt(1.0, QColor(0, 0, 0, 0));
+    painter.fillRect(rect(), glow2);
+
+    // 压暗角落
+    QRadialGradient darkCorner1(QPointF(0, 0), 400);
+    darkCorner1.setColorAt(0.0, QColor(0, 0, 0, 180));
+    darkCorner1.setColorAt(0.6, QColor(0, 0, 0, 80));
+    darkCorner1.setColorAt(1.0, QColor(0, 0, 0, 0));
+    painter.fillRect(rect(), darkCorner1);
+
+    QRadialGradient darkCorner2(QPointF(width(), height()), 450);
+    darkCorner2.setColorAt(0.0, QColor(0, 0, 0, 200));
+    darkCorner2.setColorAt(0.5, QColor(0, 0, 0, 60));
+    darkCorner2.setColorAt(1.0, QColor(0, 0, 0, 0));
+    painter.fillRect(rect(), darkCorner2);
+
+    QRadialGradient darkMidBottom(QPointF(width()/2, height()), 300);
+    darkMidBottom.setColorAt(0.0, QColor(0, 0, 0, 100));
+    darkMidBottom.setColorAt(0.7, QColor(0, 0, 0, 30));
+    darkMidBottom.setColorAt(1.0, QColor(0, 0, 0, 0));
+    painter.fillRect(rect(), darkMidBottom);
+
+    // ========== 精灵图切片动画绘制 ==========
+    if (!spriteSheet.isNull()) {
+        int col = currentFrame % columns;
+        int row = currentFrame / columns;
+
+        QRect sourceRect(col * frameWidth, row * frameHeight, frameWidth, frameHeight);
+
+        int targetW = 220;
+        int targetH = 220;
+        int targetX = (width() - targetW) / 2;
+        int targetY = (height() - targetH) / 2;
+        QRect targetRect(targetX-135, targetY+10, targetW, targetH);
+
+        painter.drawPixmap(targetRect, spriteSheet, sourceRect);
+    } else {
+        // 如果图层在绘制时发现图是空的，打印静态警告（不会高频刷屏）
+        static bool warned = false;
+        if (!warned) {
+            qDebug() << "[运行时警告] paintEvent 检测到 spriteSheet 为空，跳过动画绘制。";
+            warned = true;
         }
     }
+
+    // ========== 4. 霓虹线条 ==========
+    painter.setPen(QPen(QColor(170, 70, 220, 100), 1.5));
+    painter.drawLine(0, height()*0.2, width()*0.3, 0);
+    painter.drawLine(width()*0.1, height(), width(), height()*0.3);
+    painter.drawLine(width()*0.6, height()*0.1, width()*0.85, height()*0.1);
+    painter.drawLine(width()*0.2, height()*0.85, width()*0.5, height()*0.85);
+    painter.drawLine(width()*0.85, height()*0.4, width()*0.85, height()*0.65);
+    painter.drawLine(width()*0.1, height()*0.2, width()*0.1, height()*0.45);
+
+    // 光带
+    QPainterPath strip;
+    strip.moveTo(0, height()*0.5);
+    strip.lineTo(width()*0.25, height()*0.45);
+    strip.lineTo(width()*0.28, height()*0.55);
+    strip.lineTo(0, height()*0.6);
+    strip.closeSubpath();
+    painter.fillPath(strip, QColor(170, 70, 220, 30));
+
+    QPainterPath strip2;
+    strip2.moveTo(width()*0.7, height());
+    strip2.lineTo(width()*0.85, height()*0.7);
+    strip2.lineTo(width()*0.95, height()*0.72);
+    strip2.lineTo(width(), height());
+    strip2.closeSubpath();
+    painter.fillPath(strip2, QColor(200, 80, 150, 25));
+
+    // 光点
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QColor(160, 70, 200, 100));
+    painter.drawEllipse(60, 60, 5, 5);
+    painter.drawEllipse(width()-80, height()-70, 7, 7);
+    painter.setBrush(QColor(200, 90, 160, 80));
+    painter.drawEllipse(280, height()-140, 4, 4);
+    painter.drawEllipse(width()/2, 50, 4, 4);
 }
 
 void MainWindow::onSelectSong()
 {
-
     SelectSongWindow *window = new SelectSongWindow();
-
-
     window->setAttribute(Qt::WA_DeleteOnClose);
-    window->showFullScreen();
-
+    window->show();
     this->deleteLater();
-
-
-    delete this;
 }
-
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape) {
-        this->close();   // 退出游戏
+        this->close();
     } else {
         QMainWindow::keyPressEvent(event);
     }
@@ -143,6 +195,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
-    // 鼠标点击任何位置都进入选曲界面
+    Q_UNUSED(event);
     onSelectSong();
 }
