@@ -1,0 +1,5 @@
+BPM: 60
+SongName: MEGALOVENIA (Camellia Remix)
+MusicTime: 380081
+AudioFile: music.mp3
+CoverFile: cover.jpg

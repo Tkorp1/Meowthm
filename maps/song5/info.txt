@@ -1,3 +1,0 @@
-songBPM: 200
-songname: Spasmodic(Haocore Mix)
-songlength: 142008

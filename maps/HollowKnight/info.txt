@@ -1,0 +1,5 @@
+BPM: 60
+SongName: Hollow Knight
+MusicTime: 97253
+AudioFile: music.mp3
+CoverFile: cover.jpg

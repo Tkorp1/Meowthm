@@ -28,30 +28,20 @@
         <file>maps/song1/Track2.txt</file>
         <file>maps/song1/Track3.txt</file>
         <file>maps/song1/cover.png</file>
-        <file>maps/song2/info.txt</file>
-        <file>maps/song2/music.mp3</file>
-        <file>maps/song2/Track0.txt</file>
-        <file>maps/song2/Track1.txt</file>
-        <file>maps/song2/Track2.txt</file>
-        <file>maps/song2/Track3.txt</file>
-        <file>maps/song3/info.txt</file>
-        <file>maps/song3/music.mp3</file>
-        <file>maps/song3/Track0.txt</file>
-        <file>maps/song3/Track1.txt</file>
-        <file>maps/song3/Track2.txt</file>
-        <file>maps/song3/Track3.txt</file>
-        <file>maps/song4/info.txt</file>
-        <file>maps/song4/music.mp3</file>
-        <file>maps/song4/Track0.txt</file>
-        <file>maps/song4/Track1.txt</file>
-        <file>maps/song4/Track2.txt</file>
-        <file>maps/song4/Track3.txt</file>
-        <file>maps/song5/info.txt</file>
-        <file>maps/song5/music.mp3</file>
-        <file>maps/song5/Track0.txt</file>
-        <file>maps/song5/Track1.txt</file>
-        <file>maps/song5/Track2.txt</file>
-        <file>maps/song5/Track3.txt</file>
+        <file>maps/MEGALOVANIA/cover.png</file>
+        <file>maps/MEGALOVANIA/info.txt</file>
+        <file>maps/MEGALOVANIA/music.mp3</file>
+        <file>maps/MEGALOVANIA/Track0.txt</file>
+        <file>maps/MEGALOVANIA/Track1.txt</file>
+        <file>maps/MEGALOVANIA/Track2.txt</file>
+        <file>maps/MEGALOVANIA/Track3.txt</file>
+        <file>maps/HollowKnight/cover.png</file>
+        <file>maps/HollowKnight/info.txt</file>
+        <file>maps/HollowKnight/music.mp3</file>
+        <file>maps/HollowKnight/Track0.txt</file>
+        <file>maps/HollowKnight/Track1.txt</file>
+        <file>maps/HollowKnight/Track2.txt</file>
+        <file>maps/HollowKnight/Track3.txt</file>
     </qresource>
     <qresource prefix="/movie">
         <file>movies/video1.mp4</file>
