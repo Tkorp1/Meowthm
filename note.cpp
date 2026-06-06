@@ -88,22 +88,35 @@ qint64 Hold::getTailTime() const{
 }
 
 void Hold::setState(HoldState state) {
+    if (m_state == HOLD_MISS || m_state == HOLD_FINISHED){
+        return;
+    }
     m_state = state;
     update();
+}
+
+HoldState Hold::getState()const{
+    return m_state;
+}
+
+void Hold::setAttachedHead(bool value){
+    m_showAttachedHead = value;
+}
+bool Hold::getAttachedHead() const{
+    return m_showAttachedHead;
 }
 
 void Hold::paintEvent(QPaintEvent* event){
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    const int headHeight = 20;
     // 1. body（尾巴）
     painter.setPen(Qt::NoPen);
     QColor bodyColor;
     if(m_state == HOLD_PRESSED || m_state == HOLD_FINISHED){
-        bodyColor = m_tailPressedColor;
+        bodyColor = QColor((m_r + 255)/2, (m_g + 255)/ 2, (m_b + 255)/2, 180);
     }
     else if(m_state == HOLD_MISS){
-        bodyColor = QColor(0,0,0);
+        bodyColor = QColor(80,80,80);
     }
     else{
         bodyColor = QColor(m_r, m_g, m_b, 120);
@@ -113,7 +126,7 @@ void Hold::paintEvent(QPaintEvent* event){
         0,
         0,
         width(),
-        height() - headHeight
+        height() - HOLD_HEAD_HEIGHT
         );
     // 2. head（tap部分）
     QColor headColor = getHeadColor();
@@ -124,13 +137,20 @@ void Hold::paintEvent(QPaintEvent* event){
     else if(m_state == HOLD_MISS){
         headColor.setAlpha(80);
     }
-    painter.setBrush(headColor);
-    painter.drawRoundedRect(
-        0,
-        height() - headHeight,
-        width(),
-        headHeight,
-        5,
-        5
-        );
+    if(
+        m_state != HOLD_PRESSED &&
+        m_state != HOLD_FINISHED
+        )
+    {
+        painter.setBrush(headColor);
+
+        painter.drawRoundedRect(
+            0,
+            height() - HOLD_HEAD_HEIGHT,
+            width(),
+            HOLD_HEAD_HEIGHT,
+            5,
+            5
+            );
+    }
 }
