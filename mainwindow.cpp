@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     , frameWidth(0)
     , frameHeight(0)
 {
+    this->setFixedSize(1200, 800);
     // this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
 
