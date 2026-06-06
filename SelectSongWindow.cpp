@@ -111,16 +111,28 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 QTextStream in(&infoFile);
                 while (!in.atEnd()) {
                     QString line = in.readLine();
-                    if (line.startsWith("SongName:")) {
-                        songName = line.mid(9).trimmed(); // 截取歌名
-                    } else if (line.startsWith("CoverFile:")) {
+                    // 加入 Qt::CaseInsensitive，大小写 SongName 都能认！
+                    if (line.startsWith("SongName:", Qt::CaseInsensitive)) {
+                        songName = line.mid(9).trimmed();
+                    } else if (line.startsWith("CoverFile:", Qt::CaseInsensitive)) {
                         QString cName = line.mid(10).trimmed();
-                        if (!cName.isEmpty() && cName != "cover.jpg") {
-                            coverPath = mapFolderPath + "/" + cName; // 拼接真实图片路径
+                        // 【修复】：删掉了那个奇葩的 != "cover.jpg" 判断
+                        if (!cName.isEmpty()) {
+                            coverPath = mapFolderPath + "/" + cName;
                         }
                     }
                 }
                 infoFile.close();
+            }
+
+            // 【新增黑科技】：智能保底机制。
+            // 如果 info.txt 里没写曲绘，或者写错了，我们自动去文件夹里找！
+            if (coverPath.isEmpty() || !QFile::exists(coverPath)) {
+                if (QFile::exists(mapFolderPath + "/cover.jpg")) {
+                    coverPath = mapFolderPath + "/cover.jpg";
+                } else if (QFile::exists(mapFolderPath + "/cover.png")) {
+                    coverPath = mapFolderPath + "/cover.png";
+                }
             }
 
             // --- 开始生成 UI 卡片 ---
@@ -157,7 +169,21 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 }
             )").arg(bgStyle));
 
-            card->setText(songName); // 显示真实的歌名
+            // ==========================================
+            // 【UI 升级】：智能文字截断与悬浮提示
+            // ==========================================
+            // 1. 设置悬浮提示（鼠标放上去会弹出一个小黑框显示全名）
+            card->setToolTip(songName);
+
+            // 2. 使用文字测量仪，模拟 18px 粗体的大小
+            QFont tempFont("Arial", 14, QFont::Bold);
+            QFontMetrics fm(tempFont);
+
+            // 3. 如果名字宽度超过 190 像素（卡片宽 250），自动切断并加上 "..."
+            QString elidedName = fm.elidedText(songName, Qt::ElideRight, 190);
+
+            card->setText(elidedName); // 显示处理过的歌名
+            // ==========================================
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
             // ... 上面是你的生成卡片代码 ...

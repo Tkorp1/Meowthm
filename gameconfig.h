@@ -31,9 +31,6 @@ public:
     qint64 getCurrentOffset() const { return m_currentOffset; } // 偏移
     void setCurrentOffset(qint64 offset);
 
-    // 歌曲列表接口
-    QList<SongInfo> getSongs() const { return m_songs; }
-    void loadSongs();   // 加载歌曲列表（可扫描 maps 目录或读取配置文件）
 
     int getHitSoundVolume() const { return m_hitSoundVolume; }
     void setHitSoundVolume(int volume);
@@ -75,7 +72,6 @@ private:
     QString m_currentPlayer;
     qint64 m_currentOffset;
 
-    QList<SongInfo> m_songs;
 
     int m_hitSoundVolume;
 

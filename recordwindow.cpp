@@ -39,7 +39,7 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     mainLayout->setAlignment(Qt::AlignCenter);
     mainLayout->setSpacing(30);
 
-    QLabel *title = new QLabel("LIVE RECORD TERMINAL // 盲打录制仪", this);
+    QLabel *title = new QLabel("LIVE RECORD TERMINAL // 智能录谱仪", this);
     title->setStyleSheet("color: #00BFFF; font-size: 40px; font-weight: 900; letter-spacing: 5px;");
     title->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(title);

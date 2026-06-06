@@ -179,7 +179,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         hitBox->lower();
     }
     // 创建轨道按键发光特效
-    const int lightHeight = 250;
+    const int lightHeight = 200;
     // const int boxTopY = hitLineY - judgeBoxHeight / 2;
     for (int i = 0; i < 4; ++i) {
         trackHighlights[i] = new QFrame(this);
@@ -197,11 +197,27 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
             );
         // 使用该轨道的专属颜色生成线性渐变
         // 底部(stop:0)透明度 180，顶部(stop:1)完全透明 0
-        trackHighlights[i]->setStyleSheet(QString(
+        /*trackHighlights[i]->setStyleSheet(QString(
                                               "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
                                               "stop:0 rgba(%1, %2, %3, 100), stop:1 rgba(%1, %2, %3, 0));"
                                               "border-bottom-left-radius: 8px;"
                                               "border-bottom-right-radius: 8px;"
+                                              ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
+        */
+        trackHighlights[i]->setStyleSheet(QString(
+
+                                              "background:qlineargradient("
+
+                                              "x1:0,y1:1,x2:0,y2:0,"
+
+                                              "stop:0 rgba(%1,%2,%3,255),"
+
+                                              "stop:0.15 rgba(%1,%2,%3,180),"
+
+                                              "stop:0.5 rgba(%1,%2,%3,80),"
+
+                                              "stop:1 rgba(%1,%2,%3,0));"
+
                                               ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
         trackHighlights[i]->setAttribute(Qt::WA_TransparentForMouseEvents);
         trackHighlights[i]->hide();
