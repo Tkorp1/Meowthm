@@ -43,9 +43,9 @@ PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
     m_dynamicText->setReadOnly(true);
     m_dynamicText->setStyleSheet("background-color:transparent; color:rgb(108,83,241) ; font-size: 24px; padding: 5px;");
 
-    // 新增的额外随机文本框（位置、大小可自行调整）
+    // 新增的随机文本框
     m_extraText = new QTextEdit(this);
-    m_extraText->setGeometry(700, 400, 400, 150);   // 临时位置，后面可改
+    m_extraText->setGeometry(700, 400, 400, 250);
     m_extraText->setReadOnly(true);
     m_extraText->setStyleSheet("background-color:transparent; color:black; font-size: 18px;"); // 黑色字体，多行
     m_extraText->setPlainText(""); // 初始为空
@@ -89,14 +89,15 @@ void PokeWindow::initDynamicContent()
         imagePath = ":/image/poke1.png";
         textContent = "戳到本蛋了喵呜！\n你这个蛋ꐦ";
         extraContent = "智慧小咸鱼，三个蛋中的炸蛋，Meowthm项目的主力，负责了工程量巨大的许多页面的美化和修bug"
-                       "因此这个游戏也选用了这个蛋喜欢的风格";
+                       "因此这个游戏也选用了这个蛋喜欢的风格\n\\o/咸鱼大人\\o/是蛋中的太阳";
         break;
     case 2:
         imagePath = ":/image/poke2.png";
         textContent = "这么喜欢戳我？欺负我没法戳你是吧，已将你的账号列入黑名单，"
                       "请Vxxy4216 50吃疯狂星期四解封，要不然别想玩Meowthm了喵～";
         extraContent = "xueqiu，三个蛋中唯一真正蛋，把剩下两个人类带坏成为蛋了。因为喜欢跳舞的线，选用了雪球这个名字，实际上"
-                       "和雪球完全相反，像一个火方，又或者更贴切的，蛋。没错，这个令人忍俊不禁的戳页面，就是本蛋负责的！";
+                       "和雪球完全相反，像一个火方，又或者更贴切的，蛋。提供了这个游戏大部分的搞笑点子。"
+                       "\n“没错，这个令人忍俊不禁的戳页面，就是本蛋负责的！”";
         break;
     case 3:
         imagePath = ":/image/poke3.png";
