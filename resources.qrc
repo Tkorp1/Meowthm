@@ -50,6 +50,7 @@
         <file>maps/song5/Track1.txt</file>
         <file>maps/song5/Track2.txt</file>
         <file>maps/song5/Track3.txt</file>
+        <file>maps/song1/曲绘.png</file>
     </qresource>
     <qresource prefix="/movie">
         <file>movies/video1.mp4</file>
