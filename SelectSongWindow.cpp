@@ -225,7 +225,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     // 超大背景水印排版 (替代了那些花里胡哨的图片)
     QLabel *hugeText = new QLabel("MEOWTHM\nSYSTEM", rightArea);
     hugeText->setAlignment(Qt::AlignRight);
-    hugeText->setStyleSheet("color: rgba(255, 255, 255, 10); font-size: 80px; font-weight: 900; line-height: 80px;");
+    hugeText->setStyleSheet("color: rgba(255, 255, 255, 50); font-size: 80px; font-weight: 900; line-height: 80px;");
     rightLayout->addWidget(hugeText);
 
     rightLayout->addStretch();
@@ -299,31 +299,75 @@ SelectSongWindow::~SelectSongWindow() {}
 // ==========================================
 // 纯代码绘制深邃的赛博朋克极简背景
 // ==========================================
+// ==========================================
+// 终极赛博朋克背景：高清底图 + HUD 几何光效
+// ==========================================
 void SelectSongWindow::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 绘制深色斜向渐变背景，完全代替 bg_select.png
-    QLinearGradient bgGradient(0, 0, width(), height());
-    bgGradient.setColorAt(0.0, QColor(15, 20, 30));   // 左上极夜黑
-    bgGradient.setColorAt(0.5, QColor(25, 35, 55));   // 中间深灰蓝
-    bgGradient.setColorAt(1.0, QColor(10, 15, 25));   // 右下深渊黑
-    painter.fillRect(rect(), bgGradient);
+    // ==========================================
+    // 1. 绘制底层：你的绝美素材图
+    // ==========================================
+    // ⚠️【注意】：请确保下面这个路径，和你项目中 .qrc 文件里的真实路径完全一致！
+    // 比如：":/image/images/设置界面.jpg"
+    QPixmap bg(":/image/images/bg_select.jpg");
+    if (!bg.isNull()) {
+        painter.drawPixmap(this->rect(), bg); // 完美拉伸铺满全屏
+    } else {
+        // 万一图没加载出来，保底一个深色
+        painter.fillRect(rect(), QColor(10, 15, 25));
+    }
 
-    // 在右侧画几个倾斜的巨大半透明几何光带，增加设计感
+    // ==========================================
+    // 2. 环境压暗层 (非常重要！)
+    // ==========================================
+    // 给底图盖上一层 60% 不透明度的深渊黑，让背景“沉”下去，把前方 UI 凸显出来
+    painter.fillRect(rect(), QColor(10, 15, 25, 150));
+
+    // ==========================================
+    // 3. 绘制左侧歌单区的“专属舞台光”
+    // ==========================================
+    QLinearGradient leftGlow(0, 0, 600, 0);
+    leftGlow.setColorAt(0.0, QColor(0, 191, 255, 40)); // 左边缘泛出科技蓝光
+    leftGlow.setColorAt(1.0, QColor(0, 191, 255, 0));  // 向右侧渐隐消失
+    painter.fillRect(0, 0, 600, height(), leftGlow);
+
+    // ==========================================
+    // 4. 绘制右侧巨型多边形切割光带 (呼应图里的三角形)
+    // ==========================================
     QPainterPath path;
-    path.moveTo(width() * 0.6, 0);
-    path.lineTo(width() * 0.9, 0);
-    path.lineTo(width(), height() * 0.5);
+    path.moveTo(width() * 0.65, 0);
+    path.lineTo(width() * 0.90, 0);
+    path.lineTo(width(), height() * 0.4);
     path.lineTo(width(), height());
-    path.lineTo(width() * 0.5, height());
+    path.lineTo(width() * 0.45, height());
     path.closeSubpath();
 
     QLinearGradient shapeGradient(width() * 0.5, 0, width(), height());
-    shapeGradient.setColorAt(0.0, QColor(0, 191, 255, 15)); // 微微发光的霓虹蓝
+    shapeGradient.setColorAt(0.0, QColor(0, 191, 255, 25));   // 霓虹蓝
+    shapeGradient.setColorAt(0.5, QColor(138, 43, 226, 20));  // 赛博紫 (完美契合你原图左侧的紫色星云！)
     shapeGradient.setColorAt(1.0, QColor(255, 255, 255, 5));
     painter.fillPath(path, shapeGradient);
+
+    // 沿切割边缘画一条锐利的激光线
+    painter.setPen(QPen(QColor(0, 191, 255, 120), 2));
+    painter.drawLine(width() * 0.65, 0, width() * 0.45, height());
+
+    // ==========================================
+    // 5. 机甲 HUD 取景器边框 (屏幕四角的帅气折线)
+    // ==========================================
+    painter.setPen(QPen(QColor(255, 255, 255, 80), 3));
+    int margin = 20;
+    int lineLen = 40;
+
+    // 左上角
+    painter.drawLine(margin, margin, margin + lineLen, margin);
+    painter.drawLine(margin, margin, margin, margin + lineLen);
+    // 右下角
+    painter.drawLine(width() - margin, height() - margin, width() - margin - lineLen, height() - margin);
+    painter.drawLine(width() - margin, height() - margin, width() - margin, height() - margin - lineLen);
 
     QWidget::paintEvent(event);
 }
