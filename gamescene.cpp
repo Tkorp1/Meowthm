@@ -225,7 +225,31 @@ void GameScene::gameOver(){
 void GameScene::paintEvent(QPaintEvent *event){
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-
+    for(Track* track : tracks){
+        Note* note =
+            track->getCurrentHoldingNote();
+        if(note == nullptr)
+        continue;
+        Hold* hold =
+            dynamic_cast<Hold*>(note);
+        if(hold == nullptr)
+        continue;
+        if(!hold->getAttachedHead())
+        continue;
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(
+            hold->getHeadColor()
+            );
+        const int headHeight = 20;
+        painter.drawRoundedRect(
+            hold->x(),
+            hitLineY - headHeight,
+            hold->width(),
+            headHeight,
+            5,
+            5
+            );
+    }
 }
 
 

@@ -32,6 +32,8 @@ protected:
     // 2.颜色
     int m_r = 255, m_g = 255, m_b = 255;
 
+    static constexpr int HOLD_HEAD_HEIGHT = 20;
+
 
 public:
 
@@ -86,6 +88,9 @@ protected:
     // Hold画图特殊：
     void paintEvent(QPaintEvent* event) override;
 
+    //是否被吸附
+    bool m_showAttachedHead = false;
+
 public:
     // 注意：相比 Tap，多了一个 _tailTime 参数，同样去掉了 _type 参数
     // 注意，hold的 noteHeight 是需要创建时根据时间和流速实时计算的
@@ -99,8 +104,13 @@ public:
     // 画图相关函数
     void setState(HoldState state);
 
+    HoldState getState() const;
+
     void setTailColors(const QColor& normal, const QColor& pressed);
 
+    void setAttachedHead(bool value);
+
+    bool getAttachedHead() const;
 
 };
 

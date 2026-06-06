@@ -75,6 +75,9 @@ public:
     // 8.设置note的父类指针，同时为初始的时候增加两秒的时间
     void setNoteParent(QWidget* parent);
 
+    // 9.获得当前正在按的Hold方便画图
+    Note* getCurrentHoldingNote() const;
+
 signals:
     // 9.向gamescene报告判定的信号，只需要声明不需要实现
     // 返回值建议 0=空, 1=Miss（hold的松手）, 2=Good, 3=Perfect

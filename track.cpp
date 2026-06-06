@@ -36,7 +36,9 @@ void Track::updateTrack(qint64 currentMusicTime, double currentSpeed){
             emit noteJudged(1);
             if (noteInTrack[i]->getType() == NoteType::HOLD) {
                 Note* missedHold = noteInTrack.takeAt(i);
-                missedHold->setMissed(); // 调用你刚写的虚化函数
+                // 使用新逻辑m_state
+                dynamic_cast<Hold*> (missedHold)->setState(HOLD_MISS);
+                // missedHold->setMissed(); // 调用你刚写的虚化函数
 
                 // 之前有残留的尸体？先清理掉防止内存泄漏
                 if (currentHoldingNote != nullptr) delete currentHoldingNote;
@@ -102,6 +104,9 @@ void  Track::checkHit(qint64 currentMusicTime){
             if (currentHoldingNote != nullptr) delete currentHoldingNote;
 
             currentHoldingNote = note; // 挂载到专属指针
+            // 设置为按下状态
+            dynamic_cast<Hold*>(note)->setState(HOLD_PRESSED);
+            dynamic_cast<Hold*>(note)->setAttachedHead(true);
             currentHoldHeadResult = 2;
             noteInTrack.takeFirst();   // 从队列移除，但不delete！！！
         } else {
@@ -115,6 +120,9 @@ void  Track::checkHit(qint64 currentMusicTime){
         if (note->getType() == NoteType::HOLD) {
             if (currentHoldingNote != nullptr) delete currentHoldingNote;
             currentHoldingNote = note;
+            // 设置为按下状态
+            dynamic_cast<Hold*>(note)->setState(HOLD_PRESSED);
+            dynamic_cast<Hold*>(note)->setAttachedHead(true);
             currentHoldHeadResult = 3;
             noteInTrack.takeFirst();
         } else {
@@ -140,14 +148,19 @@ bool Track::isReleased(qint64 currentMusicTime){
     if (timeUntilEnd > totalDuration * 0.4) {
         // 提前超过60%松手，miss
         emit noteJudged(1); // 触发 Miss，打断 Combo！
-        currentHoldingNote->setMissed();
+        // 更改为MISS
+        dynamic_cast<Hold*>(currentHoldingNote)->setState(HOLD_MISS);
+        dynamic_cast<Hold*>(currentHoldingNote)->setAttachedHead(false);
         currentHoldHeadResult = 1; // 标记为尸体
         return true;
     } else {
         // 发放头判分数！
         emit noteJudged(currentHoldHeadResult);
-        delete currentHoldingNote;
-        currentHoldingNote = nullptr;
+        // delete currentHoldingNote;
+        // currentHoldingNote = nullptr;
+        // 更改为FINISHED
+        dynamic_cast<Hold*>(currentHoldingNote)->setState(HOLD_FINISHED);
+        dynamic_cast<Hold*>(currentHoldingNote)->setAttachedHead(false);
         return false;
     }
 }
@@ -169,4 +182,10 @@ void Track::setNoteParent(QWidget* parent){
         note->show();
 
     }
+}
+
+// 获得正在按的Hold
+Note* Track::getCurrentHoldingNote() const
+{
+    return currentHoldingNote;
 }
