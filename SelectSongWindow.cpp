@@ -23,6 +23,7 @@
 #include <QTextStream>
 #include <QCoreApplication>
 #include <QVariant>
+#include <QScrollBar> //
 
 SelectSongWindow::SelectSongWindow(QWidget *parent)
     : QWidget(parent)
@@ -170,15 +171,47 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 
             // 2. 顶层：左侧的小巧精美曲绘 (盖在按钮上方，保持图片色彩透亮)
             QLabel *coverLabel = new QLabel(rowWidget);
-            coverLabel->setGeometry(10, 10, 80, 80); // 放在左侧，留出 10px 的呼吸边距
-            coverLabel->setAttribute(Qt::WA_TransparentForMouseEvents); // 绝对不能漏！让点击穿透到下面的按钮
+            coverLabel->setGeometry(10, 10, 80, 80);
+            coverLabel->setAttribute(Qt::WA_TransparentForMouseEvents); // 穿透点击
 
             if (!coverPath.isEmpty() && QFile::exists(coverPath)) {
-                coverLabel->setStyleSheet(QString("border-image: url(%1); border-radius: 8px;").arg(coverPath));
-            } else {
-                coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;"); // 无封面占位
-            }
+                // 【性能与画质的完美折中】：2倍超采样渲染 (适配 Mac 高分屏)
+                QPixmap src(coverPath);
+                if (!src.isNull()) {
+                    int renderSize = 160; // 渲染尺寸翻倍 (80 * 2)
 
+                    // 1. 高清缩放
+                    QPixmap scaled = src.scaled(renderSize, renderSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+
+                    // 2. 居中裁切
+                    int x = (scaled.width() - renderSize) / 2;
+                    int y = (scaled.height() - renderSize) / 2;
+                    scaled = scaled.copy(x, y, renderSize, renderSize);
+
+                    // 3. 高清画板绘制
+                    QPixmap rounded(renderSize, renderSize);
+                    rounded.fill(Qt::transparent);
+                    QPainter p(&rounded);
+                    p.setRenderHint(QPainter::Antialiasing);
+                    p.setRenderHint(QPainter::SmoothPixmapTransform); // 开启纹理平滑
+
+                    QPainterPath clipPath;
+                    // 【注意】：因为画布大了一倍，这里的圆角也要翻倍 (8 * 2 = 16)
+                    clipPath.addRoundedRect(0, 0, renderSize, renderSize, 16, 16);
+                    p.setClipPath(clipPath);
+                    p.drawPixmap(0, 0, scaled);
+                    p.end();
+
+                    // 4. 【关键魔法】：把 160x160 的极清图，压缩显示在 80x80 的 UI 框里！
+                    coverLabel->setPixmap(rounded);
+                    coverLabel->setScaledContents(true);
+                } else {
+                    coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;");
+                }
+            } else {
+                // ... 保持原来的无封面占位 ...
+                coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;");
+            }
             // 直接将整行加入垂直容器
             vbox->addWidget(rowWidget);
         }
@@ -188,9 +221,13 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     // 放入滚动区域
     // ==========================================
     QScrollArea *scrollArea = new QScrollArea(leftArea);
-    scrollArea->setWidget(listContainer); // 绑定刚刚新建的单列垂直容器
+    scrollArea->setWidget(listContainer);
     scrollArea->setWidgetResizable(true);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
+
+    // 【UX 优化】：让鼠标滚轮每次滚动的距离更长，手感更干脆！
+    scrollArea->verticalScrollBar()->setSingleStep(30);
+
 
     // 把滚动区域正式加入左侧大布局！
     leftLayout->addWidget(scrollArea);
