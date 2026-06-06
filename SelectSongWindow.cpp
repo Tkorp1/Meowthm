@@ -48,7 +48,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     leftLayout->setContentsMargins(0, 0, 0, 0);
 
     // 左侧大标题
-    QLabel *listTitle = new QLabel("TRACKS", leftArea);
+    QLabel *listTitle = new QLabel("SONGS", leftArea);
     listTitle->setStyleSheet("color: #00BFFF; font-size: 32px; font-weight: 900; letter-spacing: 5px;");
     leftLayout->addWidget(listTitle);
 
