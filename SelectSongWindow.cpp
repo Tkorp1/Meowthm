@@ -6,6 +6,7 @@
 #include "MainWindow.h"
 #include "gamescene.h"
 #include "gameconfig.h"
+#include "recordwindow.h"
 
 #include <QPushButton>
 #include <QPainter>
@@ -17,6 +18,11 @@
 #include <QGridLayout>
 #include <QScrollArea>
 #include <QLabel>
+#include <QDir>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+#include <QVariant>
 
 SelectSongWindow::SelectSongWindow(QWidget *parent)
     : QWidget(parent)
@@ -57,36 +63,81 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     grid->setSpacing(20);
     grid->setContentsMargins(0, 10, 10, 10);
 
-    QList<SongInfo> songs = GameConfig::instance()->getSongs();
-    if (songs.isEmpty()) {
-        QLabel *noSongLabel = new QLabel("NO TRACKS FOUND", gridContainer);
+    // ==========================================
+    // 【核心改造】：动态扫描本地 maps 文件夹 (跨平台绝对安全版)
+    // ==========================================
+    QString songsPath = QCoreApplication::applicationDirPath();
+
+#ifdef Q_OS_MAC
+    QDir macDir(songsPath);
+    macDir.cdUp(); macDir.cdUp(); macDir.cdUp(); // 跳出 .app 黑盒
+    songsPath = macDir.absolutePath();
+#endif
+
+    songsPath += "/maps"; // 拼接 maps 文件夹名
+
+    // 【无敌调试法】：在终端里打印出大厅到底在扫哪个文件夹！
+    qDebug() << "========================================";
+    qDebug() << "【选曲大厅扫描路径】:" << songsPath;
+    qDebug() << "========================================";
+
+    QDir songsDir(songsPath);
+    if (!songsDir.exists()) {
+        songsDir.mkpath("."); // 如果连 maps 文件夹都没有，就建一个
+    }
+
+    // 获取目录下所有不含 . 和 .. 的子文件夹
+    QStringList mapFolders = songsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    // ... 下面的 if (mapFolders.isEmpty()) 保持原样 ...
+    if (mapFolders.isEmpty()) {
+        QLabel *noSongLabel = new QLabel("NO TRACKS FOUND\n(请使用制谱工具生成，或放入 songs 文件夹)", gridContainer);
         noSongLabel->setStyleSheet("color: rgba(255,255,255,100); font-size: 24px; font-weight: bold;");
         grid->addWidget(noSongLabel, 0, 0);
     } else {
         int row = 0, col = 0;
-        for (int i = 0; i < songs.size(); ++i) {
-            const SongInfo &song = songs[i];
 
-            // 歌曲卡片
-            QPushButton *card = new QPushButton();
-            card->setFixedSize(250, 120); // 宽卡片
-            card->setObjectName(QString("card_%1").arg(i));
+        // 遍历找到的每一个谱面文件夹
+        for (int i = 0; i < mapFolders.size(); ++i) {
+            QString folderName = mapFolders[i];
+            QString mapFolderPath = songsPath + "/" + folderName;
 
+            // 默认属性
+            QString songName = folderName; // 如果没读到名字，就用文件夹名字顶替
+            QString coverPath = "";
 
-            QPixmap cover(song.coverPath);
-            QString bgStyle;
-
-
-            // TODO: 这里目前有点问题，有图片可能也无法显示
-            if (!cover.isNull()) {
-                // 1. 如果文件夹里有 cover.jpg，就把图片作为背景居中显示
-                bgStyle = QString("background-image: url(%1); background-position: center;").arg(song.coverPath);
-            } else {
-                // 2. 如果没封面，使用统一的纯色背景
-                bgStyle = "background-color: rgba(30, 40, 55, 200);";
+            // 读取这个文件夹里的 info.txt
+            QFile infoFile(mapFolderPath + "/info.txt");
+            if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                QTextStream in(&infoFile);
+                while (!in.atEnd()) {
+                    QString line = in.readLine();
+                    if (line.startsWith("SongName:")) {
+                        songName = line.mid(9).trimmed(); // 截取歌名
+                    } else if (line.startsWith("CoverFile:")) {
+                        QString cName = line.mid(10).trimmed();
+                        if (!cName.isEmpty() && cName != "cover.jpg") {
+                            coverPath = mapFolderPath + "/" + cName; // 拼接真实图片路径
+                        }
+                    }
+                }
+                infoFile.close();
             }
 
-            // 使用 QString::arg() 把生成的背景动态注入到 QSS 里
+            // --- 开始生成 UI 卡片 ---
+            QPushButton *card = new QPushButton();
+            card->setFixedSize(250, 120);
+
+            // 【黑科技】：直接把这个谱面的真实路径绑在按钮身上！
+            card->setProperty("mapFolderPath", mapFolderPath);
+
+            // 封面处理
+            QString bgStyle;
+            if (!coverPath.isEmpty() && QFile::exists(coverPath)) {
+                bgStyle = QString("background-image: url(%1); background-position: center;").arg(coverPath);
+            } else {
+                bgStyle = "background-color: rgba(30, 40, 55, 200);"; // 纯色垫底
+            }
+
             card->setStyleSheet(QString(R"(
                 QPushButton {
                     %1
@@ -102,32 +153,37 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 }
                 QPushButton:hover {
                     border-left: 5px solid #00BFFF;
-                    /* 如果是纯色背景，悬停时会微微变亮；如果是图片，则蓝色边框高亮 */
                     background-color: rgba(60, 80, 100, 250);
                 }
             )").arg(bgStyle));
 
-            card->setText(song.name);
-            m_cardButtons.append(card);
+            card->setText(songName); // 显示真实的歌名
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
+            // ... 上面是你的生成卡片代码 ...
             grid->addWidget(card, row, col);
             col++;
             if (col >= 2) { col = 0; row++; }
         }
-    }
+    } // <--- 这是 else 的结束括号
 
-    QScrollArea *scrollArea = new QScrollArea();
+    // ==========================================
+    // 【漏掉的核心修复】：把装满歌曲的容器放到左侧屏幕上！
+    // ==========================================
+    QScrollArea *scrollArea = new QScrollArea(leftArea);
     scrollArea->setWidget(gridContainer);
     scrollArea->setWidgetResizable(true);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
+
+    // 把滚动区域正式加入左侧大布局！
     leftLayout->addWidget(scrollArea);
 
     // ==========================================
     // 3. 右侧：纯文字排版 + 极简按钮区
     // ==========================================
     QWidget *rightArea = new QWidget(this);
+    // ... 后面的代码保持不变 ...
+
     QVBoxLayout *rightLayout = new QVBoxLayout(rightArea);
     rightLayout->setContentsMargins(40, 0, 0, 0);
     rightLayout->setAlignment(Qt::AlignTop | Qt::AlignRight);
@@ -181,6 +237,20 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     connect(pokeBtn, &QPushButton::clicked, this, &SelectSongWindow::onPoke);
     rightLayout->addWidget(pokeBtn, 0, Qt::AlignRight);
     rightLayout->addSpacing(15);
+
+    // ==========================================
+    // 【新增】：制谱器入口按钮
+    // ==========================================
+    QPushButton *recordBtn = new QPushButton("EDITOR / 制谱", rightArea);
+    recordBtn->setFixedSize(250, 50);
+    // 给制谱按钮换个稍微亮一点的边框颜色，彰显它的特殊地位！
+    QString editorStyle = menuBtnStyle;
+    editorStyle.replace("rgba(255,255,255,50)", "#32CD32");
+    recordBtn->setStyleSheet(editorStyle);
+    connect(recordBtn, &QPushButton::clicked, this, &SelectSongWindow::onRecord);
+    rightLayout->addWidget(recordBtn, 0, Qt::AlignRight);
+    rightLayout->addSpacing(15);
+
 
     QPushButton *profileBtn = new QPushButton("PROFILE / 档案", rightArea);
     profileBtn->setFixedSize(250, 50);
@@ -248,17 +318,18 @@ void SelectSongWindow::onSongCardClicked()
 {
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
     if (!btn) return;
-    int idx = m_cardButtons.indexOf(btn);
-    if (idx < 0) return;
 
-    QList<SongInfo> songs = GameConfig::instance()->getSongs();
-    if (idx >= songs.size()) return;
+    // 直接从被点击的按钮身上，把路径“撕”下来
+    QString mapPath = btn->property("mapFolderPath").toString();
+    if (mapPath.isEmpty()) return;
 
-    const SongInfo &song = songs[idx];
-    GameScene *game = new GameScene(song.mapFolderPath);
+    // 召唤游戏场景
+    GameScene *game = new GameScene(mapPath);
     game->setAttribute(Qt::WA_DeleteOnClose);
-    game->show();
+    game->showFullScreen(); // 【架构同步】：统一使用全屏
+
     this->hide();
+    this->deleteLater(); // 【架构同步】：安全销毁当前选曲窗口
 }
 
 void SelectSongWindow::onSettings() { SettingsWindow *window = new SettingsWindow(this); window->show(); }
@@ -266,3 +337,15 @@ void SelectSongWindow::onPoke() { PokeWindow *window = new PokeWindow(this); win
 void SelectSongWindow::onProfile() { ProfileWindow *window = new ProfileWindow(this); window->show(); }
 void SelectSongWindow::onAchievements() { AchievementsWindow *window = new AchievementsWindow(this); window->show(); }
 void SelectSongWindow::onBackToMain() { this->close(); if (parentWidget()) parentWidget()->show(); }
+
+
+// 【新增】：跳转到制谱仪的接力连招
+void SelectSongWindow::onRecord()
+{
+    RecordWindow *recordWin = new RecordWindow();
+    recordWin->setAttribute(Qt::WA_DeleteOnClose);
+    recordWin->showFullScreen();
+
+    this->hide();
+    this->deleteLater(); // 安全销毁大厅
+}

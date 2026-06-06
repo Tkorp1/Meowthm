@@ -1,5 +1,6 @@
 #include "recordwindow.h"
 #include "gameconfig.h"
+#include "SelectSongWindow.h" // 【新增】
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QKeyEvent>
@@ -60,7 +61,7 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     m_startBtn->setFixedSize(250, 60);
     m_startBtn->setStyleSheet("QPushButton { background-color: rgba(0, 191, 255, 50); border: 2px solid #00BFFF; color: white; font-size: 20px; font-weight: bold; border-radius: 10px; } QPushButton:hover { background-color: #00BFFF; color: black; }");
 
-    m_saveBtn = new QPushButton("💾 EXPORT MAP", this);
+    m_saveBtn = new QPushButton("EXPORT MAP", this);
     m_saveBtn->setFixedSize(250, 60);
     m_saveBtn->setStyleSheet("QPushButton { background-color: rgba(50, 205, 50, 50); border: 2px solid #32CD32; color: white; font-size: 20px; font-weight: bold; border-radius: 10px; } QPushButton:hover { background-color: #32CD32; color: black; }");
 
@@ -81,10 +82,24 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     // ==========================================
     connect(m_startBtn, &QPushButton::clicked, this, &RecordWindow::onStartRecord);
     connect(m_saveBtn, &QPushButton::clicked, this, &RecordWindow::onStopAndSave);
+
     connect(m_backBtn, &QPushButton::clicked, this, [this](){
         m_player->stop();
+
+        // 1. 召唤全新的选曲大厅，这样它就会自动重新扫描 maps 文件夹！
+        SelectSongWindow *selectWin = new SelectSongWindow();
+        selectWin->setAttribute(Qt::WA_DeleteOnClose);
+        selectWin->showFullScreen();
+
+        // 2. 安全销毁录音仪
+        this->hide();
         this->deleteLater();
-        // 如果这里要退回主菜单，记得加上 new MainWindow(); 之类的
+    });
+    // 【新增】：监听音乐状态，放完直接自动结算！
+    connect(m_player, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+        if (status == QMediaPlayer::EndOfMedia && m_isRecording) {
+            onStopAndSave(); // 音乐结束，自动执行导出！
+        }
     });
 
     this->setFocusPolicy(Qt::StrongFocus);
@@ -182,12 +197,12 @@ void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
 
 
 // ==========================================
-// 导出工程逻辑 (生成完整的谱面文件夹)
+// 导出工程逻辑 (完美适配 MapParser 引擎格式)
 // ==========================================
 void RecordWindow::onStopAndSave() {
     m_isRecording = false;
     m_player->stop();
-    m_statusLabel->setText("STATUS: EXPORTING... (正在封装谱面工程)");
+    m_statusLabel->setText("STATUS: EXPORTING... (正在适配 MapParser)");
     m_statusLabel->setStyleSheet("color: #32CD32; font-size: 24px;");
 
     if (m_recordedNotes.isEmpty()) {
@@ -195,57 +210,82 @@ void RecordWindow::onStopAndSave() {
         return;
     }
 
-    // 1. 生成一个专属的“谱面工程文件夹”
-    QString folderName = QString("CustomMap_%1").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
-    QDir dir;
-    if (!dir.exists(folderName)) {
-        dir.mkpath(folderName); // 自动创建文件夹
-    }
+    // 1. 统一归档到 maps 文件夹 (跨平台绝对安全版)
+    QString baseDir = QCoreApplication::applicationDirPath();
 
-    // 2. 生成音符数据文件 (假设你们叫 notes.txt)
-    QFile notesFile(folderName + "/notes.txt");
-    if (notesFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&notesFile);
+#ifdef Q_OS_MAC
+    QDir macDir(baseDir);
+    macDir.cdUp(); macDir.cdUp(); macDir.cdUp(); // 跳出 .app 黑盒
+    baseDir = macDir.absolutePath();
+#endif
 
-        // 按照你们的格式写入音符数据
-        out << m_recordedNotes.size() << "\n";
-        for (const RecordNote& note : m_recordedNotes) {
-            // 现在的格式：[类型 1=Tap/2=Hold] [轨道ID] [起始时间] [结束时间]
+    baseDir += "/maps";
 
-            out << note.type << " " << note.trackId << " " << note.timeMs << " " << note.endTime << "\n";
+    // 【无敌调试法】：打印出录制工具到底保存在了哪里！
+    qDebug() << "========================================";
+    qDebug() << "【录制保存路径】:" << baseDir;
+    qDebug() << "========================================";
 
-        }
-        notesFile.close();
-    } else {
-        QMessageBox::critical(this, "Error", "音符数据写入失败！");
-        return;
-    }
+    QDir dir(baseDir);
+    if (!dir.exists()) dir.mkpath(".");
+    QString folderName = baseDir + QString("/CustomMap_%1").arg(QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss"));
+    dir.mkpath(folderName);
 
-    // 3. 自动生成曲目配置文件 (假设你们叫 info.txt 或 config.ini)
-    // 这里提前帮你们的 MapParser 把壳子搭好！
+    // 2. 生成完全兼容的 info.txt
     QFile infoFile(folderName + "/info.txt");
     if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&infoFile);
         QFileInfo audioInfo(m_player->source().toLocalFile());
 
-        out << "SongName: 新建自制谱面\n";
-        out << "Composer: Unknown\n";
-        out << "Mapper: " << GameConfig::instance()->getCurrentPlayer() << "\n"; // 甚至可以自动填入玩家的ID！
-        out << "AudioFile: audio.mp3\n"; // 占位符，提示玩家把音乐放进来
-        out << "CoverFile: cover.jpg\n"; // 占位符
-        out << "Offset: 0\n";
+        // 统一音频命名为 music.xxx，对齐你们旧谱面的习惯
+        QString suffix = audioInfo.suffix();
+        QString standardAudioName = "music." + suffix;
+
+        // 【严格对齐 MapParser 的读取行数！】
+        out << "BPM: 60\n";  // 第 1 行：必须是 BPM！我们用 60 来规避数学运算
+        out << "SongName: " << audioInfo.completeBaseName() << "\n"; // 第 2 行：歌名
+        out << "MusicTime: " << m_player->duration() << "\n"; // 第 3 行：MapParser::getMusicTime() 要用！
+        out << "AudioFile: " << standardAudioName << "\n";
+        out << "CoverFile: cover.jpg\n";
 
         infoFile.close();
-        QFile::copy(audioInfo.filePath(), folderName + "/" + audioInfo.fileName());
+        QFile::copy(audioInfo.filePath(), folderName + "/" + standardAudioName);
     }
 
-    // 4. 完美收官提示
-    QString successMsg = QString(
-                             "制谱成功！共录制了 %1 个音符。\n\n"
-                             "已在游戏目录下生成谱面工程：\n【%2】\n\n"
-                             "里面包含了 notes.txt 和 info.txt。\n"
-                             "下一步：请手动将对应的 .mp3 音乐和曲绘图片放入该文件夹中，即可使用！"
-                             ).arg(m_recordedNotes.size()).arg(folderName);
+    // 3. 将一个大列表，分别拆装进 Track0.txt 到 Track3.txt
+    QFile trackFiles[4];
+    QTextStream* trackStreams[4];
+    for(int i = 0; i < 4; i++) {
+        trackFiles[i].setFileName(folderName + QString("/Track%1.txt").arg(i));
+        trackFiles[i].open(QIODevice::WriteOnly | QIODevice::Text);
+        trackStreams[i] = new QTextStream(&trackFiles[i]);
+    }
 
-    QMessageBox::information(this, "Export Success", successMsg);
+    // 4. 数据翻译：毫秒 -> 拍数 (beats)
+    for (const RecordNote& note : m_recordedNotes) {
+        int tid = note.trackId;
+        if(tid < 0 || tid > 3) continue;
+
+        // 【时间魔法】：将 ms 逆运算为 MapParser 想要的 beats
+        double startBeats = (note.timeMs / 1000.0) + 1.0;
+
+        if (note.type == 1) {
+            // 我们的录音仪: 1=Tap -> MapParser: 0=Tap
+            *(trackStreams[tid]) << "0 " << QString::number(startBeats, 'f', 3) << "\n";
+        } else if (note.type == 2) {
+            // 我们的录音仪: 2=Hold -> MapParser: 1=Hold
+            double endBeats = (note.endTime / 1000.0) + 1.0;
+            *(trackStreams[tid]) << "1 " << QString::number(startBeats, 'f', 3) << " " << QString::number(endBeats, 'f', 3) << "\n";
+        }
+    }
+
+    // 清理内存
+    for(int i = 0; i < 4; i++) {
+        delete trackStreams[i];
+        trackFiles[i].close();
+    }
+
+    QMessageBox::information(this, "Export Success",
+                             QString("完美适配 MapParser！\n共封装 %1 个音符至 4 条轨道。\n已生成至：\n%2")
+                                 .arg(m_recordedNotes.size()).arg(folderName));
 }

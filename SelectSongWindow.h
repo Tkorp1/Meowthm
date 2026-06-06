@@ -30,6 +30,8 @@ private slots:
     // 点击歌曲卡片槽函数
     void onSongCardClicked();
 
+    void onRecord();
+
 
 private:
     QList<QPushButton*> m_cardButtons;
