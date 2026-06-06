@@ -18,6 +18,8 @@ private:
     // 1.成绩数据
     GameState state;
 
+    QString m_mapPath;
+
     // 2.UI控件
     QLabel* titleLabel;
 
@@ -42,7 +44,7 @@ private slots:
     void onReturnMainMenu();
 
 public:
-    explicit ResultScene(const GameState& _state,
+    explicit ResultScene(const GameState& _state, QString mapPath,
                          QWidget *parent = nullptr);
 
     ~ResultScene();

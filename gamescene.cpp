@@ -214,9 +214,14 @@ void GameScene::gameOver(){
 
     player->stop();
 
-    ResultScene* resultscene = new ResultScene(state);
+    // 假设你在 GameScene 里保存路径的变量叫 m_mapPath 或者是传进来的 mapPath
+    ResultScene* result = new ResultScene(state, mapPath);
+    result->setAttribute(Qt::WA_DeleteOnClose);
+    result->showFullScreen();
+    this->hide();
+    this->deleteLater();
 
-    resultscene->show();
+
 
     close();
 

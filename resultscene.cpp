@@ -3,11 +3,14 @@
 #include <QFont>
 #include <QPainter>
 #include <QPainterPath>
+#include "SelectSongWindow.h"
+#include <QFile>
+#include <QTextStream>
 #include "mainwindow.h"
 #include "AnalysisWindow.h"
 
-ResultScene::ResultScene(const GameState& _state, QWidget *parent)
-    : QWidget(parent), state(_state)
+ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *parent)
+    : QWidget(parent), state(_state), m_mapPath(mapPath)
 {
 
     // 在结算界面弹出的那一瞬间，把这局的数据上报给全局档案库！
@@ -23,16 +26,22 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
     }
 
     // =========================
-    // 2. 动态获取曲绘与谱面路径
+    // 2. 从真实路径动态获取曲绘
     // =========================
-    QString coverPath;
-    QString mapPath;
-    for (const SongInfo& s : GameConfig::instance()->getSongs()) {
-        if (s.name == state.getCurrentSong()) {
-            coverPath = s.coverPath;
-            mapPath = s.mapFolderPath;
-            break;
+    QString coverPath = "";
+    QFile infoFile(m_mapPath + "/info.txt");
+    if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&infoFile);
+        while (!in.atEnd()) {
+            QString line = in.readLine();
+            if (line.startsWith("CoverFile:")) {
+                QString cName = line.mid(10).trimmed();
+                if (!cName.isEmpty() && cName != "cover.jpg") {
+                    coverPath = m_mapPath + "/" + cName;
+                }
+            }
         }
+        infoFile.close();
     }
 
     // 绘制曲绘面板 (x=700, y=70)
@@ -152,17 +161,14 @@ ResultScene::ResultScene(const GameState& _state, QWidget *parent)
         QPushButton:hover { background-color: #00BFFF; color: white; border: 2px solid white; }
     )");
 
-    connect(restartButton, &QPushButton::clicked, this, [this, mapPath]() {
-        if (!mapPath.isEmpty()) {
-            // 先立刻把当前的结算画面藏起来，防止视觉残留！
+    connect(restartButton, &QPushButton::clicked, this, [this]() {
+        if (!m_mapPath.isEmpty()) {
             this->hide();
 
-            // 新的游戏
-            GameScene* game = new GameScene(mapPath);
+            GameScene* game = new GameScene(m_mapPath);
             game->setAttribute(Qt::WA_DeleteOnClose);
-            game->show();
+            game->showFullScreen(); // 【架构同步】：必须强制全屏！
 
-            // 不要用 close()，用 deleteLater() 让 Qt 在安全的空闲时间自动回收它
             this->deleteLater();
         }
     });
@@ -197,9 +203,14 @@ ResultScene::~ResultScene()
 
 void ResultScene::onReturnMainMenu()
 {
-    MainWindow* menu = new MainWindow();
-    menu->show();
-    close();
+    // 召唤全新的选曲大厅（会自动重新扫描你的最新谱面）
+    SelectSongWindow* selectWin = new SelectSongWindow();
+    selectWin->setAttribute(Qt::WA_DeleteOnClose);
+    selectWin->showFullScreen();
+
+    // 优雅销毁当前结算界面
+    this->hide();
+    this->deleteLater();
 }
 
 // =========================
