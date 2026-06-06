@@ -107,18 +107,23 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
             QString songName = folderName;
             QString coverPath = "";
 
-            // 读取 info.txt
+            // ==========================================
+            // 【防弹护盾 1】：安全读取 info.txt
+            // ==========================================
             QFile infoFile(mapFolderPath + "/info.txt");
             if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QTextStream in(&infoFile);
-                while (!in.atEnd()) {
-                    QString line = in.readLine();
+                int lineCount = 0;
+                // 限制：最多只读 50 行，防止读取到几百 MB 的假文本/乱码文件导致死机
+                while (!in.atEnd() && lineCount < 50) {
+                    QString line = in.readLine(1024); // 每行最多读 1024 个字符
                     if (line.startsWith("SongName:", Qt::CaseInsensitive)) {
                         songName = line.mid(9).trimmed();
                     } else if (line.startsWith("CoverFile:", Qt::CaseInsensitive)) {
                         QString cName = line.mid(10).trimmed();
                         if (!cName.isEmpty()) coverPath = mapFolderPath + "/" + cName;
                     }
+                    lineCount++;
                 }
                 infoFile.close();
             }
@@ -129,13 +134,10 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 else if (QFile::exists(mapFolderPath + "/cover.png")) coverPath = mapFolderPath + "/cover.png";
             }
 
-            // ==========================================
-            // 【核心 UI 重构】：长条形卡片 (底层按钮 + 顶层曲绘)
-            // ==========================================
+            // UI 框架
             QWidget *rowWidget = new QWidget();
-            rowWidget->setFixedSize(520, 100); // 宽度拉满到 520，高度收缩到 100
+            rowWidget->setFixedSize(520, 100);
 
-            // 1. 底层：长条形磨砂按钮 (覆盖整行，负责点击和深色背景)
             QPushButton *card = new QPushButton(rowWidget);
             card->setFixedSize(520, 100);
             card->setProperty("mapFolderPath", mapFolderPath);
@@ -152,7 +154,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                     font-size: 24px;
                     font-weight: bold;
                     text-align: left;
-                    padding-left: 110px; /* 【核心魔法】：把文字往右推，给曲绘留出 100px 的空间！ */
+                    padding-left: 110px;
                 }
                 QPushButton:hover {
                     border-left: 5px solid #00BFFF;
@@ -160,61 +162,70 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 }
             )");
 
-            // --- 智能文字截断与悬浮提示 ---
             card->setToolTip(songName);
             QFont tempFont("Arial", 24, QFont::Bold);
             QFontMetrics fm(tempFont);
-            // 宽度空间大幅提升！现在可以显示长达 360px 的超长歌名了！
             QString elidedName = fm.elidedText(songName, Qt::ElideRight, 360);
             card->setText(elidedName);
 
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
-            // 2. 顶层：左侧的小巧精美曲绘 (盖在按钮上方，保持图片色彩透亮)
+            // ==========================================
+            // 【防弹护盾 2】：极限安全的曲绘渲染
+            // ==========================================
             QLabel *coverLabel = new QLabel(rowWidget);
             coverLabel->setGeometry(10, 10, 80, 80);
-            coverLabel->setAttribute(Qt::WA_TransparentForMouseEvents); // 穿透点击
+            coverLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
 
+            bool imageLoaded = false;
             if (!coverPath.isEmpty() && QFile::exists(coverPath)) {
-                // 【性能与画质的完美折中】：2倍超采样渲染 (适配 Mac 高分屏)
-                QPixmap src(coverPath);
-                if (!src.isNull()) {
-                    int renderSize = 160; // 渲染尺寸翻倍 (80 * 2)
+                QPixmap src;
+                // 使用 load() 替代直接构造，能安全捕获损坏的图片格式
+                if (src.load(coverPath)) {
+                    // 确保图片有实体，且宽高不是 0
+                    if (!src.isNull() && src.width() > 0 && src.height() > 0) {
 
-                    // 1. 高清缩放
-                    QPixmap scaled = src.scaled(renderSize, renderSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+                        // 【核心拦截】：如果原图太大（比如4K图），在裁剪前先粗略压扁它，绝对防止内存溢出！
+                        if (src.width() > 2000 || src.height() > 2000) {
+                            src = src.scaled(1000, 1000, Qt::KeepAspectRatio, Qt::FastTransformation);
+                        }
 
-                    // 2. 居中裁切
-                    int x = (scaled.width() - renderSize) / 2;
-                    int y = (scaled.height() - renderSize) / 2;
-                    scaled = scaled.copy(x, y, renderSize, renderSize);
+                        int renderSize = 160;
+                        QPixmap scaled = src.scaled(renderSize, renderSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
 
-                    // 3. 高清画板绘制
-                    QPixmap rounded(renderSize, renderSize);
-                    rounded.fill(Qt::transparent);
-                    QPainter p(&rounded);
-                    p.setRenderHint(QPainter::Antialiasing);
-                    p.setRenderHint(QPainter::SmoothPixmapTransform); // 开启纹理平滑
+                        // 确保缩放成功，并且尺寸达标，防止 copy() 时发生越界崩溃
+                        if (!scaled.isNull() && scaled.width() >= renderSize && scaled.height() >= renderSize) {
+                            int x = (scaled.width() - renderSize) / 2;
+                            int y = (scaled.height() - renderSize) / 2;
+                            scaled = scaled.copy(x, y, renderSize, renderSize);
 
-                    QPainterPath clipPath;
-                    // 【注意】：因为画布大了一倍，这里的圆角也要翻倍 (8 * 2 = 16)
-                    clipPath.addRoundedRect(0, 0, renderSize, renderSize, 16, 16);
-                    p.setClipPath(clipPath);
-                    p.drawPixmap(0, 0, scaled);
-                    p.end();
+                            QPixmap rounded(renderSize, renderSize);
+                            rounded.fill(Qt::transparent);
+                            QPainter p(&rounded);
+                            p.setRenderHint(QPainter::Antialiasing);
+                            p.setRenderHint(QPainter::SmoothPixmapTransform);
 
-                    // 4. 【关键魔法】：把 160x160 的极清图，压缩显示在 80x80 的 UI 框里！
-                    coverLabel->setPixmap(rounded);
-                    coverLabel->setScaledContents(true);
-                } else {
-                    coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;");
+                            QPainterPath clipPath;
+                            clipPath.addRoundedRect(0, 0, renderSize, renderSize, 16, 16);
+                            p.setClipPath(clipPath);
+                            p.drawPixmap(0, 0, scaled);
+                            p.end();
+
+                            coverLabel->setPixmap(rounded);
+                            coverLabel->setScaledContents(true);
+                            imageLoaded = true; // 标记加载成功
+                        }
+                    }
                 }
-            } else {
-                // ... 保持原来的无封面占位 ...
+            }
+
+            // 如果任何一个环节加载失败（没图、图坏了、比例奇葩），统统使用默认纯色兜底！
+            if (!imageLoaded) {
                 coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;");
             }
-            // 直接将整行加入垂直容器
+
             vbox->addWidget(rowWidget);
+
         }
     } // <--- 这是 else 的结束括号
 
