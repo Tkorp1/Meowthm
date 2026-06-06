@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     , frameWidth(0)
     , frameHeight(0)
 {
-    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    // this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
 
     spriteSheet.load(":/image/big_image.png");
@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     titleLabel->adjustSize();
 
     // 4. 调用显示函数
-    this->showFullScreen();
+    // this->showFullScreen();
 
     setFocus();
 }
@@ -178,10 +178,11 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
 void MainWindow::onSelectSong()
 {
+    // 召唤选曲大厅
     SelectSongWindow *window = new SelectSongWindow();
-    window->setAttribute(Qt::WA_DeleteOnClose);
-    window->show();
-    this->deleteLater();
+
+    // 【终极丝滑连招】：直接交给舞台去切换！不需要自己 show 和 deleteLater 了！
+    SceneManager::switchScene(window);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

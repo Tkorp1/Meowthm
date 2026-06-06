@@ -8,6 +8,8 @@
 #include <QPushButton>
 #include <QLabel>   // 新增：用于显示图片
 
+#include "scenemanager.h"
+
 
 class SelectSongWindow : public QWidget
 {
