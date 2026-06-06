@@ -56,12 +56,15 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     line->setStyleSheet("background-color: rgba(0, 191, 255, 100);");
     leftLayout->addWidget(line);
 
-    // 歌曲网格容器
-    QWidget *gridContainer = new QWidget();
-    gridContainer->setStyleSheet("background: transparent;");
-    QGridLayout *grid = new QGridLayout(gridContainer);
-    grid->setSpacing(20);
-    grid->setContentsMargins(0, 10, 10, 10);
+    // ==========================================
+    // 歌曲列表容器 (改为垂直单列排版)
+    // ==========================================
+    QWidget *listContainer = new QWidget();
+    listContainer->setStyleSheet("background: transparent;");
+    QVBoxLayout *vbox = new QVBoxLayout(listContainer);
+    vbox->setSpacing(15);
+    vbox->setContentsMargins(0, 10, 10, 10);
+    vbox->setAlignment(Qt::AlignTop); // 保证列表里的歌从上往下整齐堆叠
 
     // ==========================================
     // 【核心改造】：动态扫描本地 maps 文件夹 (跨平台绝对安全版)
@@ -90,114 +93,102 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     QStringList mapFolders = songsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
     // ... 下面的 if (mapFolders.isEmpty()) 保持原样 ...
     if (mapFolders.isEmpty()) {
-        QLabel *noSongLabel = new QLabel("NO TRACKS FOUND\n(请使用制谱工具生成，或放入 songs 文件夹)", gridContainer);
+        QLabel *noSongLabel = new QLabel("NO TRACKS FOUND\n(请使用制谱工具生成，或放入 maps 文件夹)", listContainer);
         noSongLabel->setStyleSheet("color: rgba(255,255,255,100); font-size: 24px; font-weight: bold;");
-        grid->addWidget(noSongLabel, 0, 0);
+        vbox->addWidget(noSongLabel);
     } else {
-        int row = 0, col = 0;
-
         // 遍历找到的每一个谱面文件夹
         for (int i = 0; i < mapFolders.size(); ++i) {
             QString folderName = mapFolders[i];
             QString mapFolderPath = songsPath + "/" + folderName;
 
-            // 默认属性
-            QString songName = folderName; // 如果没读到名字，就用文件夹名字顶替
+            QString songName = folderName;
             QString coverPath = "";
 
-            // 读取这个文件夹里的 info.txt
+            // 读取 info.txt
             QFile infoFile(mapFolderPath + "/info.txt");
             if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
                 QTextStream in(&infoFile);
                 while (!in.atEnd()) {
                     QString line = in.readLine();
-                    // 加入 Qt::CaseInsensitive，大小写 SongName 都能认！
                     if (line.startsWith("SongName:", Qt::CaseInsensitive)) {
                         songName = line.mid(9).trimmed();
                     } else if (line.startsWith("CoverFile:", Qt::CaseInsensitive)) {
                         QString cName = line.mid(10).trimmed();
-                        // 【修复】：删掉了那个奇葩的 != "cover.jpg" 判断
-                        if (!cName.isEmpty()) {
-                            coverPath = mapFolderPath + "/" + cName;
-                        }
+                        if (!cName.isEmpty()) coverPath = mapFolderPath + "/" + cName;
                     }
                 }
                 infoFile.close();
             }
 
-            // 【新增黑科技】：智能保底机制。
-            // 如果 info.txt 里没写曲绘，或者写错了，我们自动去文件夹里找！
+            // 智能保底图片
             if (coverPath.isEmpty() || !QFile::exists(coverPath)) {
-                if (QFile::exists(mapFolderPath + "/cover.jpg")) {
-                    coverPath = mapFolderPath + "/cover.jpg";
-                } else if (QFile::exists(mapFolderPath + "/cover.png")) {
-                    coverPath = mapFolderPath + "/cover.png";
-                }
+                if (QFile::exists(mapFolderPath + "/cover.jpg")) coverPath = mapFolderPath + "/cover.jpg";
+                else if (QFile::exists(mapFolderPath + "/cover.png")) coverPath = mapFolderPath + "/cover.png";
             }
 
-            // --- 开始生成 UI 卡片 ---
-            QPushButton *card = new QPushButton();
-            card->setFixedSize(250, 120);
+            // ==========================================
+            // 【核心 UI 重构】：长条形卡片 (底层按钮 + 顶层曲绘)
+            // ==========================================
+            QWidget *rowWidget = new QWidget();
+            rowWidget->setFixedSize(520, 100); // 宽度拉满到 520，高度收缩到 100
 
-            // 【黑科技】：直接把这个谱面的真实路径绑在按钮身上！
+            // 1. 底层：长条形磨砂按钮 (覆盖整行，负责点击和深色背景)
+            QPushButton *card = new QPushButton(rowWidget);
+            card->setFixedSize(520, 100);
             card->setProperty("mapFolderPath", mapFolderPath);
 
-            // 封面处理
-            QString bgStyle;
-            if (!coverPath.isEmpty() && QFile::exists(coverPath)) {
-                bgStyle = QString("background-image: url(%1); background-position: center;").arg(coverPath);
-            } else {
-                bgStyle = "background-color: rgba(30, 40, 55, 200);"; // 纯色垫底
-            }
-
-            card->setStyleSheet(QString(R"(
+            card->setStyleSheet(R"(
                 QPushButton {
-                    %1
+                    background-color: rgba(20, 25, 35, 180);
                     border-left: 5px solid #4682B4;
-                    border-top: 1px solid rgba(255,255,255,30);
-                    border-right: 1px solid rgba(255,255,255,30);
-                    border-bottom: 1px solid rgba(255,255,255,30);
+                    border-top: 1px solid rgba(255,255,255,20);
+                    border-right: 1px solid rgba(255,255,255,20);
+                    border-bottom: 1px solid rgba(255,255,255,20);
+                    border-radius: 12px;
                     color: white;
-                    font-size: 18px;
+                    font-size: 24px;
                     font-weight: bold;
                     text-align: left;
-                    padding-left: 20px;
+                    padding-left: 110px; /* 【核心魔法】：把文字往右推，给曲绘留出 100px 的空间！ */
                 }
                 QPushButton:hover {
                     border-left: 5px solid #00BFFF;
-                    background-color: rgba(60, 80, 100, 250);
+                    background-color: rgba(50, 70, 90, 200);
                 }
-            )").arg(bgStyle));
+            )");
 
-            // ==========================================
-            // 【UI 升级】：智能文字截断与悬浮提示
-            // ==========================================
-            // 1. 设置悬浮提示（鼠标放上去会弹出一个小黑框显示全名）
+            // --- 智能文字截断与悬浮提示 ---
             card->setToolTip(songName);
-
-            // 2. 使用文字测量仪，模拟 18px 粗体的大小
-            QFont tempFont("Arial", 14, QFont::Bold);
+            QFont tempFont("Arial", 24, QFont::Bold);
             QFontMetrics fm(tempFont);
+            // 宽度空间大幅提升！现在可以显示长达 360px 的超长歌名了！
+            QString elidedName = fm.elidedText(songName, Qt::ElideRight, 360);
+            card->setText(elidedName);
 
-            // 3. 如果名字宽度超过 190 像素（卡片宽 250），自动切断并加上 "..."
-            QString elidedName = fm.elidedText(songName, Qt::ElideRight, 190);
-
-            card->setText(elidedName); // 显示处理过的歌名
-            // ==========================================
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
-            // ... 上面是你的生成卡片代码 ...
-            grid->addWidget(card, row, col);
-            col++;
-            if (col >= 2) { col = 0; row++; }
+            // 2. 顶层：左侧的小巧精美曲绘 (盖在按钮上方，保持图片色彩透亮)
+            QLabel *coverLabel = new QLabel(rowWidget);
+            coverLabel->setGeometry(10, 10, 80, 80); // 放在左侧，留出 10px 的呼吸边距
+            coverLabel->setAttribute(Qt::WA_TransparentForMouseEvents); // 绝对不能漏！让点击穿透到下面的按钮
+
+            if (!coverPath.isEmpty() && QFile::exists(coverPath)) {
+                coverLabel->setStyleSheet(QString("border-image: url(%1); border-radius: 8px;").arg(coverPath));
+            } else {
+                coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;"); // 无封面占位
+            }
+
+            // 直接将整行加入垂直容器
+            vbox->addWidget(rowWidget);
         }
     } // <--- 这是 else 的结束括号
 
     // ==========================================
-    // 【漏掉的核心修复】：把装满歌曲的容器放到左侧屏幕上！
+    // 放入滚动区域
     // ==========================================
     QScrollArea *scrollArea = new QScrollArea(leftArea);
-    scrollArea->setWidget(gridContainer);
+    scrollArea->setWidget(listContainer); // 绑定刚刚新建的单列垂直容器
     scrollArea->setWidgetResizable(true);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
 
