@@ -23,6 +23,8 @@ public:
     void setSpeed(double speed);
     void registerHit();
 
+    void setHitSoundType(const QString& type);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void timerEvent(QTimerEvent *event) override;   // 使用定时器更新下落位置

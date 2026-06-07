@@ -57,12 +57,21 @@ public:
     void unlockAchievement(int id);
     void checkAchievements(const GameState& state); // 每次打完歌触发审核
 
+    QString getHitSoundType() const { return m_hitSoundType; }
+    void setHitSoundType(const QString& type) {
+        if (m_hitSoundType != type) {
+            m_hitSoundType = type;
+            emit hitSoundTypeChanged(m_hitSoundType);
+        }
+    }
+
 
 signals:
     void noteSpeedChanged(double newSpeed);
     void currentPlayerChanged(const QString &newName);
     void currentOffsetChanged(qint64 newOffset);
     void hitSoundVolumeChanged(int volume);
+    void hitSoundTypeChanged(const QString& type);
 
 private:
     explicit GameConfig(QObject *parent = nullptr);
@@ -86,6 +95,8 @@ private:
     QString m_playerBio;
 
     QSet<int> m_unlockedAchievements; // 存储已解锁成就的 ID
+
+    QString m_hitSoundType = "dong";
 };
 
 #endif // GAMECONFIG_H

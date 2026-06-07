@@ -17,6 +17,7 @@
     </qresource>
     <qresource prefix="/sound">
         <file>sounds/dong.wav</file>
+        <file>sounds/meow.wav</file>
     </qresource>
     <qresource prefix="/map">
         <file>maps/song1/info.txt</file>
