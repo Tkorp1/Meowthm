@@ -1,7 +1,5 @@
 <RCC>
     <qresource prefix="/image">
-        <file>bg.png</file>
-        <file>bg2.png</file>
         <file>poke1.png</file>
         <file>poke2.png</file>
         <file>big_image.png</file>
