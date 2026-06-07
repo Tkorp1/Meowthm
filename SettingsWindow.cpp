@@ -37,7 +37,7 @@ PreviewTrack::~PreviewTrack()
 
 void PreviewTrack::setSpeed(double speed)
 {
-    m_speed = speed;
+    m_speed = speed * 3;
 }
 
 void PreviewTrack::paintEvent(QPaintEvent *event)

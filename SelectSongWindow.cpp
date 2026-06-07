@@ -198,7 +198,6 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                             int x = (scaled.width() - renderSize) / 2;
                             int y = (scaled.height() - renderSize) / 2;
                             scaled = scaled.copy(x, y, renderSize, renderSize);
-
                             QPixmap rounded(renderSize, renderSize);
                             rounded.fill(Qt::transparent);
                             QPainter p(&rounded);
