@@ -23,7 +23,7 @@ PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
     // 固定文本2
     m_fixedText2 = new QTextEdit(this);
     m_fixedText2->setGeometry(508, 376, 500, 240);
-    m_fixedText2->setPlainText("这是第二个固定内容框。\n也可以放提示信息。");
+    m_fixedText2->setPlainText("此处是神秘作者的留言");
     m_fixedText2->setReadOnly(true);
     m_fixedText2->setStyleSheet("background-color: transparent; font-size: 14px;");
 

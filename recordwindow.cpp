@@ -15,9 +15,11 @@
 
 RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
 {
+    this->setFixedSize(1200, 800);
     // // 全屏无边框
     // setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
     // showFullScreen();
+
 
     m_isRecording = false;
     for (int i = 0; i < 4; ++i) m_pressTime[i] = -1;
@@ -37,7 +39,8 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     // 极简科幻 UI 布局
     // ==========================================
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
-    mainLayout->setAlignment(Qt::AlignCenter);
+    mainLayout->setAlignment(Qt::AlignTop);
+    mainLayout->setContentsMargins(0, 80, 0, 0); // 往下推 80 像素，留出呼吸感
     mainLayout->setSpacing(30);
 
     QLabel *title = new QLabel("LIVE RECORD TERMINAL // 智能录谱仪", this);
