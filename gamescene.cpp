@@ -12,7 +12,7 @@
 GameScene::GameScene(QString _mapPath, QWidget *parent)
     : QWidget{parent},
     mapPath(_mapPath),
-    currentMusicTime(-2000),
+    currentMusicTime(-8000),
     state(GameState()),
     gameEnded(false),
     isPaused(false)
@@ -95,7 +95,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
 
         QList<Note*> noteListTemp = mp.parse(path);
 
-        // 在塞入轨道前，给这根轨道上的每一个音符染上颜色！
+        // 在塞入轨道前，给这根轨道上的每一个音符染上颜色
         for(Note* note : noteListTemp) {
             note->setNoteColor(colorR[i], colorG[i], colorB[i]);
         }
@@ -114,6 +114,11 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     player->setAudioOutput(audioOutput);
 
     QString musicPath = dir.filePath("music.mp3");
+
+    m_musicStartOffset = GameConfig::instance()->getMusicStartOffset();
+    if (m_musicStartOffset != 0) {
+        player->setPosition(m_musicStartOffset);
+    }
 
     // 判断这是内置歌曲，还是外部自定义歌曲
     if (musicPath.startsWith(":")) {
@@ -162,7 +167,7 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
         vLine->setStyleSheet("background-color: rgba(255, 255, 255, 150);");
         vLine->setAttribute(Qt::WA_TransparentForMouseEvents); // 鼠标穿透，防挡底层事件
 
-        // 把这条线强行拉到最顶层，死死压在音符上面！
+        // 把这条线拉到最顶层
         vLine->raise();
     }
 
@@ -198,13 +203,8 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
             );
         // 使用该轨道的专属颜色生成线性渐变
         // 底部(stop:0)透明度 180，顶部(stop:1)完全透明 0
-        /*trackHighlights[i]->setStyleSheet(QString(
-                                              "background: qlineargradient(x1:0, y1:1, x2:0, y2:0, "
-                                              "stop:0 rgba(%1, %2, %3, 100), stop:1 rgba(%1, %2, %3, 0));"
-                                              "border-bottom-left-radius: 8px;"
-                                              "border-bottom-right-radius: 8px;"
-                                              ).arg(colorR[i]).arg(colorG[i]).arg(colorB[i]));
-        */
+
+
         trackHighlights[i]->setStyleSheet(QString(
 
                                               "background:qlineargradient("
@@ -245,7 +245,7 @@ void GameScene::gameOver(){
     updateTimer->stop();
     player->stop();
 
-    // 【架构同步】：完美切入结算幕布
+    // 切入结算幕布
     ResultScene* result = new ResultScene(state, mapPath);
     SceneManager::switchScene(result);
 }
@@ -254,33 +254,7 @@ void GameScene::gameOver(){
 void GameScene::paintEvent(QPaintEvent *event){
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    /*
-    for(Track* track : tracks){
-        Note* note =
-            track->getCurrentHoldingNote();
-        if(note == nullptr)
-        continue;
-        Hold* hold =
-            dynamic_cast<Hold*>(note);
-        if(hold == nullptr)
-        continue;
-        if(!hold->getAttachedHead())
-        continue;
-        painter.setPen(Qt::NoPen);
-        painter.setBrush(
-            hold->getHeadColor()
-            );
-        const int headHeight = 20;
-        painter.drawRoundedRect(
-            hold->x(),
-            hitLineY - headHeight,
-            hold->width(),
-            headHeight,
-            5,
-            5
-            );
-    }
-    */
+
 }
 
 

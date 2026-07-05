@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "scenemanager.h" // 【新增】：引入场景管理器
+#include "scenemanager.h"
 #include <QApplication>
 #include <QStackedWidget>
 

@@ -14,7 +14,7 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     : QWidget(parent), state(_state), m_mapPath(mapPath)
 {
 
-    // 在结算界面弹出的那一瞬间，把这局的数据上报给全局档案库！
+    // 在结算界面弹出时，把这局的数据上报给全局档案库
     GameConfig::instance()->addCombatRecord(state);
 
     // =========================
@@ -30,7 +30,7 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     // 2. 从真实路径动态获取曲绘和歌名
     // =========================
     QString coverPath = "";
-    QString realSongName = "UNKNOWN TRACK"; // 【核心修复 1】：这里声明并保底了 realSongName！
+    QString realSongName = "UNKNOWN TRACK"; // 这里声明并保底了 realSongName
 
     QFile infoFile(m_mapPath + "/info.txt");
     if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -43,13 +43,13 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
                     coverPath = m_mapPath + "/" + cName;
                 }
             } else if (line.startsWith("SongName:", Qt::CaseInsensitive)) {
-                realSongName = line.mid(9).trimmed(); // 【核心修复 2】：从文件里把真实的歌名读出来！
+                realSongName = line.mid(9).trimmed(); // 从文件里把真实的歌名读出来
             }
         }
         infoFile.close();
     }
 
-    // 智能保底机制：自动探测图片 (支持 png 和 jpg)
+    // 保底机制：自动探测图片 (支持 png 和 jpg)
     if (coverPath.isEmpty() || !QFile::exists(coverPath)) {
         if (QFile::exists(m_mapPath + "/cover.jpg")) coverPath = m_mapPath + "/cover.jpg";
         else if (QFile::exists(m_mapPath + "/cover.png")) coverPath = m_mapPath + "/cover.png";
@@ -70,25 +70,25 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     }
 
     // =========================
-    // 3. 标题 (Song Name) - 动态自适应排版
+    // 3. 标题 (Song Name)
     // =========================
     songNameLabel = new QLabel(this);
-    songNameLabel->setText(realSongName); // 现在它认识 realSongName 了！
+    songNameLabel->setText(realSongName);
     songNameLabel->setGeometry(930, 70, 600, 60);
 
-    // 【魔法算法】：计算文字宽度，太长就自动缩小字号！
+    // 计算文字宽度，太长就自动缩小字号！
     int fontSize = 52; // 默认最大字号
     QFont tmpFont(fontFamily, fontSize, QFont::Black);
     QFontMetrics fm(tmpFont);
 
-    // 只要文字像素宽度大于可用宽度 (580)，且字号还没缩到最小限制 (20)，就一直缩小！
+    // 只要文字像素宽度大于可用宽度 (580)，且字号还没缩到最小限制 (20)，就一直缩小
     while (fm.horizontalAdvance(realSongName) > 580 && fontSize > 20) {
-        fontSize -= 2; // 每次缩小 2 号
+        fontSize -= 2;
         tmpFont.setPointSize(fontSize);
-        fm = QFontMetrics(tmpFont); // 重新测量
+        fm = QFontMetrics(tmpFont);
     }
 
-    // 把算出来的完美字号 (fontSize) 动态塞进 CSS 样式表里
+    // 把算出来的字号 (fontSize) 塞进 CSS 样式表里
     songNameLabel->setStyleSheet(QString(
                                      "color: white; "
                                      "font-size: %1px; "
@@ -100,7 +100,6 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     // =========================
     // 4. 最终得分 (Total Score)
     // =========================
-    // 【核心修复 3】：确保这里带有 QLabel* 声明，解决 undeclared 报错！
     QLabel* scoreTitle = new QLabel("TOTAL SCORE", this);
     scoreTitle->setGeometry(930, 150, 300, 30);
     scoreTitle->setStyleSheet("color: #DDA0DD; font-size: 22px; font-weight: bold; letter-spacing: 5px; background: transparent;");
@@ -173,10 +172,10 @@ ResultScene::ResultScene(const GameState& _state, QString mapPath, QWidget *pare
     )");
 
     connect(reportButton, &QPushButton::clicked, this, [this]() {
-        // 【核心修改】：在 new 的时候传入 `this`，让它成为当前界面的子图层！
+        // 在 new 的时候传入 `this`，让它成为当前界面的子图层
         AnalysisWindow* aw = new AnalysisWindow(state, this);
-        aw->setGeometry(0, 0, this->width(), this->height()); // 绝对覆盖全屏
-        aw->raise(); // 强制提升到最顶层，盖住所有按钮和文字
+        aw->setGeometry(0, 0, this->width(), this->height()); // 覆盖全屏
+        aw->raise(); // 提升到最顶层，盖住所有按钮和文字
         aw->show();
     });
 
@@ -233,7 +232,7 @@ ResultScene::~ResultScene()
 
 void ResultScene::onReturnMainMenu()
 {
-    // 【架构同步】：丝滑返回选曲大厅！
+    // 返回选曲大厅
     SceneManager::switchScene(new SelectSongWindow());
 }
 

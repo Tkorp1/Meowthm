@@ -6,7 +6,7 @@
 #include <QList>
 
 #include <QPushButton>
-#include <QLabel>   // 新增：用于显示图片
+#include <QLabel>   // 用于显示图片
 
 #include "scenemanager.h"
 
@@ -38,7 +38,7 @@ private slots:
 private:
     QList<QPushButton*> m_cardButtons;
 
-    // 新增：四张图片控件
+    // 四张图片控件
     QLabel *m_image1;
     QLabel *m_image2;
     QLabel *m_image3;

@@ -38,8 +38,8 @@ private:
     // 10.数据分析
     QList<qint64> m_hitOffsets;     // 记录每一次敲击的误差(deltaT)
     QList<qint64> m_hitTimestamps;  // 记录每一次敲击发生的时间戳
-    int m_leftHandHits = 0;         // 左半脑(左手)负载
-    int m_rightHandHits = 0;        // 右半脑(右手)负载
+    int m_leftHandHits = 0;         // 左手负载
+    int m_rightHandHits = 0;        // 右手负载
 
 public:
     // 1.构造函数

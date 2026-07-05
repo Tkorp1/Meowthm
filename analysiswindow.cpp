@@ -69,7 +69,7 @@ AnalysisWindow::AnalysisWindow(const GameState& state, QWidget *parent)
 AnalysisWindow::~AnalysisWindow() {}
 
 // ==========================================
-// 核心数学引擎：计算高阶数据
+// 计算高阶数据
 // ==========================================
 void AnalysisWindow::calculateMetrics()
 {
@@ -118,7 +118,7 @@ void AnalysisWindow::calculateMetrics()
 }
 
 // ==========================================
-// 极具冲击力的可视化图表
+// 可视化图表
 // ==========================================
 void AnalysisWindow::paintEvent(QPaintEvent *event)
 {

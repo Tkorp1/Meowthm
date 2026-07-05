@@ -7,7 +7,7 @@
 #include "gamescene.h"
 #include "gameconfig.h"
 #include "recordwindow.h"
-#include "scenemanager.h" // 【新增】：引入场景管理器
+#include "scenemanager.h"
 
 #include <QPushButton>
 #include <QPainter>
@@ -59,7 +59,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     leftLayout->addWidget(line);
 
     // ==========================================
-    // 歌曲列表容器 (改为垂直单列排版)
+    // 歌曲列表容器 (垂直单列排版)
     // ==========================================
     QWidget *listContainer = new QWidget();
     listContainer->setStyleSheet("background: transparent;");
@@ -69,7 +69,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     vbox->setAlignment(Qt::AlignTop); // 保证列表里的歌从上往下整齐堆叠
 
     // ==========================================
-    // 【核心改造】：动态扫描本地 maps 文件夹 (跨平台绝对安全版)
+    // 动态扫描本地 maps 文件夹
     // ==========================================
     QString songsPath = QCoreApplication::applicationDirPath();
 
@@ -81,10 +81,10 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 
     songsPath += "/maps"; // 拼接 maps 文件夹名
 
-    // 【无敌调试法】：在终端里打印出大厅到底在扫哪个文件夹！
-    qDebug() << "========================================";
-    qDebug() << "【选曲大厅扫描路径】:" << songsPath;
-    qDebug() << "========================================";
+    // // 在终端里打印出大厅到底在扫哪个文件夹！
+    // qDebug() << "========================================";
+    // qDebug() << "【选曲大厅扫描路径】:" << songsPath;
+    // qDebug() << "========================================";
 
     QDir songsDir(songsPath);
     if (!songsDir.exists()) {
@@ -93,7 +93,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 
     // 获取目录下所有不含 . 和 .. 的子文件夹
     QStringList mapFolders = songsDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    // ... 下面的 if (mapFolders.isEmpty()) 保持原样 ...
+
     if (mapFolders.isEmpty()) {
         QLabel *noSongLabel = new QLabel("NO TRACKS FOUND\n(请使用制谱工具生成，或放入 maps 文件夹)", listContainer);
         noSongLabel->setStyleSheet("color: rgba(255,255,255,100); font-size: 24px; font-weight: bold;");
@@ -108,7 +108,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
             QString coverPath = "";
 
             // ==========================================
-            // 【防弹护盾 1】：安全读取 info.txt
+            // 安全读取 info.txt
             // ==========================================
             QFile infoFile(mapFolderPath + "/info.txt");
             if (infoFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -128,7 +128,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 infoFile.close();
             }
 
-            // 智能保底图片
+            // 保底图片
             if (coverPath.isEmpty() || !QFile::exists(coverPath)) {
                 if (QFile::exists(mapFolderPath + "/cover.jpg")) coverPath = mapFolderPath + "/cover.jpg";
                 else if (QFile::exists(mapFolderPath + "/cover.png")) coverPath = mapFolderPath + "/cover.png";
@@ -171,7 +171,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
             connect(card, &QPushButton::clicked, this, &SelectSongWindow::onSongCardClicked);
 
             // ==========================================
-            // 【防弹护盾 2】：极限安全的曲绘渲染
+            // 曲绘渲染
             // ==========================================
             QLabel *coverLabel = new QLabel(rowWidget);
             coverLabel->setGeometry(10, 10, 80, 80);
@@ -185,7 +185,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                     // 确保图片有实体，且宽高不是 0
                     if (!src.isNull() && src.width() > 0 && src.height() > 0) {
 
-                        // 【核心拦截】：如果原图太大（比如4K图），在裁剪前先粗略压扁它，绝对防止内存溢出！
+                        // 如果原图太大（比如4K图），在裁剪前先粗略压扁它，防止内存溢出
                         if (src.width() > 2000 || src.height() > 2000) {
                             src = src.scaled(1000, 1000, Qt::KeepAspectRatio, Qt::FastTransformation);
                         }
@@ -219,7 +219,7 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
                 }
             }
 
-            // 如果任何一个环节加载失败（没图、图坏了、比例奇葩），统统使用默认纯色兜底！
+            // 使用默认纯色兜底
             if (!imageLoaded) {
                 coverLabel->setStyleSheet("background-color: rgba(255, 255, 255, 15); border-radius: 8px;");
             }
@@ -237,18 +237,17 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     scrollArea->setWidgetResizable(true);
     scrollArea->setStyleSheet("QScrollArea { background: transparent; border: none; }");
 
-    // 【UX 优化】：让鼠标滚轮每次滚动的距离更长，手感更干脆！
+    // 让鼠标滚轮每次滚动的距离更长
     scrollArea->verticalScrollBar()->setSingleStep(30);
 
 
-    // 把滚动区域正式加入左侧大布局！
+    // 把滚动区域加入左侧大布局
     leftLayout->addWidget(scrollArea);
 
     // ==========================================
     // 3. 右侧：纯文字排版 + 极简按钮区
     // ==========================================
     QWidget *rightArea = new QWidget(this);
-    // ... 后面的代码保持不变 ...
 
     QVBoxLayout *rightLayout = new QVBoxLayout(rightArea);
     rightLayout->setContentsMargins(40, 0, 0, 0);
@@ -259,15 +258,15 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     backBtn->setFixedSize(120, 40);
     backBtn->setStyleSheet("QPushButton { background: transparent; color: rgba(255,255,255,150); font-size: 18px; font-weight: bold; border: none; text-align: right; } QPushButton:hover { color: white; }");
     connect(backBtn, &QPushButton::clicked, this, [this]() {
-        // 【终极丝滑连招】：只管 new，然后交给舞台去切换！
+        // 交给舞台去切换
         MainWindow* startMenu = new MainWindow();
         SceneManager::switchScene(startMenu);
     });
     rightLayout->addWidget(backBtn, 0, Qt::AlignRight);
 
-    rightLayout->addSpacing(80); // 留白是高级感的来源
+    rightLayout->addSpacing(80); // 留白
 
-    // 超大背景水印排版 (替代了那些花里胡哨的图片)
+    // 超大背景水印排版
     QLabel *hugeText = new QLabel("MEOWTHM\nSYSTEM", rightArea);
     hugeText->setAlignment(Qt::AlignRight);
     hugeText->setStyleSheet("color: rgba(255, 255, 255, 50); font-size: 80px; font-weight: 900; line-height: 80px;");
@@ -301,11 +300,11 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
     rightLayout->addSpacing(15);
 
     // ==========================================
-    // 【新增】：制谱器入口按钮
+    // 制谱器入口按钮
     // ==========================================
     QPushButton *recordBtn = new QPushButton("EDITOR / 制谱", rightArea);
     recordBtn->setFixedSize(250, 50);
-    // 给制谱按钮换个稍微亮一点的边框颜色，彰显它的特殊地位！
+    // 给制谱按钮换个稍微亮一点的边框颜色
     QString editorStyle = menuBtnStyle;
     editorStyle.replace("rgba(255,255,255,50)", "#32CD32");
     recordBtn->setStyleSheet(editorStyle);
@@ -342,9 +341,6 @@ SelectSongWindow::SelectSongWindow(QWidget *parent)
 SelectSongWindow::~SelectSongWindow() {}
 
 // ==========================================
-// 纯代码绘制深邃的赛博朋克极简背景
-// ==========================================
-// ==========================================
 // 终极赛博朋克背景：高清底图 + HUD 几何光效
 // ==========================================
 void SelectSongWindow::paintEvent(QPaintEvent *event)
@@ -353,22 +349,21 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // ==========================================
-    // 1. 绘制底层：你的绝美素材图
+    // 1. 绘制底层：素材图
     // ==========================================
-    // ⚠️【注意】：请确保下面这个路径，和你项目中 .qrc 文件里的真实路径完全一致！
-    // 比如：":/image/images/设置界面.jpg"
+
     QPixmap bg(":/image/images/bg_select.jpg");
     if (!bg.isNull()) {
-        painter.drawPixmap(this->rect(), bg); // 完美拉伸铺满全屏
+        painter.drawPixmap(this->rect(), bg); // 拉伸铺满全屏
     } else {
-        // 万一图没加载出来，保底一个深色
+        // 如果图没加载出来，保底一个深色
         painter.fillRect(rect(), QColor(10, 15, 25));
     }
 
     // ==========================================
-    // 2. 环境压暗层 (非常重要！)
+    // 2. 环境压暗层
     // ==========================================
-    // 给底图盖上一层 60% 不透明度的深渊黑，让背景“沉”下去，把前方 UI 凸显出来
+    // 给底图盖上一层 60% 不透明度的深渊黑，把前方 UI 凸显出来
     painter.fillRect(rect(), QColor(10, 15, 25, 150));
 
     // ==========================================
@@ -380,7 +375,7 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
     painter.fillRect(0, 0, 600, height(), leftGlow);
 
     // ==========================================
-    // 4. 绘制右侧巨型多边形切割光带 (呼应图里的三角形)
+    // 4. 绘制右侧巨型多边形切割光带
     // ==========================================
     QPainterPath path;
     path.moveTo(width() * 0.65, 0);
@@ -392,7 +387,7 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
 
     QLinearGradient shapeGradient(width() * 0.5, 0, width(), height());
     shapeGradient.setColorAt(0.0, QColor(0, 191, 255, 25));   // 霓虹蓝
-    shapeGradient.setColorAt(0.5, QColor(138, 43, 226, 20));  // 赛博紫 (完美契合你原图左侧的紫色星云！)
+    shapeGradient.setColorAt(0.5, QColor(138, 43, 226, 20));  // 赛博紫
     shapeGradient.setColorAt(1.0, QColor(255, 255, 255, 5));
     painter.fillPath(path, shapeGradient);
 
@@ -401,7 +396,7 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
     painter.drawLine(width() * 0.65, 0, width() * 0.45, height());
 
     // ==========================================
-    // 5. 机甲 HUD 取景器边框 (屏幕四角的帅气折线)
+    // 5. 机甲 HUD 取景器边框
     // ==========================================
     painter.setPen(QPen(QColor(255, 255, 255, 80), 3));
     int margin = 20;
@@ -417,9 +412,6 @@ void SelectSongWindow::paintEvent(QPaintEvent *event)
     QWidget::paintEvent(event);
 }
 
-// ==========================================
-// 槽函数部分保持不变
-// ==========================================
 void SelectSongWindow::onSongCardClicked()
 {
     QPushButton *btn = qobject_cast<QPushButton*>(sender());
@@ -427,7 +419,7 @@ void SelectSongWindow::onSongCardClicked()
     QString mapPath = btn->property("mapFolderPath").toString();
     if (mapPath.isEmpty()) return;
 
-    // 【终极丝滑连招】：只管 new 出来，剩下全交给舞台！
+    // 全交给舞台
     GameScene *game = new GameScene(mapPath);
     SceneManager::switchScene(game);
 }

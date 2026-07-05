@@ -13,9 +13,6 @@ class MapParser
 protected:
     int currentBPM; // 记录曲目bpm
 
-    // gpt说目前不需要gamescene所以先不管（）
-    // GameScene* currentGameScene; // 记录当前游戏界面，方便给新生成的音符 parent
-
     Track** ptrTracks; // 指向四个轨道的指针
     QString Path;//记录歌曲名的路径
 public:

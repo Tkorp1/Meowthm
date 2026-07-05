@@ -1,4 +1,4 @@
-BPM: 180
+BPM: 200
 SongName: Fragrance
 MusicTime: 262000
 AudioFile: music.mp3

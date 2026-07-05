@@ -27,7 +27,7 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     )";
 
     // ==========================================
-    // 左侧面板：PERSONAL DATA (个人数据区) - 保持不变
+    // 左侧面板：PERSONAL DATA (个人数据区)
     // ==========================================
     QFrame *leftPanel = new QFrame(this);
     leftPanel->setStyleSheet(panelStyle);
@@ -86,7 +86,7 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     bioHeader->setStyleSheet("color: #A9A9A9; font-size: 16px; background: transparent; border: none;");
     leftLayout->addWidget(bioHeader);
 
-    // 【修改】：从全局配置读取真实简介
+    // 从全局配置读取真实简介
     QString savedBio = GameConfig::instance()->getPlayerBio();
     if (savedBio.isEmpty()) savedBio = "这个人很神秘，还没有留下打歌记录...";
 
@@ -135,7 +135,7 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     rightLayout->addWidget(rightTitle);
 
     // ==========================================
-    // 【核心魔法】：动态抽取游戏数据并赋予酷炫样式！
+    // 动态抽取游戏数据
     // ==========================================
     int cleared = GameConfig::instance()->getTracksCleared();
     int fcs = GameConfig::instance()->getFullCombos();
@@ -156,7 +156,7 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
     else if (avgAcc >= 90.0) { rating = "A"; ratingColor = "#00FFFF"; }  // 青色
     else if (avgAcc >= 80.0) { rating = "B"; ratingColor = "#32CD32"; }  // 绿色
 
-    // 使用 QString::arg() 把真实数据嵌入进去！
+    // 使用 QString::arg() 把真实数据嵌入
     QString statsHtml = QString(
                             "<table width='100%' style='font-size: 20px; line-height: 2.5;'>"
                             "<tr><td style='color:#A9A9A9;'>SYSTEM RATING (系统评级)</td><td align='right' style='color:%1; font-weight:bold; font-size: 28px;'>%2</td></tr>"
@@ -169,8 +169,6 @@ ProfileWindow::ProfileWindow(QWidget *parent) : QWidget(parent)
                             ).arg(ratingColor).arg(rating)
                             .arg(hours, 2, 10, QChar('0')).arg(minutes, 2, 10, QChar('0'))
                             .arg(cleared).arg(fcs).arg(avgAcc, 0, 'f', 2).arg(kps);
-
-    // QLabel *statsInfo = new QLabel(statsHtml, rightPanel);
 
     QLabel *statsInfo = new QLabel(statsHtml, rightPanel);
     statsInfo->setStyleSheet("background: transparent; border: none;");

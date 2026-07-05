@@ -10,7 +10,7 @@ public:
     // 全局唯一的舞台容器
     static QStackedWidget* stage;
 
-    // 统一的丝滑切换接口
+    // 统一的切换接口
     static void switchScene(QWidget* newScene);
 };
 

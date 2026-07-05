@@ -66,15 +66,15 @@ AchievementsWindow::AchievementsWindow(QWidget *parent) : QWidget(parent)
     listLayout->setSpacing(20);
     listLayout->setContentsMargins(10, 10, 10, 10);
 
-    // 录入你策划的所有成就！
+    // 录入所有成就
     QList<AchData> allAchievements = {
         {1, "滚木", ""},
         {2, "打一首歌", "有手就行"},
         {3, "菜就多练", "菜，就多练；输不起，就别玩～"},
         {4, "我承认你有点鸟不起", "tr(我) < tr(您)"},
         {5, "大神啊", "！？强强？！"},
-        {6, "令 人 忍 俊 不 禁", "沉默微笑做不到（我猜是因为他没玩过Meowthm）"}
-        // 以后有互动成就，直接往这里加！
+        {6, "令 人 忍 俊 不 禁", "滚木做不到（我猜是因为他没玩过Meowthm）"}
+        // 更多的成就加这里
     };
 
     // 动态生成成就卡片
@@ -90,12 +90,11 @@ AchievementsWindow::AchievementsWindow(QWidget *parent) : QWidget(parent)
         QLabel *iconLabel = new QLabel(card);
         iconLabel->setFixedSize(80, 80);
         iconLabel->setAlignment(Qt::AlignCenter);
-        iconLabel->setText("🏆"); // 【修改】：去掉锁头，统一使用奖杯
-
+        iconLabel->setText("🏆"); //
         // 中间文字区
         QVBoxLayout *textLayout = new QVBoxLayout();
 
-        // 加上 background: transparent
+
         QLabel *title = new QLabel(ach.title, card);
         title->setStyleSheet(isUnlocked ? "color: white; font-size: 24px; font-weight: bold; background: transparent;"
                                         : "color: rgba(255,255,255,100); font-size: 24px; font-weight: bold; background: transparent;");
@@ -112,7 +111,7 @@ AchievementsWindow::AchievementsWindow(QWidget *parent) : QWidget(parent)
         QLabel *statusLabel = new QLabel(isUnlocked ? "UNLOCKED" : "LOCKED", card);
         statusLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-        // 根据是否解锁，赋予不同的高级样式！
+        // 根据是否解锁选颜色
         if (isUnlocked) {
             // 解锁状态：发散金光
             card->setStyleSheet("QFrame { background-color: rgba(255, 215, 0, 20); border: none; border-radius: 15px; }");
@@ -147,7 +146,7 @@ void AchievementsWindow::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 科技感深渊黑金渐变背景
+    // 背景
     QRadialGradient gradient(rect().center(), rect().width() / 1.2);
     gradient.setColorAt(0.0, QColor(30, 25, 10)); // 中心微微泛金
     gradient.setColorAt(1.0, QColor(10, 10, 15)); // 边缘极夜黑

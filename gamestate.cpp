@@ -54,20 +54,7 @@ int GameState::getCurrentMiss() const{
 QVector<int> GameState::getAllJudge() const{
     return allJudge;
 }
-/*
-    if(result == 1){ // Miss
-        // 连击中断
 
-        currentCombo = 0;
-        //comboLabel->show();
-    }else if(result >= 2){
-        currentCombo++;
-        // 目前暂定给分，之后调整
-        currentScore += (result == 3) ? 100 : 70;
-        comboLabel -> setText(QString("Combo: %1").arg(currentCombo));
-        //comboLabel->show();
-    }
-*/
 // 3.修改函数
 void GameState::changeCurrentState(int judge){
     switch(judge){

@@ -23,7 +23,7 @@ PokeWindow::PokeWindow(QWidget *parent) : QWidget(parent)
     // 固定文本2
     m_fixedText2 = new QTextEdit(this);
     m_fixedText2->setGeometry(508, 376, 500, 240);
-    m_fixedText2->setPlainText("这是第二个固定内容框。\n也可以放提示信息。");
+    m_fixedText2->setPlainText("");
     m_fixedText2->setReadOnly(true);
     m_fixedText2->setStyleSheet("background-color: transparent; font-size: 14px;");
 
@@ -89,7 +89,7 @@ void PokeWindow::initDynamicContent()
         imagePath = ":/image/poke1.png";
         textContent = "戳到本蛋了喵呜！\n你这个蛋ꐦ";
         extraContent = "智慧小咸鱼，三个蛋中的炸蛋，Meowthm项目的主力，负责了工程量巨大的许多页面的美化和修bug"
-                       "因此这个游戏也选用了这个蛋喜欢的风格\n\\o/咸鱼大人\\o/是蛋中的太阳";
+                       "因此这个游戏也选用了这个蛋喜欢的风格\n\\o/咸鱼大人\\o/是蛋中的太阳，领导我们从一个胜利走向另一个胜利";
         break;
     case 2:
         imagePath = ":/image/poke2.png";
@@ -104,7 +104,7 @@ void PokeWindow::initDynamicContent()
         textContent = "滚木的消息被设为了精华消息";
         extraContent = "Tkorp，4kex2，phigros16.9，arcaea13.00，舞萌伪装成15834的16601，在Dynamix范式起源等领域也很强，是"
                        "毋庸置疑的音游大神（实际上这游戏的谱就他一个人能玩）平日里也是修数双的大学神，看起来和蛋一点都不沾边"
-                        "可是在深夜里，也是会独自想□□□。！的可爱男生";
+                        "\n可是在某些时候，也是会独自想□□□。！的滚木";
         break;
     default:
         imagePath = ":/image/poke1.png";

@@ -143,7 +143,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
     QString valStyle = "background-color: rgba(0, 0, 0, 100); border-radius: 10px; color: #00BFFF; font-size: 24px; font-weight: bold;";
 
-    // 滑块专属赛博朋克QSS样式（高画质无损发光感）
+    // 滑块专属赛博朋克QSS样式
     QString sliderStyle = R"(
         QSlider::groove:horizontal {
             border: 1px solid rgba(255, 255, 255, 30);
@@ -358,8 +358,8 @@ void SettingsWindow::onSpeedButtonClicked(double delta)
 void SettingsWindow::onOffsetButtonClicked(qint64 delta)
 {
     qint64 newOffset = GameConfig::instance()->getCurrentOffset() + delta;
-    if (newOffset < -500) newOffset = -500;
-    if (newOffset > 500) newOffset = 500;
+    if (newOffset < -5000) newOffset = -5000;
+    if (newOffset > 5000) newOffset = 5000;
 
     // 直接操作滑块更新，滑块会触发 valueChanged 信号连带修改配置及文本
     m_offsetSlider->setValue(newOffset);

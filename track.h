@@ -25,7 +25,7 @@ protected:
     int hitLineY;
 
 
-    //下面是关于hold的逻辑，可以暂时先不写
+
     // 5.记录当前正在长按的 hold 音符
     Note* currentHoldingNote = nullptr;
 
@@ -61,8 +61,6 @@ public:
     void  checkHit(qint64 currentMusicTime);
 
 
-
-    //下面是 hold 的逻辑可以先不写
     // 6.对hold的长按释放判定
     /* 当此时 currentHoldingNote 不为 nullptr 且松开按键，说明玩家松手了，触发miss并 delete 这个音符，
      指针悬空*/

@@ -26,9 +26,12 @@ GameConfig::GameConfig(QObject *parent) : QObject(parent)
     m_peakKPS = settings.value("stats/peakKPS", 0).toInt();
     m_totalPlayTimeSec = settings.value("stats/totalPlayTimeSec", 0).toLongLong();
 
+    m_musicStartOffset = settings.value("game/musicStartOffset", 0).toLongLong();
+    m_currentOffset = 500;
+
     m_playerBio = settings.value("game/playerBio", "这个人很神秘，还没有留下打歌记录...").toString();
 
-    // 【新增】：读取硬盘里的成就数据
+    // 读取硬盘里的成就数据
     int achCount = settings.beginReadArray("achievements");
     for (int i = 0; i < achCount; ++i) {
         settings.setArrayIndex(i);
@@ -79,13 +82,12 @@ void GameConfig::setCurrentOffset(qint64 offset)
     emit currentOffsetChanged(offset);
 }
 
-
 void GameConfig::setHitSoundVolume(int volume)
 {
     if (m_hitSoundVolume == volume) return;
     m_hitSoundVolume = volume;
     QSettings().setValue("game/hitSoundVolume", volume);
-    emit hitSoundVolumeChanged(volume); // 发出信号，通知全服！
+    emit hitSoundVolumeChanged(volume);
 }
 
 // ==========================================
@@ -96,14 +98,14 @@ void GameConfig::addCombatRecord(const GameState& state)
     // 1. 基础数据累计
     m_tracksCleared++;
     if (state.getCurrentMiss() == 0) {
-        m_fullCombos++; // 没有 Miss，就是 Full Combo！
+        m_fullCombos++; // Full Combo！
     }
     m_totalAccuracySum += state.getCurrentAcc();
 
     // 2. 解析反射时间戳，计算高阶数据
     QList<qint64> times = state.getHitTimestamps();
 
-    // 突破极限计算：这局的 KPS 有没有打破历史最高记录？
+    // 这局的 KPS 有没有打破历史最高记录？
     int sessionPeakKPS = 0;
     for (int i = 0; i < times.size(); ++i) {
         int currentKPS = 0;
@@ -114,7 +116,7 @@ void GameConfig::addCombatRecord(const GameState& state)
         if (currentKPS > sessionPeakKPS) sessionPeakKPS = currentKPS;
     }
     if (sessionPeakKPS > m_peakKPS) {
-        m_peakKPS = sessionPeakKPS; // 破纪录啦！
+        m_peakKPS = sessionPeakKPS; // 破纪录
     }
 
     // 计算这首歌的实际游玩时长 (最后一个音符减去第一个音符)
@@ -123,7 +125,7 @@ void GameConfig::addCombatRecord(const GameState& state)
         m_totalPlayTimeSec += (durationMs / 1000);
     }
 
-    // 3. 立即存入本地注册表，防止游戏崩溃丢失数据！
+    // 3. 立即存入本地注册表，防止游戏崩溃丢失数据
     QSettings settings;
     settings.setValue("stats/tracksCleared", m_tracksCleared);
     settings.setValue("stats/fullCombos", m_fullCombos);
@@ -131,18 +133,18 @@ void GameConfig::addCombatRecord(const GameState& state)
     settings.setValue("stats/peakKPS", m_peakKPS);
     settings.setValue("stats/totalPlayTimeSec", m_totalPlayTimeSec);
 
-    // 每次更新完作战记录，立刻看一下有没有解锁新成就！
+    // 每次更新完作战记录，立刻看一下有没有解锁新成就
     checkAchievements(state);
 }
 
 
-// 【新增】：将简介保存到本地注册表/配置中
+// 将简介保存到本地注册表/配置中
 void GameConfig::setPlayerBio(const QString &bio)
 {
     if (m_playerBio == bio)
         return;
     m_playerBio = bio;
-    QSettings().setValue("game/playerBio", bio); // 写进硬盘！
+    QSettings().setValue("game/playerBio", bio); // 写进硬盘
 }
 
 // ==========================================
@@ -153,7 +155,7 @@ bool GameConfig::isAchievementUnlocked(int id) const {
 }
 
 void GameConfig::unlockAchievement(int id) {
-    // 如果还没解锁，就解锁并立即存入硬盘！
+    // 如果还没解锁，就解锁并立即存入硬盘
     if (!m_unlockedAchievements.contains(id)) {
         m_unlockedAchievements.insert(id);
 
@@ -167,7 +169,6 @@ void GameConfig::unlockAchievement(int id) {
         settings.endArray();
 
         qDebug() << "🏆 恭喜解锁成就 ID:" << id;
-        // （未来这里可以加一个 emit 信号，在游戏里弹出一个“成就解锁”的横幅！）
     }
 }
 

@@ -22,7 +22,7 @@ private:
     // 0.谱面文件路径
     QString mapPath;
     // 1.游戏核心变量
-    double globalSpeed;      // 全局流速 像素/ms。 // 先写了一个数据记得改
+    double globalSpeed;      // 全局流速 像素/ms。
     qint64 currentMusicTime; // 当前音乐播放时间 ms //初始化时记得设为0
     int hitLineY;            // 判定线的统一Y坐标 像素
     qint64 offset;
@@ -42,6 +42,8 @@ private:
     // 5.音乐引擎
     QMediaPlayer* player;
     QAudioOutput* audioOutput;
+
+    qint64 m_musicStartOffset = 0;  // 音乐起始偏移（毫秒）
 
     // 6.停止相关
     bool gameEnded;
@@ -80,7 +82,7 @@ public:
     // 二、在构造函数中设计窗口的形状，例如用 this->setFixedSize 设计大小，this->setStyleSheet 设计样式；设计分数空间的位置和样式（注意：要把分数控件移动到最顶层）
     // 三、创建四条轨道，并把它们的信号连接到 hitNoteJudge 函数上
     // 四、设置updateTime定时器，并连接信号槽：每次定时器响就执行gameloop。定时器的间隔可以先设置为16ms，之后再调整
-    // 五、使用谱面解析器生成音符（谱面解析器还没写，这一块暂）
+    // 五、使用谱面解析器生成音符
     explicit GameScene(QString _mapPath, QWidget *parent = nullptr);
 
 

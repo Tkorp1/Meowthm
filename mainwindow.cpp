@@ -5,7 +5,7 @@
 #include <QRadialGradient>
 #include <QPainterPath>
 #include <QFont>
-#include <QDebug> // <-- 新增：引入Debug头文件
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,16 +18,12 @@ MainWindow::MainWindow(QWidget *parent)
     , frameHeight(0)
 {
     this->setFixedSize(1200, 800);
-    // this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 
 
     spriteSheet.load(":/image/big_image.png");
 
-
-
-
-        frameWidth = spriteSheet.width() / columns;
-        frameHeight = spriteSheet.height() / (totalFrames / columns);
+    frameWidth = spriteSheet.width() / columns;
+    frameHeight = spriteSheet.height() / (totalFrames / columns);
 
 
     // 2. 初始化动画定时器
@@ -46,9 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
     font.setLetterSpacing(QFont::AbsoluteSpacing, 5);
     titleLabel->setFont(font);
     titleLabel->adjustSize();
-
-    // 4. 调用显示函数
-    // this->showFullScreen();
 
     setFocus();
 }
@@ -133,7 +126,7 @@ void MainWindow::paintEvent(QPaintEvent *event)
 
         painter.drawPixmap(targetRect, spriteSheet, sourceRect);
     } else {
-        // 如果图层在绘制时发现图是空的，打印静态警告（不会高频刷屏）
+        // 如果图层在绘制时发现图是空的，打印静态警告
         static bool warned = false;
         if (!warned) {
             qDebug() << "[运行时警告] paintEvent 检测到 spriteSheet 为空，跳过动画绘制。";
@@ -182,7 +175,7 @@ void MainWindow::onSelectSong()
     // 召唤选曲大厅
     SelectSongWindow *window = new SelectSongWindow();
 
-    // 【终极丝滑连招】：直接交给舞台去切换！不需要自己 show 和 deleteLater 了！
+    // 交给舞台去切换
     SceneManager::switchScene(window);
 }
 

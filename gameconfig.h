@@ -6,7 +6,7 @@
 #include <QList>
 #include <QSet>
 
-#include "gamestate.h" // 【新增】因为我们要解析战斗数据
+#include "gamestate.h" // 解析战斗数据
 
 
 
@@ -33,6 +33,13 @@ public:
     qint64 getCurrentOffset() const { return m_currentOffset; } // 偏移
     void setCurrentOffset(qint64 offset);
 
+    qint64 getMusicStartOffset() const { return m_musicStartOffset; }
+    void setMusicStartOffset(qint64 offset);
+    // 添加信号
+    void musicStartOffsetChanged(qint64 newOffset);
+
+
+
 
     int getHitSoundVolume() const { return m_hitSoundVolume; }
     void setHitSoundVolume(int volume);
@@ -49,7 +56,7 @@ public:
     // 打完一首歌后，向系统上报数据的接口！
     void addCombatRecord(const GameState& state);
 
-    QString getPlayerBio() const { return m_playerBio; }  // 【新增】获取简介
+    QString getPlayerBio() const { return m_playerBio; }  // 获取简介
     void setPlayerBio(const QString &bio);
 
     // 成就系统的三大核心接口
@@ -73,6 +80,10 @@ private:
     double m_noteSpeed;
     QString m_currentPlayer;
     qint64 m_currentOffset;
+    qint64 m_musicStartOffset;
+
+
+
 
 
     int m_hitSoundVolume;

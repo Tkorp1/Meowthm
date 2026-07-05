@@ -30,9 +30,6 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     m_player->setAudioOutput(m_audioOutput);
     m_audioOutput->setVolume(0.8);
 
-    // // 【TODO】：这里填入你想要制谱的歌曲路径
-    // m_player->setSource(QUrl("qrc:/sound/sounds/test_song.mp3"));
-
     // ==========================================
     // 极简科幻 UI 布局
     // ==========================================
@@ -87,15 +84,15 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     connect(m_backBtn, &QPushButton::clicked, this, [this](){
         m_player->stop();
 
-        // 【架构同步】：让舞台一秒切回大厅！
+        // 舞台切回大厅
         SceneManager::switchScene(new SelectSongWindow());
     });
 
 
-    // 【新增】：监听音乐状态，放完直接自动结算！
+    // 监听音乐状态，放完直接自动结算
     connect(m_player, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
         if (status == QMediaPlayer::EndOfMedia && m_isRecording) {
-            onStopAndSave(); // 音乐结束，自动执行导出！
+            onStopAndSave(); // 音乐结束，自动执行导出
         }
     });
 
@@ -140,7 +137,7 @@ void RecordWindow::paintEvent(QPaintEvent *event) {
     for (int i = 0; i < 4; ++i) {
         QRect keyRect(startX + i * (keyWidth + spacing), startY, keyWidth, keyHeight);
 
-        // 【核心魔法】：通过 m_pressTime 数组判断当前这个键有没有被按着！
+        // 通过 m_pressTime 数组判断当前这个键有没有被按着
         bool isPressed = (m_pressTime[i] != -1);
 
         if (isPressed) {
@@ -173,7 +170,7 @@ void RecordWindow::paintEvent(QPaintEvent *event) {
 // 盲打录制核心逻辑
 // ==========================================
 void RecordWindow::onStartRecord() {
-    // 1. 【新增】：如果还没选歌，先弹窗让用户选
+    // 1. 如果还没选歌，先弹窗让用户选
     if (m_player->source().isEmpty()) {
         QString fileName = QFileDialog::getOpenFileName(this,
                                                         "选择音频文件",
@@ -189,7 +186,6 @@ void RecordWindow::onStartRecord() {
     m_recordedNotes.clear();
     m_countLabel->setText("RECORDED NOTES: 0");
 
-    // ... 后面的逻辑保持不变 ...
     m_isRecording = true;
     m_player->setPosition(0);
     m_player->play();
@@ -220,7 +216,7 @@ void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
     else if (event->key() == Qt::Key_J) trackId = 2;
     else if (event->key() == Qt::Key_K) trackId = 3;
 
-    // 松开时：结账！计算按了多久！
+    // 松开时：计算按了多久
     if (trackId != -1 && m_pressTime[trackId] != -1) {
         qint64 startTime = m_pressTime[trackId];
         qint64 endTime = m_player->position();
@@ -230,18 +226,18 @@ void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
         note.trackId = trackId;
         note.timeMs = startTime;
 
-        // 【分水岭】：150毫秒
+        // 150毫秒
         if (duration < 150) {
             note.type = 1; // 这是一个 Tap
             note.endTime = startTime; // Tap 的结束时间等于开始时间（或者填0也可以）
         } else {
-            note.type = 2; // 这是一个 Hold 长条！
+            note.type = 2; // 这是一个 Hold 长条
             note.endTime = endTime;
         }
 
         m_recordedNotes.append(note);
 
-        // 结账完毕，清空这个轨道的按下状态
+        // 完毕，清空这个轨道的按下状态
         m_pressTime[trackId] = -1;
 
         // 更新 UI
@@ -254,7 +250,7 @@ void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
 
 
 // ==========================================
-// 导出工程逻辑 (完美适配 MapParser 引擎格式)
+// 导出工程逻辑
 // ==========================================
 void RecordWindow::onStopAndSave() {
     m_isRecording = false;
@@ -267,7 +263,7 @@ void RecordWindow::onStopAndSave() {
         return;
     }
 
-    // 1. 统一归档到 maps 文件夹 (跨平台绝对安全版)
+    // 1. 统一归档到 maps 文件夹
     QString baseDir = QCoreApplication::applicationDirPath();
 
 #ifdef Q_OS_MAC
@@ -278,10 +274,10 @@ void RecordWindow::onStopAndSave() {
 
     baseDir += "/maps";
 
-    // 【无敌调试法】：打印出录制工具到底保存在了哪里！
-    qDebug() << "========================================";
-    qDebug() << "【录制保存路径】:" << baseDir;
-    qDebug() << "========================================";
+    // // 打印出录制工具到底保存在了哪里
+    // qDebug() << "========================================";
+    // qDebug() << "【录制保存路径】:" << baseDir;
+    // qDebug() << "========================================";
 
     QDir dir(baseDir);
     if (!dir.exists()) dir.mkpath(".");
@@ -294,14 +290,13 @@ void RecordWindow::onStopAndSave() {
         QTextStream out(&infoFile);
         QFileInfo audioInfo(m_player->source().toLocalFile());
 
-        // 统一音频命名为 music.xxx，对齐你们旧谱面的习惯
+        // 统一音频命名为 music.xxx
         QString suffix = audioInfo.suffix();
         QString standardAudioName = "music." + suffix;
 
-        // 【严格对齐 MapParser 的读取行数！】
         out << "BPM: 60\n";  // 第 1 行：必须是 BPM！我们用 60 来规避数学运算
         out << "SongName: " << audioInfo.completeBaseName() << "\n"; // 第 2 行：歌名
-        out << "MusicTime: " << m_player->duration() << "\n"; // 第 3 行：MapParser::getMusicTime() 要用！
+        out << "MusicTime: " << m_player->duration() << "\n"; // 第 3 行：MapParser::getMusicTime() 要用
         out << "AudioFile: " << standardAudioName << "\n";
         out << "CoverFile: cover.jpg\n";
 
@@ -323,14 +318,14 @@ void RecordWindow::onStopAndSave() {
         int tid = note.trackId;
         if(tid < 0 || tid > 3) continue;
 
-        // 【时间魔法】：将 ms 逆运算为 MapParser 想要的 beats
+        // 将 ms 逆运算为 MapParser 想要的 beats
         double startBeats = (note.timeMs / 1000.0) + 1.0;
 
         if (note.type == 1) {
-            // 我们的录音仪: 1=Tap -> MapParser: 0=Tap
+            // 录音仪: 1=Tap -> MapParser: 0=Tap
             *(trackStreams[tid]) << "0 " << QString::number(startBeats, 'f', 3) << "\n";
         } else if (note.type == 2) {
-            // 我们的录音仪: 2=Hold -> MapParser: 1=Hold
+            // 录音仪: 2=Hold -> MapParser: 1=Hold
             double endBeats = (note.endTime / 1000.0) + 1.0;
             *(trackStreams[tid]) << "1 " << QString::number(startBeats, 'f', 3) << " " << QString::number(endBeats, 'f', 3) << "\n";
         }
@@ -343,6 +338,6 @@ void RecordWindow::onStopAndSave() {
     }
 
     QMessageBox::information(this, "Export Success",
-                             QString("完美适配 MapParser！\n共封装 %1 个音符至 4 条轨道。\n已生成至：\n%2")
+                             QString("\n共封装 %1 个音符至 4 条轨道。\n已生成至：\n%2")
                                  .arg(m_recordedNotes.size()).arg(folderName));
 }
