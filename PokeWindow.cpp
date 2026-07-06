@@ -89,7 +89,9 @@ void PokeWindow::initDynamicContent()
         imagePath = ":/image/poke1.png";
         textContent = "戳到本蛋了喵呜！\n你这个蛋ꐦ";
         extraContent = "智慧小咸鱼，三个蛋中的炸蛋，Meowthm项目的主力，负责了工程量巨大的许多页面的美化和修bug"
-                       "因此这个游戏也选用了这个蛋喜欢的风格\n\\o/咸鱼大人\\o/是蛋中的太阳，领导我们从一个胜利走向另一个胜利";
+                       "因此这个游戏也选用了这个蛋喜欢的风格\n\\o/咸鱼大人\\o/是蛋中的太阳，领导我们从一个胜利走向另一个胜利！"
+                       "（注：此段文字疑似某🥚在被肘怕了的情况下写出）"
+                        "\n“本人严肃声明：咸鱼不是区！！！”";
         break;
     case 2:
         imagePath = ":/image/poke2.png";
