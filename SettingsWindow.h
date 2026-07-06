@@ -53,7 +53,7 @@ protected:
 private slots:
     void onSpeedButtonClicked(double delta);        // 流速调节按钮（+0.05 / -0.05）
     void onOffsetButtonClicked(qint64 delta);       // 偏移调节按钮（+5 / -5）
-    void onOffsetSliderChanged(int value);          // 滑块拖动事件槽函数
+    // void onOffsetSliderChanged(int value);          // 滑块拖动事件槽函数
     void onExitClicked();                           // 退出按钮
 
     void updateSpeedLabel(double speed);            // 更新流速显示标签
@@ -70,7 +70,7 @@ private:
     QPushButton *m_speedMinusBtn;  // 流速-0.05
     QPushButton *m_offsetPlusBtn;  // 偏移+5
     QPushButton *m_offsetMinusBtn; // 偏移-5
-    QSlider     *m_offsetSlider;   // 偏移值调节滑块
+    //QSlider     *m_offsetSlider;   // 偏移值调节滑块
     QPushButton *m_exitBtn;        // 退出按钮
 
     // 预览轨道
