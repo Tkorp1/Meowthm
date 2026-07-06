@@ -20,17 +20,13 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
     m_isRecording = false;
     for (int i = 0; i < 4; ++i) m_pressTime[i] = -1;
 
-    // ==========================================
-    // 音频引擎初始化
-    // ==========================================
+
     m_audioOutput = new QAudioOutput(this);
     m_player = new QMediaPlayer(this);
     m_player->setAudioOutput(m_audioOutput);
     m_audioOutput->setVolume(0.8);
 
-    // ==========================================
-    // 极简科幻 UI 布局
-    // ==========================================
+
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 100, 0, 0);
     mainLayout->setAlignment(Qt::AlignTop);
@@ -74,16 +70,14 @@ RecordWindow::RecordWindow(QWidget *parent) : QWidget(parent)
 
     mainLayout->addLayout(btnLayout);
 
-    // ==========================================
-    // 信号连接
-    // ==========================================
+
     connect(m_startBtn, &QPushButton::clicked, this, &RecordWindow::onStartRecord);
     connect(m_saveBtn, &QPushButton::clicked, this, &RecordWindow::onStopAndSave);
 
     connect(m_backBtn, &QPushButton::clicked, this, [this](){
         m_player->stop();
 
-        // 舞台切回大厅
+        // 切回大厅
         SceneManager::switchScene(new SelectSongWindow());
     });
 
@@ -102,9 +96,7 @@ RecordWindow::~RecordWindow() {
     m_player->stop();
 }
 
-// ==========================================
-// 动感视觉反馈绘制
-// ==========================================
+
 void RecordWindow::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
     QPainter painter(this);
@@ -165,9 +157,7 @@ void RecordWindow::paintEvent(QPaintEvent *event) {
     }
 }
 
-// ==========================================
-// 盲打录制核心逻辑
-// ==========================================
+
 void RecordWindow::onStartRecord() {
     // 1. 如果还没选歌，先弹窗让用户选
     if (m_player->source().isEmpty()) {
@@ -248,9 +238,7 @@ void RecordWindow::keyReleaseEvent(QKeyEvent *event) {
 }
 
 
-// ==========================================
-// 导出工程逻辑
-// ==========================================
+
 void RecordWindow::onStopAndSave() {
     m_isRecording = false;
     m_player->stop();
