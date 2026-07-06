@@ -54,11 +54,25 @@ GameScene::GameScene(QString _mapPath, QWidget *parent)
     scoreLabel -> setStyleSheet("color: #FFD700; font-size: 28px; font-weight: bold; background-color: transparent;");
     scoreLabel ->show();
 
+    // 开始修改combo的居中显示
     comboLabel = new QLabel(this);
-    comboLabel -> setText("0");
-    comboLabel -> setGeometry(400, 200, 150, 50);
-    comboLabel -> setStyleSheet("color: #FFFFFF; font-size: 36px; font-weight: bold; background-color: transparent;");
-    comboLabel -> show();
+    comboLabel->setText("0");
+    comboLabel->setStyleSheet("color: #FFFFFF; font-size: 36px; font-weight: bold; background-color: transparent;");
+    comboLabel->adjustSize();
+    int parentW = 800;
+    int parentH = 600;
+    // 获取标签实际宽高
+    int labelW = comboLabel->width();
+    int labelH = comboLabel->height();
+    // 计算居中左上角坐标
+    int x = (parentW - labelW) / 2;
+    int y = (parentH - labelH) / 2 - 80;
+    // 设置位置
+    comboLabel->setGeometry(x, y, labelW, labelH);
+    // 将文本在标签框内居中对齐
+    comboLabel->setAlignment(Qt::AlignCenter);
+    comboLabel->show();
+
 
     accuracyLabel = new QLabel(this);
     accuracyLabel -> setText("Acc: 100.00%");
@@ -237,6 +251,32 @@ GameScene::~GameScene(){
 
 }
 
+void GameScene::updateComboDisplay(int combo)
+{
+    if (!comboLabel) return;
+
+    // 1. 更新文本
+    comboLabel->setText(QString::number(combo));
+
+    // 2. 让标签自适应新文本的尺寸
+    comboLabel->adjustSize();
+
+    // 3. 获取父窗口尺寸（因为是固定的 800x600，直接用 this 的宽高）
+    int parentW = this->width();
+    int parentH = this->height();
+
+    // 4. 获取标签新尺寸
+    int labelW = comboLabel->width();
+    int labelH = comboLabel->height();
+
+    // 5. 重新计算居中坐标
+    int x = (parentW - labelW) / 2;
+    int y = (parentH - labelH) / 2 - 80;
+
+    // 6. 重新设置位置（保持新尺寸）
+    comboLabel->setGeometry(x, y, labelW, labelH);
+}
+
 void GameScene::gameOver(){
     if(gameEnded){
         return;
@@ -367,6 +407,8 @@ void GameScene::hitNoteJudge(int result){
     state.changeCurrentState(result);
     // 然后更改显示
     comboLabel->setText(QString("%1").arg(state.getCurrentCombo()));
+
+    updateComboDisplay(state.getCurrentCombo());
 
     scoreLabel->setText(QString("Score: %1").arg(state.getCurrentScore()));
 

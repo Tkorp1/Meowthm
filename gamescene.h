@@ -92,6 +92,8 @@ public:
     // 2.获取谱面文件路径
     QString getMapPath() const;
 
+    // 3.combo数更新函数
+    void updateComboDisplay(int combo);
 
 protected:
 
